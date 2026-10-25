@@ -40,3 +40,25 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# ---- .NET back end (Backend/) ----
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userprefs
+*.rsuser
+[Dd]ebug/
+[Rr]elease/
+TestResults/
+*.log
+logs/
+# Local development settings (copy from appsettings.Development.example.json)
+appsettings.Development.json
+appsettings.*.local.json
