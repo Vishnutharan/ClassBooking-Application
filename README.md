@@ -38,3 +38,79 @@ ClassBooking is a comprehensive online education platform connecting students wi
 ## Team
 - **Developer**: Vishnutharan
 - **Role**: Full Stack Engineer
+
+## Repository structure
+
+This repository contains both parts of the application:
+
+- **Front end** – Angular 19 app (with SSR) at the repository root (`src/`, `angular.json`, `package.json`).
+- **Back end** – ASP.NET Core Web API (.NET 9) in `Backend/ClassBooking.API`, solution file `Backend/ClassBooking.sln`.
+
+```text
+ClassBooking-Application/
+├── .vscode/
+├── Backend/
+│   ├── ClassBooking.API/
+│   └── ClassBooking.sln
+├── public/
+├── src/
+│   ├── app/
+│   ├── environments/
+│   ├── index.html
+│   └── main.ts
+├── .editorconfig
+├── .gitignore
+├── angular.json
+├── package-lock.json
+├── package.json
+├── README.md
+├── tsconfig.app.json
+├── tsconfig.json
+└── tsconfig.spec.json
+```
+
+## Prerequisites
+
+- Node.js 18.19+ / 20+ and npm (Angular 19 requirement)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- SQL Server or SQL Server LocalDB
+- Optional: `dotnet-ef` tool (`dotnet tool install --global dotnet-ef`)
+
+## Back-end setup (Backend/ClassBooking.API)
+
+`appsettings.json` only contains placeholders for secrets. Create your local, git-ignored settings file:
+
+```bash
+cd Backend/ClassBooking.API
+cp appsettings.Development.example.json appsettings.Development.json
+```
+
+Then set:
+
+- `ConnectionStrings:DefaultConnection` – your SQL Server connection string
+- `Jwt:Key` – a long random secret (32+ characters)
+
+Apply the EF Core migrations and run the API:
+
+```bash
+dotnet ef database update      # creates/updates ClassBookingDB from Migrations/
+dotnet run                     # http://localhost:5197 (see Properties/launchSettings.json)
+```
+
+Swagger UI is available at `http://localhost:5197/swagger` in Development. Seed data is inserted on start-up by `Data/DataSeeder.cs`.
+
+## Front-end setup
+
+```bash
+npm install
+npm start                      # ng serve → http://localhost:4200
+```
+
+The API base URL is configured in `src/environments/environment.ts` (`apiUrl`, default `http://localhost:5197/api`).
+
+Production build and SSR server:
+
+```bash
+npm run build
+npm run serve:ssr:Classbooking
+```
