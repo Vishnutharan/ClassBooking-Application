@@ -1,21 +1,25 @@
 .auth-shell {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
   background: radial-gradient(circle at 20% 20%, #eef2ff 0%, #f1f5f9 55%, #e2e8f0 100%);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
 }
 
 .auth-card {
-  width: min(1060px, 100%);
+  width: 100%;
+  max-width: 980px;
   background: #ffffff;
   border-radius: 24px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.16);
   overflow: hidden;
   display: grid;
-  grid-template-columns: 38% 62%;
+  grid-template-columns: 360px 1fr;
+  box-sizing: border-box;
 }
 
 /* Left UK Brand Panel */
@@ -27,6 +31,7 @@
   justify-content: center;
   padding: 36px 28px;
   color: #ffffff;
+  box-sizing: border-box;
 }
 
 .side-content {
@@ -35,6 +40,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  width: 100%;
 }
 
 .uk-pill-badge {
@@ -54,7 +60,7 @@
 
 .side-content h2 {
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #ffffff;
@@ -71,7 +77,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin: 6px 0;
+  margin: 4px 0;
 }
 
 .side-feature {
@@ -85,7 +91,7 @@
 }
 
 .side-btn {
-  margin-top: 6px;
+  margin-top: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -108,10 +114,13 @@
 
 /* Right Form Area */
 .auth-main {
-  padding: 32px 40px;
+  padding: 32px 36px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .auth-header h1 {
@@ -125,7 +134,7 @@
 .auth-header p {
   margin: 4px 0 16px;
   color: #64748b;
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 /* 1-Click Demo Access Box */
@@ -133,19 +142,23 @@
   background: #f8fafc;
   border: 1px solid #cbd5e1;
   border-radius: 14px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   margin-bottom: 16px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .demo-access-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .demo-title {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -160,21 +173,26 @@
 
 .demo-role-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .demo-role-btn {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
-  padding: 9px 10px;
+  padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
   background: #ffffff;
   cursor: pointer;
   text-align: left;
+  min-width: 0;
+  overflow: hidden;
   transition: all 0.15s ease;
+  box-sizing: border-box;
 }
 
 .demo-role-btn:hover {
@@ -198,45 +216,39 @@
 .role-icon {
   font-size: 18px;
   line-height: 1;
-  margin-top: 2px;
+  flex-shrink: 0;
 }
 
 .role-meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
+  overflow: hidden;
 }
 
-.role-meta strong {
+.role-title {
   font-size: 12px;
   font-weight: 800;
   color: #0f172a;
-}
-
-.role-meta small {
-  font-size: 10.5px;
-  color: #475569;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.pwd-tag {
-  display: inline-block;
-  margin-top: 2px;
-  font-size: 10px;
-  font-weight: 700;
-  color: #4338ca;
-  background: #eef2ff;
-  padding: 1px 6px;
-  border-radius: 4px;
-  align-self: flex-start;
+.role-sub {
+  font-size: 10.5px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .auth-form {
   display: grid;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-row-2col {
@@ -266,6 +278,7 @@
   color: #0f172a;
   font-size: 13.5px;
   outline: none;
+  box-sizing: border-box;
   transition: all 0.15s ease;
 }
 
@@ -292,6 +305,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .toggle-password:hover {
@@ -343,6 +357,7 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+  box-sizing: border-box;
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -355,12 +370,28 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 900px) {
+/* Responsive queries */
+@media (max-width: 860px) {
   .auth-card {
+    grid-template-columns: 1fr;
+    border-radius: 18px;
+  }
+
+  .auth-side {
+    padding: 28px 24px;
+  }
+
+  .auth-main {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 540px) {
+  .demo-role-grid {
     grid-template-columns: 1fr;
   }
 
-  .demo-role-grid {
+  .form-row-2col {
     grid-template-columns: 1fr;
   }
 }

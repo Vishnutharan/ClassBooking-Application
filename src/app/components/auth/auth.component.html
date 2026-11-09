@@ -4,16 +4,16 @@
     <aside class="auth-side">
       <div class="side-content">
         <span class="uk-pill-badge">🇬🇧 UK NATIONAL ACADEMIC PLATFORM</span>
-        <h2>{{ isLoginMode ? 'ClassBooking UK Portal' : 'Join ClassBooking UK' }}</h2>
+        <h2>{{ isLoginMode ? 'ClassBooking UK' : 'Join ClassBooking UK' }}</h2>
         <p>
           {{ isLoginMode
-            ? 'Access 1-to-1 GCSE, A-Level & 11+ tuition, Enhanced DBS-verified UK tutors, and GBP settlement tools.'
+            ? 'Access 1-to-1 GCSE, A-Level & 11+ tuition with Enhanced DBS-verified UK tutors.'
             : 'Already registered with our UK Academic Portal?' }}
         </p>
 
         <div class="side-feature-list" *ngIf="isLoginMode">
           <div class="side-feature">🛡️ Enhanced DBS & QTS Vetted Tutors</div>
-          <div class="side-feature">📚 AQA, Edexcel & OCR Curriculum Aligned</div>
+          <div class="side-feature">📚 AQA, Edexcel & OCR Aligned</div>
           <div class="side-feature">💷 Instant GBP (£) Tuition & Receipts</div>
         </div>
 
@@ -27,40 +27,37 @@
     <section class="auth-main">
       <div class="auth-header">
         <h1>{{ isLoginMode ? 'Sign In to Your Workspace' : 'Create UK Account' }}</h1>
-        <p>{{ isLoginMode ? 'Enter your credentials or use 1-Click UK Demo Access below' : 'Register as a UK Student or Tutor' }}</p>
+        <p>{{ isLoginMode ? 'Enter credentials or select a 1-click UK demo account below' : 'Register as a UK Student or Tutor' }}</p>
       </div>
 
       <!-- 1-Click UK Demo Credentials Bar (Login Mode) -->
       <div class="demo-access-box" *ngIf="isLoginMode">
         <div class="demo-access-header">
-          <span class="demo-title">⚡ Instant 1-Click UK Portal Login</span>
-          <span class="demo-hint">Click any role to auto-fill & sign in</span>
+          <span class="demo-title">⚡ Instant 1-Click UK Demo Login</span>
+          <span class="demo-hint">Auto-fills & logs in</span>
         </div>
         <div class="demo-role-grid">
-          <button type="button" class="demo-role-btn admin" (click)="quickDemoLogin('Admin')">
+          <button type="button" class="demo-role-btn admin" (click)="quickDemoLogin('Admin')" title="Login as UK Admin">
             <span class="role-icon">🛡️</span>
             <div class="role-meta">
-              <strong>UK Admin Dashboard</strong>
-              <small>admin&#64;britannia-tuition.co.uk</small>
-              <span class="pwd-tag">Pass: Admin&#64;123</span>
+              <strong class="role-title">UK Admin</strong>
+              <span class="role-sub">Victoria Sterling</span>
             </div>
           </button>
 
-          <button type="button" class="demo-role-btn teacher" (click)="quickDemoLogin('Teacher')">
+          <button type="button" class="demo-role-btn teacher" (click)="quickDemoLogin('Teacher')" title="Login as UK Tutor">
             <span class="role-icon">👨‍🏫</span>
             <div class="role-meta">
-              <strong>UK Tutor Dashboard</strong>
-              <small>eleanor.vance&#64;oxbridge-tutors.co.uk</small>
-              <span class="pwd-tag">Pass: Tutor&#64;123</span>
+              <strong class="role-title">UK Tutor</strong>
+              <span class="role-sub">Dr. Eleanor Vance</span>
             </div>
           </button>
 
-          <button type="button" class="demo-role-btn student" (click)="quickDemoLogin('Student')">
+          <button type="button" class="demo-role-btn student" (click)="quickDemoLogin('Student')" title="Login as UK Student">
             <span class="role-icon">🎓</span>
             <div class="role-meta">
-              <strong>UK Student Dashboard</strong>
-              <small>oliver.t&#64;student.co.uk</small>
-              <span class="pwd-tag">Pass: Student&#64;123</span>
+              <strong class="role-title">UK Student</strong>
+              <span class="role-sub">Oliver Thompson</span>
             </div>
           </button>
         </div>
