@@ -50,7 +50,7 @@ namespace ClassBooking.API.Models
         public string StudentId { get; set; } = string.Empty;
         public string? BookingId { get; set; }
         public decimal Amount { get; set; }
-        public string Currency { get; set; } = "LKR";
+        public string Currency { get; set; } = "GBP";
         public string Status { get; set; } = "Pending";
         public string? PaymentMethod { get; set; }
         public DateTime? TransactionDate { get; set; }
@@ -63,7 +63,7 @@ namespace ClassBooking.API.Models
     {
         public string BookingId { get; set; } = string.Empty;
         public decimal Amount { get; set; }
-        public string Currency { get; set; } = "LKR";
+        public string Currency { get; set; } = "GBP";
         public string PaymentMethod { get; set; } = string.Empty;
         public string? PaymentDetails { get; set; } // Card info, bank details, etc.
         public CardPaymentDetails? Card { get; set; }
@@ -105,7 +105,7 @@ namespace ClassBooking.API.Models
         public string PaymentMethod { get; set; } = string.Empty;
         public string PaymentStatus { get; set; } = string.Empty;
         public decimal Amount { get; set; }
-        public string Currency { get; set; } = "LKR";
+        public string Currency { get; set; } = "GBP";
         public string? TransactionReference { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? PaidAt { get; set; }

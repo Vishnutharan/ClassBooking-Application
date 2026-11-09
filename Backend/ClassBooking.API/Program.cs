@@ -37,6 +37,7 @@ builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IExamRepository, ExamRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IFeeRepository, FeeRepository>();
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
@@ -59,6 +60,8 @@ builder.Services.AddScoped<ILessonPlanService, LessonPlanService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<ITimetableService, TimetableService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<StripeCheckoutService>();
+builder.Services.AddScoped<AdminReportExportService>();
 
 // CORS Configuration (MUST be BEFORE Authentication)
 builder.Services.AddCors(options =>
@@ -109,15 +112,13 @@ builder.Services.AddAuthentication(options =>
             logger.LogError("Authentication failed: {Message}", context.Exception.Message);
             return Task.CompletedTask;
         },
-        OnTokenValidated = context =>
+        OnTokenValidated = async context =>
         {
-            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation("Token validated successfully for user: {User}", context.Principal?.Identity?.Name);
-            
-            var claims = context.Principal?.Claims.Select(c => $"{c.Type}: {c.Value}").ToList();
-            logger.LogInformation("Claims in Token: {Claims}", string.Join(", ", claims ?? new List<string>()));
-            
-            return Task.CompletedTask;
+            var userId = context.Principal?.FindFirst("userId")?.Value;
+            var users = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+            var user = userId == null ? null : await users.GetByIdAsync(userId);
+            if (user == null || user.Status != "Active" || !context.Principal!.IsInRole(user.Role))
+                context.Fail("Account is inactive or its permissions have changed. Please log in again.");
         },
         OnChallenge = context =>
         {
@@ -137,16 +138,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// UseHttpsRedirection AFTER Swagger but BEFORE CORS
-app.UseHttpsRedirection();
-
 // Global Exception Handler (MUST be early in pipeline)
 app.UseGlobalExceptionHandler();
 
-app.UseStaticFiles();
-
-// CORS MUST be called BEFORE Authentication & Authorization
+// CORS MUST be called BEFORE HttpsRedirection, Authentication & Authorization
 app.UseCors("AllowAngularApp");
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

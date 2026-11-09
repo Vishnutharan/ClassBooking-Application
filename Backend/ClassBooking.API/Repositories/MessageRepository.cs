@@ -7,6 +7,7 @@ namespace ClassBooking.API.Repositories
 {
     public interface IMessageRepository
     {
+        Task<bool> IsParticipantAsync(string conversationId, string userId);
         Task<List<ConversationDto>> GetConversationsAsync(string userId);
         Task<List<MessageDto>> GetMessagesAsync(string conversationId);
         Task<MessageDto> SendMessageAsync(string conversationId, string senderId, string senderName, string content);
@@ -23,6 +24,9 @@ namespace ClassBooking.API.Repositories
         {
             _context = context;
         }
+
+        public Task<bool> IsParticipantAsync(string conversationId, string userId) =>
+            _context.ConversationParticipants.AnyAsync(p => p.ConversationId == conversationId && p.UserId == userId);
 
         public async Task<List<ConversationDto>> GetConversationsAsync(string userId)
         {
@@ -62,6 +66,7 @@ namespace ClassBooking.API.Repositories
 
         public async Task<List<MessageDto>> GetMessagesAsync(string conversationId)
         {
+            if (!await _context.Conversations.AnyAsync(c => c.Id == conversationId)) return new();
             var messages = await _context.Messages
                 .Where(m => m.ConversationId == conversationId)
                 .OrderBy(m => m.SentAt)

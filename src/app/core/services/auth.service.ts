@@ -8,7 +8,6 @@ import { Router } from '@angular/router';
 import { User } from '../models/user.models';
 import { LoginRequest, AuthResponse } from '../models/auth.models';
 import { environment } from '../../../environments/environment';
-import { MockDataService } from './mock-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +16,6 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
-  private mockData = inject(MockDataService);
   private isBrowser = isPlatformBrowser(this.platformId);
 
   // Initialize with safe defaults
@@ -75,6 +73,14 @@ export class AuthService {
     this.router.navigate(['/auth']);
   }
 
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/change-password`, { currentPassword, newPassword });
+  }
+
+  deactivateAccount(currentPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/deactivate-account`, { currentPassword });
+  }
+
   refreshToken(): Observable<AuthResponse> {
     // TODO: Implement real refresh token endpoint in backend
     // For now, we just return an error or mock it if needed, but let's keep it simple
@@ -91,7 +97,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return this.isAuthenticatedSubject.value;
+    return this.isAuthenticatedSubject.value && this.hasValidToken();
   }
 
   hasRole(roles: string[]): boolean {
@@ -135,7 +141,7 @@ export class AuthService {
     if (!token) return false;
 
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = this.decodeToken(token);
       return payload.exp * 1000 > Date.now();
     } catch {
       return false;
@@ -144,7 +150,8 @@ export class AuthService {
 
   decodeToken(token: string): any {
     try {
-      return JSON.parse(atob(token.split('.')[1]));
+      const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(encoded.padEnd(Math.ceil(encoded.length / 4) * 4, '=')));
     } catch {
       return null;
     }

@@ -1,0 +1,137 @@
+<div class="students-container">
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">🇬🇧 UK Student Roster</span>
+      <h1>My Enrolled Students & Progress Reports</h1>
+      <p class="subtitle">Track student attendance, GCSE/A-Level syllabus progress, and submit academic performance updates.</p>
+    </div>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="filters-section">
+    <div class="search-box">
+      <input type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()"
+        placeholder="Search UK students by name or email..." />
+    </div>
+    <div class="grade-filter">
+      <label>UK Year Group:</label>
+      <select [(ngModel)]="selectedGrade" (change)="onGradeChange()">
+        <option value="all">All UK Year Groups</option>
+        <option value="Year 9">Year 9 (KS3)</option>
+        <option value="Year 10">Year 10 (GCSE)</option>
+        <option value="Year 11">Year 11 (GCSE)</option>
+        <option value="Year 12">Year 12 (AS-Level)</option>
+        <option value="Year 13">Year 13 (A-Level)</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <p>Loading student roster...</p>
+  </div>
+
+  <div *ngIf="!isLoading && filteredStudents.length > 0" class="students-grid">
+    <div *ngFor="let student of filteredStudents" class="student-card">
+      <div class="student-header">
+        <div class="student-avatar">
+          {{ student.name.charAt(0) }}
+        </div>
+        <div class="student-info">
+          <h3>{{ student.name }}</h3>
+          <p class="email">{{ student.email }}</p>
+          <span class="grade-badge">{{ student.grade || 'Year 11 (GCSE)' }}</span>
+        </div>
+      </div>
+
+      <div class="student-subjects">
+        <strong>Subjects:</strong>
+        <span *ngFor="let subject of student.subjects" class="subject-tag">{{ subject }}</span>
+      </div>
+
+      <div class="student-stats">
+        <div class="stat">
+          <span class="stat-label">Sessions</span>
+          <span class="stat-value">{{ student.attendedClasses }}/{{ student.totalClasses }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Attendance</span>
+          <span class="stat-value">{{ getAttendanceRate(student) }}%</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Performance</span>
+          <span class="performance-badge" [style.background-color]="getPerformanceColor(student.performanceLevel)">
+            {{ student.performanceLevel }}
+          </span>
+        </div>
+      </div>
+
+      <div class="student-notes" *ngIf="student.notes">
+        <strong>Tutor Notes:</strong>
+        <p>{{ student.notes }}</p>
+      </div>
+
+      <div class="student-footer">
+        <span class="enrolled-date">Enrolled: {{ student.enrolledDate | date:'dd MMM yyyy' }}</span>
+        <button class="view-details-btn" (click)="openProgressModal(student)">
+          📈 Update Progress Report
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && filteredStudents.length === 0" class="empty-state">
+    <p>No students found matching your criteria.</p>
+  </div>
+
+  <!-- Progress Modal -->
+  <div *ngIf="showProgressModal" class="modal-backdrop" (click)="closeProgressModal()"></div>
+  <div *ngIf="showProgressModal" class="modal">
+    <div class="modal-header">
+      <h3>Update Academic Progress — {{ selectedStudent?.name }}</h3>
+      <button class="close-btn" (click)="closeProgressModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>UK Subject *</label>
+        <input type="text" [(ngModel)]="progressForm.subject" placeholder="e.g. AQA GCSE Mathematics" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Assessment Average (%)</label>
+          <input type="number" [(ngModel)]="progressForm.averageScore" min="0" max="100" />
+        </div>
+        <div class="form-group">
+          <label>Completed Classes</label>
+          <input type="number" [(ngModel)]="progressForm.completedClasses" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Total Planned Classes</label>
+          <input type="number" [(ngModel)]="progressForm.totalClasses" min="0" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Attendance Rate (%)</label>
+          <input type="number" [(ngModel)]="progressForm.attendanceRate" min="0" max="100" />
+        </div>
+        <div class="form-group">
+          <label>Tracked Study Hours</label>
+          <input type="number" [(ngModel)]="progressForm.studyHours" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Performance Band</label>
+          <select [(ngModel)]="progressForm.performanceLevel">
+            <option value="Excellent">Excellent (Grade 8–9 / A*)</option>
+            <option value="Good">Good (Grade 6–7 / A–B)</option>
+            <option value="Average">Average (Grade 4–5 / C)</option>
+            <option value="NeedsImprovement">Needs Improvement</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeProgressModal()">Cancel</button>
+      <button class="btn-primary" (click)="saveProgress()">Save Progress Report</button>
+    </div>
+  </div>
+</div>

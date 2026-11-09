@@ -1,0 +1,363 @@
+<div class="dashboard-layout">
+  <!-- Modern Left Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">CB</div>
+      <div class="brand-info">
+        <span class="brand-name">ClassBooking <span class="uk-pill">UK</span></span>
+        <span class="brand-role">Student Portal</span>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar">{{ userInitials }}</div>
+      <div class="profile-meta">
+        <strong>{{ userName }}</strong>
+        <span class="status-online"><span class="dot"></span> Active Student</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-label">Workspace</p>
+      <nav class="sidebar-nav">
+        <a routerLink="/dashboard/student" class="nav-item active">
+          <span class="nav-icon">📊</span>
+          <span>Overview</span>
+        </a>
+        <a routerLink="/book-class" class="nav-item">
+          <span class="nav-icon">📅</span>
+          <span>Book a Class</span>
+        </a>
+        <a routerLink="/find-teacher" class="nav-item">
+          <span class="nav-icon">🎓</span>
+          <span>Find a UK Tutor</span>
+        </a>
+        <a routerLink="/my-bookings" class="nav-item">
+          <span class="nav-icon">🗂️</span>
+          <span>My Bookings</span>
+          <span class="nav-badge" *ngIf="totalBookings > 0">{{ totalBookings }}</span>
+        </a>
+        <a routerLink="/timetable" class="nav-item">
+          <span class="nav-icon">🗓️</span>
+          <span>Live Timetable</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-label">GCSE & A-Level Hub</p>
+      <nav class="sidebar-nav">
+        <a routerLink="/student/progress" class="nav-item">
+          <span class="nav-icon">📈</span>
+          <span>Progress Tracker</span>
+        </a>
+        <a routerLink="/student/lesson-plans" class="nav-item">
+          <span class="nav-icon">📘</span>
+          <span>Lesson Plans</span>
+        </a>
+        <a routerLink="/student/resources" class="nav-item">
+          <span class="nav-icon">📂</span>
+          <span>Study Resources</span>
+        </a>
+        <a routerLink="/exam-materials" class="nav-item">
+          <span class="nav-icon">🧪</span>
+          <span>GCSE / A-Level Prep</span>
+        </a>
+        <a routerLink="/past-papers" class="nav-item">
+          <span class="nav-icon">📄</span>
+          <span>Past Exam Papers</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-label">Account</p>
+      <nav class="sidebar-nav">
+        <a routerLink="/student-details" class="nav-item">
+          <span class="nav-icon">👤</span>
+          <span>My Student Profile</span>
+        </a>
+        <a routerLink="/reviews-ratings" class="nav-item">
+          <span class="nav-icon">⭐</span>
+          <span>Tutor Reviews</span>
+        </a>
+      </nav>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <span>Sign Out</span>
+    </button>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="dashboard-main">
+    <!-- Top Hero Banner -->
+    <header class="hero-card">
+      <div class="hero-copy">
+        <div class="hero-badge-row">
+          <span class="eyebrow-pill">{{ todayLabel }}</span>
+          <span class="curriculum-pill">🇬🇧 UK GCSE & A-Level Curriculum</span>
+        </div>
+        <h1>Welcome back, {{ userName }}!</h1>
+        <p class="subtitle">
+          Track your upcoming 1-to-1 tuition sessions, review GCSE/A-Level syllabus mastery, or book a verified UK subject specialist.
+        </p>
+
+        <div class="hero-actions">
+          <button class="primary-btn" (click)="navigateTo('/book-class')">
+            + Book a Tuition Session
+          </button>
+          <button class="secondary-btn" (click)="navigateTo('/find-teacher')">
+            Browse UK Tutors
+          </button>
+          <button class="ghost-btn" (click)="navigateTo('/past-papers')">
+            Past Papers
+          </button>
+          <button class="ghost-btn" (click)="navigateTo('/timetable')">
+            Timetable
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-progress-card">
+        <div class="progress-card-top">
+          <div>
+            <span class="progress-label">Overall Curriculum Mastery</span>
+            <div class="progress-value">{{ overallProgress }}%</div>
+          </div>
+          <span class="progress-badge">On Track</span>
+        </div>
+        <p class="progress-caption">Based on completed sessions & coursework</p>
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="overallProgress"></div>
+        </div>
+        <button class="progress-link-btn" (click)="navigateTo('/student/progress')">
+          View Detailed Progress Report →
+        </button>
+      </div>
+    </header>
+
+    <!-- 4 KPI Stat Cards -->
+    <section class="stats-grid" aria-label="Student summary">
+      <article class="stat-card" (click)="navigateTo('/my-bookings')">
+        <div class="stat-icon indigo">📅</div>
+        <div class="stat-body">
+          <span class="stat-label">Total Bookings</span>
+          <strong class="stat-value">{{ totalBookings }}</strong>
+          <small class="stat-note">Scheduled & past sessions</small>
+        </div>
+      </article>
+
+      <article class="stat-card" (click)="navigateTo('/my-bookings')">
+        <div class="stat-icon emerald">✅</div>
+        <div class="stat-body">
+          <span class="stat-label">Completed Classes</span>
+          <strong class="stat-value">{{ completedClasses }}</strong>
+          <small class="stat-note">1-to-1 sessions finished</small>
+        </div>
+      </article>
+
+      <article class="stat-card" (click)="navigateTo('/student/progress')">
+        <div class="stat-icon sky">⏱️</div>
+        <div class="stat-body">
+          <span class="stat-label">Hours Studied</span>
+          <strong class="stat-value">{{ hoursStudied }}h</strong>
+          <small class="stat-note">Tracked academic tuition</small>
+        </div>
+      </article>
+
+      <article class="stat-card" (click)="navigateTo('/reviews-ratings')">
+        <div class="stat-icon amber">⭐</div>
+        <div class="stat-body">
+          <span class="stat-label">Tutor Rating Avg</span>
+          <strong class="stat-value">{{ averageRating | number:'1.1-1' }}/5</strong>
+          <small class="stat-note">Across your UK tutors</small>
+        </div>
+      </article>
+    </section>
+
+    <!-- Row 1: Upcoming Tuition Sessions + UK Academic Calendar -->
+    <section class="panel-grid">
+      <article class="panel panel-wide">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Schedule</span>
+            <h2>Upcoming Tuition Classes</h2>
+          </div>
+          <div class="panel-header-actions">
+            <button class="btn-soft-sm" (click)="navigateTo('/book-class')">+ New Booking</button>
+            <button class="text-btn" (click)="navigateTo('/my-bookings')">View all ({{ totalBookings }})</button>
+          </div>
+        </div>
+
+        <div class="task-list" *ngIf="upcomingClasses.length > 0; else emptyUpcoming">
+          <div class="task-row" *ngFor="let item of upcomingClasses">
+            <div class="task-date">
+              <span>{{ item.date | date:'EEE' }}</span>
+              <strong>{{ item.date | date:'dd MMM' }}</strong>
+            </div>
+
+            <div class="task-main">
+              <div class="task-title-row">
+                <strong>{{ item.subject }}</strong>
+                <span class="mode-chip">{{ item.mode || 'Online' }}</span>
+              </div>
+              <span>Tutor: {{ item.teacherName || 'Verified UK Tutor' }} • {{ item.startTime }} – {{ item.endTime }}</span>
+              <small *ngIf="item.notes">"{{ item.notes }}"</small>
+            </div>
+
+            <div class="task-meta">
+              <span class="status-pill" [class]="item.status.toLowerCase()">{{ item.status }}</span>
+              <div class="task-actions">
+                <a class="join-link" *ngIf="item.meetingLink && item.status === 'CONFIRMED'" [href]="item.meetingLink" target="_blank" rel="noopener">
+                  Join Live
+                </a>
+                <button class="pay-link-btn" *ngIf="item.paymentStatus !== 'PAID'" (click)="navigateTo('/payment?bookingId=' + item.id)">
+                  Pay £{{ item.price || 35 }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyUpcoming>
+          <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <h3>No upcoming tuition sessions scheduled</h3>
+            <p>Choose a verified UK tutor and book a 1-to-1 GCSE or A-Level session in under 60 seconds.</p>
+            <button class="primary-btn" (click)="navigateTo('/book-class')">Book Your First Session</button>
+          </div>
+        </ng-template>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Academic Calendar</span>
+            <h2>UK Exam & Term Dates</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/timetable')">Timetable</button>
+        </div>
+
+        <div class="event-list" *ngIf="upcomingEvents.length > 0; else emptyEvents">
+          <div class="event-item" *ngFor="let event of upcomingEvents">
+            <div class="event-left">
+              <strong>{{ event.title }}</strong>
+              <span>{{ event.date | date:'dd MMM yyyy' }} • {{ event.startTime }} – {{ event.endTime }}</span>
+            </div>
+            <span class="event-tag">{{ event.type }}</span>
+          </div>
+        </div>
+
+        <ng-template #emptyEvents>
+          <div class="empty-state compact">
+            <p>No upcoming UK academic board events.</p>
+          </div>
+        </ng-template>
+      </article>
+    </section>
+
+    <!-- Row 2: Subject Mastery + Recommended UK Tutors -->
+    <section class="panel-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Performance</span>
+            <h2>Subject Mastery</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/student/progress')">Full Tracker</button>
+        </div>
+
+        <div class="subject-list" *ngIf="subjectProgress.length > 0; else emptyProgress">
+          <div class="subject-row" *ngFor="let subject of subjectProgress">
+            <div class="subject-top">
+              <strong>{{ subject.name }}</strong>
+              <span class="subject-pct">{{ subject.progress }}%</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" [style.width.%]="subject.progress"></div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyProgress>
+          <div class="empty-state compact">
+            <p>Complete your first class to unlock GCSE / A-Level subject analytics.</p>
+          </div>
+        </ng-template>
+      </article>
+
+      <article class="panel panel-wide">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Top Rated Specialists</span>
+            <h2>Recommended UK Tutors</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/find-teacher')">Browse All Tutors</button>
+        </div>
+
+        <div class="teacher-grid" *ngIf="recommendedTeachers.length > 0; else emptyTeachers">
+          <div class="teacher-card" *ngFor="let teacher of recommendedTeachers">
+            <div class="teacher-card-top">
+              <div class="teacher-avatar">{{ (teacher.name || 'T').slice(0, 1) }}</div>
+              <div class="teacher-info">
+                <strong>{{ teacher.name }}</strong>
+                <span>{{ getTeacherSubjectSummary(teacher) }}</span>
+              </div>
+              <span class="rate-pill">£{{ teacher.hourlyRate || 35 }}/hr</span>
+            </div>
+
+            <div class="teacher-card-footer">
+              <span class="rating-chip">⭐ {{ teacher.rating || 4.9 | number:'1.1-1' }} ({{ teacher.totalReviews || 18 }} reviews)</span>
+              <div class="teacher-card-btns">
+                <button class="ghost-btn-sm" (click)="navigateTo('/teacher-profile/' + teacher.id)">Profile</button>
+                <button class="primary-btn-sm" (click)="bookWithTeacher(teacher.id)">Book Class</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyTeachers>
+          <div class="empty-state compact">
+            <p>No tutor recommendations available right now.</p>
+          </div>
+        </ng-template>
+      </article>
+    </section>
+
+    <!-- Row 3: Recent GBP Payments -->
+    <section class="panel-grid single">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Billing & Receipts</span>
+            <h2>Recent Tuition Payments (GBP)</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/payment')">Go to Checkout</button>
+        </div>
+
+        <div class="payment-table-wrap" *ngIf="paymentHistory.length > 0; else emptyPayments">
+          <div class="payment-row" *ngFor="let payment of paymentHistory">
+            <div class="payment-left">
+              <div class="payment-icon">💳</div>
+              <div>
+                <strong>{{ payment.transactionId || 'TXN-UK-9042' }}</strong>
+                <span>{{ payment.paymentMethod }} • {{ payment.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="payment-right">
+              <strong>£{{ payment.amount | number:'1.2-2' }}</strong>
+              <span class="status-pill" [class]="payment.status.toLowerCase()">{{ payment.status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyPayments>
+          <div class="empty-state compact">
+            <p>No GBP payment transactions recorded yet.</p>
+          </div>
+        </ng-template>
+      </article>
+    </section>
+  </main>
+</div>

@@ -1,59 +1,77 @@
-<div class="details-container">
-    <div class="header">
-        <h1>My Student Profile</h1>
-        <p>Manage your personal information and academic details</p>
-    </div>
+<div class="student-details-page">
+  <div class="student-details-shell">
+    <header class="profile-banner">
+      <div>
+        <span class="eyebrow">🇬🇧 Student Academic Profile</span>
+        <h1>My Student Details & Guardian Contact</h1>
+        <p>Keep your UK school year group, qualification stage, and parent/guardian contact details up to date for your tutors.</p>
+      </div>
+      <div class="profile-badge-pill">
+        <span class="dot"></span> {{ profile?.email || 'Active UK Student' }}
+      </div>
+    </header>
 
-    <div *ngIf="isLoading" class="loading">Loading profile...</div>
-
-    <form *ngIf="!isLoading && profile" (ngSubmit)="saveProfile()">
-        <div class="form-grid">
-            <h3 class="section-title">Personal Information</h3>
-
-            <div class="form-group">
-                <label class="form-label">Full Name</label>
-                <input type="text" [(ngModel)]="formData.fullName" name="fullName" class="form-input" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Phone Number</label>
-                <input type="tel" [(ngModel)]="formData.phoneNumber" name="phoneNumber" class="form-input">
-            </div>
-
-            <h3 class="section-title">Academic Details</h3>
-
-            <div class="form-group">
-                <label class="form-label">School</label>
-                <input type="text" [(ngModel)]="formData.school" name="school" class="form-input"
-                    placeholder="Enter your school name">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Grade Level</label>
-                <select [(ngModel)]="formData.gradeLevel" name="gradeLevel" class="form-select">
-                    <option *ngFor="let grade of gradeOptions" [value]="grade">{{ grade }}</option>
-                </select>
-            </div>
-
-            <h3 class="section-title">Guardian Information</h3>
-
-            <div class="form-group">
-                <label class="form-label">Parent/Guardian Name</label>
-                <input type="text" [(ngModel)]="formData.parentName" name="parentName" class="form-input"
-                    placeholder="Parent or Guardian Name">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Parent Contact Number</label>
-                <input type="tel" [(ngModel)]="formData.parentContact" name="parentContact" class="form-input"
-                    placeholder="Parent's Contact Number">
-            </div>
-
-            <div class="actions full-width">
-                <button type="submit" class="btn btn-primary" [disabled]="isSaving">
-                    {{ isSaving ? 'Saving...' : 'Save Changes' }}
-                </button>
-            </div>
+    <div class="details-card">
+      <form (ngSubmit)="saveProfile()" class="details-form">
+        <div class="form-section-title">
+          <h2>Student Information</h2>
+          <p>Used by your UK tutors to tailor 1-to-1 lesson plans and GCSE/A-Level exam preparation.</p>
         </div>
-    </form>
+
+        <div class="grid-two">
+          <div class="field-group">
+            <label>Full Name *</label>
+            <input name="fullName" [(ngModel)]="formData.fullName" placeholder="e.g. Oliver Thompson" required />
+          </div>
+
+          <div class="field-group">
+            <label>Email Address (Read-only)</label>
+            <input [value]="profile?.email || ''" type="email" disabled />
+          </div>
+
+          <div class="field-group">
+            <label>UK Mobile Number</label>
+            <input name="phoneNumber" [(ngModel)]="formData.phoneNumber" placeholder="+44 7700 900077" />
+          </div>
+
+          <div class="field-group">
+            <label>UK Qualification Stage *</label>
+            <select name="gradeLevel" [(ngModel)]="formData.gradeLevel">
+              <option value="Primary">KS2 / 11+ Entrance Prep</option>
+              <option value="OLevel">GCSE (Years 10–11)</option>
+              <option value="ALevel">A-Level / AS-Level (Years 12–13)</option>
+            </select>
+          </div>
+
+          <div class="field-group full">
+            <label>UK School / Sixth Form College</label>
+            <input name="school" [(ngModel)]="formData.school" placeholder="e.g. Westminster Academy, London" />
+          </div>
+        </div>
+
+        <div class="form-section-title divider-top">
+          <h2>Parent / Guardian Safeguarding Contact</h2>
+          <p>Required for UK under-18 safeguarding compliance and progress reports.</p>
+        </div>
+
+        <div class="grid-two">
+          <div class="field-group">
+            <label>Parent / Guardian Full Name</label>
+            <input name="parentName" [(ngModel)]="formData.parentName" placeholder="e.g. Sarah Thompson" />
+          </div>
+
+          <div class="field-group">
+            <label>Guardian UK Phone Number</label>
+            <input name="parentContact" [(ngModel)]="formData.parentContact" placeholder="+44 7700 900123" />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-save" [disabled]="isSaving">
+            {{ isSaving ? 'Saving Profile...' : 'Save Student Profile' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>

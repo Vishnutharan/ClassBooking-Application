@@ -1,1 +1,331 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   ClassBooking UK — Modern SaaS Global Design System (2026)
+   ========================================================================== */
+
+:root {
+  --bg-app: #f8fafc;
+  --bg-subtle: #f1f5f9;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-muted: #f8fafc;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-soft: #eef2ff;
+  --primary-border: #c7d2fe;
+
+  --accent: #0ea5e9;
+  --accent-soft: #e0f2fe;
+
+  --success: #10b981;
+  --success-soft: #ecfdf5;
+  --success-text: #065f46;
+
+  --warning: #f59e0b;
+  --warning-soft: #fffbeb;
+  --warning-text: #92400e;
+
+  --danger: #ef4444;
+  --danger-soft: #fef2f2;
+  --danger-text: #991b1b;
+
+  --text-main: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 12px 24px -6px rgba(15, 23, 42, 0.07), 0 4px 8px -4px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 20px 36px -10px rgba(15, 23, 42, 0.1), 0 8px 16px -6px rgba(15, 23, 42, 0.05);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: 1.55;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ==========================================================================
+   Global FullCalendar Modern Theme Overrides
+   ========================================================================== */
+.fc {
+  font-family: 'Inter', sans-serif !important;
+  --fc-border-color: #e2e8f0;
+  --fc-button-bg-color: #ffffff;
+  --fc-button-border-color: #cbd5e1;
+  --fc-button-text-color: #1e293b;
+  --fc-button-hover-bg-color: #f8fafc;
+  --fc-button-hover-border-color: #94a3b8;
+  --fc-button-active-bg-color: #4f46e5;
+  --fc-button-active-border-color: #4f46e5;
+  --fc-today-bg-color: rgba(79, 70, 229, 0.05);
+}
+
+.fc .fc-toolbar-title {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 1.15rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+}
+
+.fc .fc-button {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.84rem !important;
+  padding: 0.45rem 0.85rem !important;
+  text-transform: capitalize !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  transition: all 0.15s ease !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: #4f46e5 !important;
+  border-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  padding: 10px 4px !important;
+  font-weight: 700 !important;
+  font-size: 0.82rem !important;
+  color: #334155 !important;
+}
+
+.fc .fc-event {
+  border-radius: 8px !important;
+  padding: 2px 6px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  border: none !important;
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* ==========================================================================
+   Global Reusable SaaS Layout & Component Primitives
+   ========================================================================== */
+.saas-page {
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 2rem 1.5rem 3.5rem;
+}
+
+.saas-container {
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+.saas-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.6rem 1.85rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.saas-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #4f46e5;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  margin-bottom: 0.55rem;
+}
+
+.saas-title {
+  font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.3rem;
+}
+
+.saas-subtitle {
+  color: #64748b;
+  font-size: 0.94rem;
+  margin: 0;
+  max-width: 68ch;
+}
+
+.saas-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 1.4rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.saas-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.saas-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.saas-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem 1.35rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.saas-stat-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.saas-stat-value {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.15;
+}
+
+.saas-stat-meta {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}
+
+.saas-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.62rem 1.15rem;
+  border-radius: 11px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  text-decoration: none;
+}
+
+.saas-btn-primary {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.24);
+}
+
+.saas-btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.32);
+}
+
+.saas-btn-secondary {
+  background: #ffffff;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.saas-btn-secondary:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.saas-btn-soft {
+  background: #eef2ff;
+  color: #4f46e5;
+  border-color: #c7d2fe;
+}
+
+.saas-btn-soft:hover:not(:disabled) {
+  background: #e0e7ff;
+}
+
+.saas-btn-danger {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.saas-btn-danger:hover:not(:disabled) {
+  background: #fee2e2;
+}

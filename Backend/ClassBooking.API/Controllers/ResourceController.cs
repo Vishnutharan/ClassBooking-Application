@@ -4,6 +4,7 @@ using ClassBooking.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using ClassBooking.API.Repositories;
 
 namespace ClassBooking.API.Controllers
 {
@@ -15,12 +16,14 @@ namespace ClassBooking.API.Controllers
         private readonly IResourceService _resourceService;
         private readonly ITeacherService _teacherService;
         private readonly IStudentService _studentService;
+        private readonly IResourceRepository _resources;
 
-        public ResourceController(IResourceService resourceService, ITeacherService teacherService, IStudentService studentService)
+        public ResourceController(IResourceService resourceService, ITeacherService teacherService, IStudentService studentService, IResourceRepository resources)
         {
             _resourceService = resourceService;
             _teacherService = teacherService;
             _studentService = studentService;
+            _resources = resources;
         }
 
         [HttpPost("upload")]
@@ -48,6 +51,9 @@ namespace ClassBooking.API.Controllers
 
             if (request.File == null || request.File.Length == 0)
                 return BadRequest("No file uploaded");
+            var extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
+            if (request.File.Length > 20 * 1024 * 1024 || !new[] { ".pdf", ".png", ".jpg", ".jpeg", ".mp4", ".docx", ".pptx", ".txt" }.Contains(extension))
+                return BadRequest(new { message = "Use a supported document, image or video up to 20 MB." });
 
             // Save file
             var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "resources");
@@ -89,9 +95,10 @@ namespace ClassBooking.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ResourceEntity>> GetResource(string id)
         {
-            // Note: In real app, check permissions (if student, is it for them? if teacher, is it theirs?)
-            // For now, assuming basic access if authenticated.
-            return Ok(); // Placeholder as we mostly use list endpoints
+            var resource = await _resources.GetByIdAsync(id);
+            if (resource == null) return NotFound();
+            if (!await CanAccess(resource)) return Forbid();
+            return Ok(resource);
         }
 
         [HttpGet("teacher")]
@@ -136,9 +143,22 @@ namespace ClassBooking.API.Controllers
         public async Task<ActionResult> DeleteResource(string id)
         {
              var userId = User.FindFirst("userId")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-             // Check ownership...
+             var resource = await _resources.GetByIdAsync(id);
+             if (resource == null) return NotFound();
+             var teacher = await _teacherService.GetTeacherByUserIdAsync(userId!);
+             if (teacher == null || teacher.Id != resource.TeacherProfileId) return Forbid();
              await _resourceService.DeleteResourceAsync(id);
              return NoContent();
+        }
+
+        private async Task<bool> CanAccess(ResourceEntity resource)
+        {
+            if (resource.IsPublic || User.IsInRole("Admin")) return true;
+            var userId = User.FindFirst("userId")!.Value;
+            if (User.IsInRole("Teacher"))
+                return (await _teacherService.GetTeacherByUserIdAsync(userId))?.Id == resource.TeacherProfileId;
+            var student = await _studentService.GetProfileAsync(userId);
+            return resource.StudentId == userId || (student != null && resource.StudentId == student.Id);
         }
 
         private string GetResourceType(string mimeType)

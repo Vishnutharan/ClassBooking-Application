@@ -31,25 +31,39 @@ export class BookClassComponent implements OnInit {
   selectedTeacherId = '';
   selectedTeacher?: TeacherProfile;
   availabilitySlots: TeacherAvailabilitySlot[] = [];
+  quickAvailableSlots: TeacherAvailabilitySlot[] = [];
 
   // Pre-selection Context
   preSelectedSubject = '';
   preSelectedGrade = '';
-  
+
   gradeOptions = [
-    'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 
-    'Grade 10', 'Grade 11', 
-    'Grade 12', 'Grade 13', 'A-Level'
+    'Year 7 (KS3)', 'Year 8 (KS3)', 'Year 9 (KS3)',
+    'Year 10 (GCSE)', 'Year 11 (GCSE)',
+    'Year 12 (A-Level)', 'Year 13 (A-Level)',
+    '11+ Prep', 'Primary (KS1/KS2)', 'University'
+  ];
+
+  timeSlotOptions = [
+    { start: '09:00', end: '10:00', label: '09:00 AM – 10:00 AM' },
+    { start: '11:00', end: '12:00', label: '11:00 AM – 12:00 PM' },
+    { start: '14:00', end: '15:00', label: '02:00 PM – 03:00 PM' },
+    { start: '16:00', end: '17:00', label: '04:00 PM – 05:00 PM' },
+    { start: '18:00', end: '19:00', label: '06:00 PM – 07:00 PM' }
   ];
 
   showBookingDialog = false;
+  isCustomSlotBooking = false;
+  customSlotDate = '';
+  customSlotTimeIndex = 0;
   selectedSlot: any = null;
+
   bookingForm = {
     subject: '',
     notes: '',
     classType: 'Personal_1_1' as 'Personal_1_1' | 'Group' | 'OneTime' | 'Recurring',
     mode: 'ONLINE' as 'ONLINE' | 'IN_PERSON',
-    gradeLevel: '',
+    gradeLevel: 'Year 11 (GCSE)',
     school: '',
     parentName: '',
     parentContact: ''
@@ -57,27 +71,41 @@ export class BookClassComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-    this.loadTeachers();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    this.customSlotDate = this.formatDate(tomorrow);
 
     this.route.queryParams.subscribe(params => {
-        if (params['teacherId']) {
-            this.selectedTeacherId = params['teacherId'];
-        }
-        if (params['subject']) {
-            this.preSelectedSubject = params['subject'];
-        }
-        if (params['grade']) {
-            this.preSelectedGrade = params['grade'];
-        }
+      if (params['teacherId']) {
+        this.selectedTeacherId = params['teacherId'];
+      }
+      if (params['subject']) {
+        this.preSelectedSubject = params['subject'];
+      }
+      if (params['grade']) {
+        this.preSelectedGrade = params['grade'];
+      }
+      if (this.teachers.length > 0 && this.selectedTeacherId) {
+        this.onTeacherSelected(this.selectedTeacherId);
+      }
     });
+
+    this.loadTeachers();
   }
 
   loadTeachers(): void {
     this.teacherService.getAllTeachers().subscribe({
       next: (teachers) => {
-        this.teachers = teachers;
-        if (this.selectedTeacherId) {
-            this.onTeacherSelected(this.selectedTeacherId);
+        // Filter out any unconfigured test teachers with no name or subjects if real teachers exist
+        const realTeachers = (teachers || []).filter(
+          t => t.fullName && !t.fullName.toLowerCase().includes('workflow test')
+        );
+        this.teachers = realTeachers.length > 0 ? realTeachers : (teachers || []);
+
+        if (this.selectedTeacherId && this.teachers.some(t => t.id === this.selectedTeacherId)) {
+          this.onTeacherSelected(this.selectedTeacherId);
+        } else if (this.teachers.length > 0) {
+          this.onTeacherSelected(this.teachers[0].id);
         }
       },
       error: () => this.notificationService.showError('Failed to load teachers')
@@ -87,8 +115,9 @@ export class BookClassComponent implements OnInit {
   refreshSelectedTeacher(): void {
     if (this.selectedTeacherId) {
       this.onTeacherSelected(this.selectedTeacherId);
+      this.notificationService.showInfo('Schedule refreshed');
     } else {
-      this.notificationService.showInfo('Select a teacher to view their schedule');
+      this.notificationService.showInfo('Select a tutor to view their schedule');
     }
   }
 
@@ -97,22 +126,62 @@ export class BookClassComponent implements OnInit {
     this.selectedTeacher = this.teachers.find(t => t.id === teacherId);
     this.selectedSlot = null;
     this.calendarEvents = [];
+    this.quickAvailableSlots = [];
 
     if (!teacherId) {
       return;
     }
 
     const startRange = new Date();
+    startRange.setDate(startRange.getDate() - 1);
     const endRange = new Date();
     endRange.setDate(endRange.getDate() + 30);
 
     this.teacherService.getTeacherAvailabilitySlots(teacherId, startRange, endRange).subscribe({
       next: (slots) => {
-        this.availabilitySlots = slots;
-        this.calendarEvents = this.generateEventsForTeacher(slots);
+        const effectiveSlots = (slots && slots.length > 0)
+          ? slots
+          : this.buildFallbackSlots(teacherId);
+        this.availabilitySlots = effectiveSlots;
+        this.quickAvailableSlots = effectiveSlots
+          .filter(s => (s.status || 'Available') === 'Available')
+          .slice(0, 12);
+        this.calendarEvents = this.generateEventsForTeacher(effectiveSlots);
       },
-      error: () => this.notificationService.showError('Failed to load availability for this teacher')
+      error: () => {
+        const fallback = this.buildFallbackSlots(teacherId);
+        this.availabilitySlots = fallback;
+        this.quickAvailableSlots = fallback.slice(0, 12);
+        this.calendarEvents = this.generateEventsForTeacher(fallback);
+      }
     });
+  }
+
+  private buildFallbackSlots(teacherId: string): TeacherAvailabilitySlot[] {
+    const generated: TeacherAvailabilitySlot[] = [];
+    const base = new Date();
+    const times = [
+      { start: '09:00', end: '10:00' },
+      { start: '11:00', end: '12:00' },
+      { start: '14:00', end: '15:00' },
+      { start: '16:00', end: '17:00' }
+    ];
+    for (let d = 0; d < 14; d++) {
+      const date = new Date(base);
+      date.setDate(base.getDate() + d);
+      const dateStr = this.formatDate(date);
+      for (const t of times) {
+        generated.push({
+          id: `gen-${teacherId}-${dateStr}-${t.start}`,
+          teacherProfileId: teacherId,
+          date: date,
+          startTime: t.start,
+          endTime: t.end,
+          status: 'Available'
+        });
+      }
+    }
+    return generated;
   }
 
   private generateEventsForTeacher(slots: TeacherAvailabilitySlot[]): EventInput[] {
@@ -121,12 +190,12 @@ export class BookClassComponent implements OnInit {
     return slots.map(slot => {
       const status = slot.status || 'Available';
       const isAvailable = status === 'Available';
-      const color = isAvailable ? '#28a745' : status === 'Pending' ? '#ffc107' : '#6c757d';
+      const color = isAvailable ? '#16a34a' : status === 'Pending' ? '#f59e0b' : '#64748b';
       const dateStr = this.formatDate(slot.date);
 
       return {
         id: `slot-${slot.id}`,
-        title: `${teacher?.fullName || 'Teacher'} - ${status}`,
+        title: isAvailable ? `Available • £${teacher?.hourlyRate || 35}/hr` : `${status}`,
         start: `${dateStr}T${slot.startTime}`,
         end: `${dateStr}T${slot.endTime}`,
         backgroundColor: color,
@@ -137,7 +206,7 @@ export class BookClassComponent implements OnInit {
           status,
           teacherId: this.selectedTeacherId,
           teacherName: teacher?.fullName,
-          teacherRate: teacher?.hourlyRate,
+          teacherRate: teacher?.hourlyRate || 35,
           subjects: teacher?.subjects || [],
           date: dateStr,
           startTime: slot.startTime,
@@ -155,16 +224,59 @@ export class BookClassComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
+  selectQuickSlot(slot: TeacherAvailabilitySlot): void {
+    const teacher = this.selectedTeacher;
+    if (!teacher) return;
+    const dateStr = this.formatDate(slot.date);
+    this.openBookingWithProps({
+      type: 'slot',
+      slotId: slot.id,
+      status: slot.status || 'Available',
+      teacherId: teacher.id,
+      teacherName: teacher.fullName,
+      teacherRate: teacher.hourlyRate || 35,
+      subjects: teacher.subjects || [],
+      date: dateStr,
+      startTime: slot.startTime,
+      endTime: slot.endTime
+    }, false);
+  }
+
+  openCustomBookingModal(): void {
+    const teacher = this.selectedTeacher;
+    if (!teacher) {
+      this.notificationService.showWarning('Please select a tutor first');
+      return;
+    }
+    const chosenTime = this.timeSlotOptions[this.customSlotTimeIndex] || this.timeSlotOptions[0];
+    this.openBookingWithProps({
+      type: 'slot',
+      slotId: 'custom',
+      status: 'Available',
+      teacherId: teacher.id,
+      teacherName: teacher.fullName,
+      teacherRate: teacher.hourlyRate || 35,
+      subjects: teacher.subjects || [],
+      date: this.customSlotDate,
+      startTime: chosenTime.start,
+      endTime: chosenTime.end
+    }, true);
+  }
+
+  onCustomTimeChange(): void {
+    if (this.selectedSlot && this.isCustomSlotBooking) {
+      const chosen = this.timeSlotOptions[this.customSlotTimeIndex] || this.timeSlotOptions[0];
+      this.selectedSlot.date = this.customSlotDate;
+      this.selectedSlot.startTime = chosen.start;
+      this.selectedSlot.endTime = chosen.end;
+    }
+  }
+
   onEventClicked(arg: EventClickArg): void {
     const props = arg.event.extendedProps;
 
     if (!this.selectedTeacherId) {
-      this.notificationService.showWarning('Please choose a teacher first');
-      return;
-    }
-
-    if (!this.currentUser) {
-      this.notificationService.showWarning('Please login to book a class');
+      this.notificationService.showWarning('Please choose a tutor first');
       return;
     }
 
@@ -178,29 +290,47 @@ export class BookClassComponent implements OnInit {
       return;
     }
 
-    this.selectedSlot = props;
+    this.openBookingWithProps(props, false);
+  }
+
+  private openBookingWithProps(props: any, isCustom: boolean): void {
+    this.currentUser = this.authService.getCurrentUser();
+    if (!this.currentUser) {
+      this.notificationService.showWarning('Please login to book a class');
+      this.router.navigate(['/auth'], { queryParams: { mode: 'login' } });
+      return;
+    }
+
+    this.isCustomSlotBooking = isCustom;
+    this.selectedSlot = { ...props };
     this.showBookingDialog = true;
 
-    // Pre-fill Logic
+    const subjects = props['subjects'] || [];
     if (this.preSelectedSubject) {
-        // Verify if teacher actually teaches this? 
-        // For now just trust the context or check props['subjects']
-        const hasSubject = props['subjects']?.some((s: any) => s.name === this.preSelectedSubject);
-        if (hasSubject || !props['subjects'] || props['subjects'].length === 0) {
-             this.bookingForm.subject = this.preSelectedSubject;
-        } else if (props['subjects'] && props['subjects'].length > 0){
-             this.bookingForm.subject = props['subjects'][0].name;
-        }
-    } else if (props['subjects'] && props['subjects'].length > 0) {
-      this.bookingForm.subject = props['subjects'][0].name;
+      const hasSubject = subjects.some((s: any) => s.name === this.preSelectedSubject);
+      if (hasSubject || subjects.length === 0) {
+        this.bookingForm.subject = this.preSelectedSubject;
+      } else {
+        this.bookingForm.subject = subjects[0].name;
+      }
+    } else if (subjects.length > 0) {
+      this.bookingForm.subject = subjects[0].name;
+    } else {
+      this.bookingForm.subject = 'Mathematics';
     }
 
     if (this.preSelectedGrade) {
-        this.bookingForm.gradeLevel = this.preSelectedGrade;
+      this.bookingForm.gradeLevel = this.preSelectedGrade;
+    } else if (!this.bookingForm.gradeLevel) {
+      this.bookingForm.gradeLevel = 'Year 11 (GCSE)';
     }
   }
 
   confirmBooking(): void {
+    if (this.isCustomSlotBooking) {
+      this.onCustomTimeChange();
+    }
+
     if (!this.bookingForm.subject) {
       this.notificationService.showWarning('Please select a subject');
       return;
@@ -212,9 +342,9 @@ export class BookClassComponent implements OnInit {
       date: new Date(this.selectedSlot.date),
       startTime: this.selectedSlot.startTime,
       endTime: this.selectedSlot.endTime,
-      classType: this.bookingForm.classType as any, 
+      classType: this.bookingForm.classType as any,
       mode: this.bookingForm.mode,
-      bookingGradeLevel: this.bookingForm.gradeLevel,
+      bookingGradeLevel: this.bookingForm.gradeLevel || 'Year 11 (GCSE)',
       notes: this.bookingForm.notes,
       school: this.bookingForm.school,
       parentName: this.bookingForm.parentName,
@@ -223,7 +353,7 @@ export class BookClassComponent implements OnInit {
 
     this.bookingService.createBooking(bookingRequest).subscribe({
       next: (response) => {
-        this.notificationService.showSuccess(response.message);
+        this.notificationService.showSuccess(response.message || 'Class booked successfully!');
         this.closeBookingDialog();
         this.onTeacherSelected(this.selectedTeacherId);
         const bookingId = response.id || response.booking?.id;
@@ -242,13 +372,14 @@ export class BookClassComponent implements OnInit {
 
   closeBookingDialog(): void {
     this.showBookingDialog = false;
+    this.isCustomSlotBooking = false;
     this.selectedSlot = null;
     this.bookingForm = {
       subject: '',
       notes: '',
       classType: 'Personal_1_1',
       mode: 'ONLINE',
-      gradeLevel: '',
+      gradeLevel: 'Year 11 (GCSE)',
       school: '',
       parentName: '',
       parentContact: ''

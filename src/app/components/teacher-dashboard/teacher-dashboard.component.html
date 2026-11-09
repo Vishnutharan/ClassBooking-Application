@@ -1,291 +1,230 @@
-<div class="dashboard-shell">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark"></div>
-      <div>
-        <p class="brand-title">ClassBooking</p>
-        <p class="brand-sub">Teacher hub</p>
+<div class="bento-dashboard">
+  <!-- TOP ROW: Compact Educator Hero Banner + 4 KPI Stat Cards -->
+  <section class="top-row-grid">
+    <div class="hero-banner-card">
+      <div class="hero-main-content">
+        <div class="hero-badges">
+          <span class="badge-date">{{ today | date:'EEEE, d MMM yyyy' }}</span>
+          <span class="badge-uk">🇬🇧 UK Educator Workspace</span>
+          <span class="badge-verified">✓ {{ teacherProfile?.verificationStatus || 'DBS Verified' }}</span>
+        </div>
+        <h1>Welcome back, {{ teacherProfile?.fullName || 'Educator' }}!</h1>
+        <p>Manage your 1-to-1 UK tuition schedule, confirm incoming student booking requests, and track GBP earnings.</p>
+
+        <div class="hero-quick-btns">
+          <button type="button" class="btn-hero-primary" (click)="navigate('/manage-schedule')">+ Update Availability</button>
+          <button type="button" class="btn-hero-secondary" (click)="navigate('/my-classes')">My Classes ({{ upcomingClasses.length }})</button>
+          <button type="button" class="btn-hero-ghost" (click)="navigate('/teacher/lesson-planner')">Lesson Planner</button>
+          <button type="button" class="btn-hero-ghost" (click)="navigate('/resources-upload')">Upload Resources</button>
+        </div>
+      </div>
+
+      <div class="hero-mastery-box" (click)="navigate('/manage-profile')" title="Edit Rate & Subjects">
+        <div class="mastery-top">
+          <span>Hourly Tuition Rate</span>
+          <span class="mastery-tag">Active</span>
+        </div>
+        <div class="mastery-pct">£{{ teacherProfile?.hourlyRate || 35 }}<small>/hr</small></div>
+        <p class="rate-sub">This week: {{ weekStats.classesThisWeek }} classes • £{{ weekStats.earningsThisWeek | number:'1.0-0' }}</p>
+        <span class="mastery-link">Edit Tutor Profile & Rate →</span>
       </div>
     </div>
 
-    <div class="nav-group">
-      <p class="nav-label">Today</p>
-      <button class="nav-item active">Overview</button>
-      <button class="nav-item" (click)="navigate('/my-classes')">My classes</button>
-      <button class="nav-item" (click)="navigate('/manage-schedule')">Availability</button>
-      <!-- <button class="nav-item" (click)="navigate('/teacher/messages')">Messages</button> -->
-      <button class="nav-item" (click)="navigate('/timetable')">Timetable</button>
+    <!-- 4 KPI Stat Cards (2x2 Grid beside Hero) -->
+    <div class="kpi-quad-grid">
+      <article class="kpi-card" (click)="navigate('/teacher/students')">
+        <div class="kpi-icon indigo">👥</div>
+        <div class="kpi-info">
+          <span class="kpi-label">Active Students</span>
+          <strong class="kpi-val">{{ stats.totalStudents }}</strong>
+          <small class="kpi-sub">Enrolled UK learners</small>
+        </div>
+      </article>
+
+      <article class="kpi-card" (click)="navigate('/my-classes')">
+        <div class="kpi-icon emerald">🎓</div>
+        <div class="kpi-info">
+          <span class="kpi-label">Completed</span>
+          <strong class="kpi-val">{{ stats.completedClasses }}</strong>
+          <small class="kpi-sub">Delivered 1-to-1 classes</small>
+        </div>
+      </article>
+
+      <article class="kpi-card" (click)="navigate('/reviews-ratings')">
+        <div class="kpi-icon amber">⭐</div>
+        <div class="kpi-info">
+          <span class="kpi-label">Tutor Rating</span>
+          <strong class="kpi-val">{{ stats.averageRating || 4.9 | number:'1.1-1' }}/5</strong>
+          <small class="kpi-sub">{{ teacherProfile?.totalReviews || recentReviews.length }} verified reviews</small>
+        </div>
+      </article>
+
+      <article class="kpi-card" (click)="navigate('/teacher/analytics')">
+        <div class="kpi-icon sky">💷</div>
+        <div class="kpi-info">
+          <span class="kpi-label">Monthly Revenue</span>
+          <strong class="kpi-val">£{{ stats.monthlyEarnings | number:'1.0-0' }}</strong>
+          <small class="kpi-sub">Current month GBP</small>
+        </div>
+      </article>
     </div>
+  </section>
 
-    <div class="nav-group">
-      <p class="nav-label">Growth</p>
-      <button class="nav-item" (click)="navigate('/teacher/analytics')">Analytics</button>
-      <button class="nav-item" (click)="navigate('/resources-upload')">Resources</button>
-      <button class="nav-item" (click)="navigate('/teacher/lesson-planner')">Lesson plans</button>
-      <button class="nav-item" (click)="navigate('/teacher/students')">Students</button>
-    </div>
-
-    <div class="nav-footer">
-      <p class="nav-hint">Keep your profile fresh.</p>
-      <button class="pill-btn" (click)="navigate('/manage-profile')">Manage profile</button>
-    </div>
-
-    <button class="logout-btn" (click)="logout()">Logout</button>
-  </aside>
-
-  <main class="dashboard-main">
-    <header class="page-header">
-      <div>
-        <p class="eyebrow">{{ today | date:'EEE, MMM d' }}</p>
-        <h1>Hello, {{ teacherProfile?.fullName || 'Teacher' }}</h1>
-        <p class="lede">Plan your week, approve bookings, and watch your earnings grow.</p>
-        <div class="chip-row">
-          <button class="chip" (click)="navigate('/manage-schedule')">Update availability</button>
-          <button class="chip" (click)="navigate('/teacher/attendance')">Mark attendance</button>
-          <button class="chip" (click)="navigate('/teacher/messages')">Open inbox</button>
-          <button class="chip" (click)="navigate('/resources-upload')">Upload resources</button>
-        </div>
-      </div>
-      <div class="hero-card">
-        <p class="mini-label">Hourly rate</p>
-        <h3>LKR {{ teacherProfile?.hourlyRate || 0 }}/hr</h3>
-        <p class="small-text">Status: {{ teacherProfile?.verificationStatus || 'Pending' }}</p>
-        <div class="spark-bar">
-          <div class="spark-fill" [style.width.%]="ratingWidth(stats.averageRating)"></div>
-        </div>
-        <button class="ghost-btn" (click)="navigate('/manage-profile')">Edit details</button>
-      </div>
-    </header>
-
-    <section class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Active students</p>
-          <span class="meta-dot success"></span>
-        </div>
-        <h2>{{ stats.totalStudents }}</h2>
-        <p class="meta-sub">Unique students taught</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Completed classes</p>
-          <span class="meta-dot info"></span>
-        </div>
-        <h2>{{ stats.completedClasses }}</h2>
-        <p class="meta-sub">Finished sessions</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Average rating</p>
-          <span class="meta-dot warning"></span>
-        </div>
-        <h2>{{ stats.averageRating | number:'1.1-1' }}/5</h2>
-        <p class="meta-sub">Based on student feedback</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Monthly earnings</p>
-          <span class="meta-dot neutral"></span>
-        </div>
-        <h2>LKR {{ stats.monthlyEarnings | number:'1.0-0' }}</h2>
-        <p class="meta-sub">Confirmed sessions this month</p>
-      </div>
-    </section>
-
-    <article class="panel wide">
-      <div class="panel-header">
+  <!-- MAIN BENTO WORKSPACE: 3-Column No-Scroll Grid -->
+  <section class="bento-main-grid">
+    <!-- COLUMN 1: Upcoming Confirmed Tuition Classes -->
+    <article class="bento-panel">
+      <div class="panel-head">
         <div>
-          <p class="mini-label">Schedule</p>
-          <h3>Upcoming classes</h3>
+          <span class="panel-kicker">Teaching Schedule</span>
+          <h2>Upcoming Confirmed Classes</h2>
         </div>
-        <button class="ghost-btn" (click)="navigate('/my-classes')">View all</button>
+        <div class="panel-head-actions">
+          <button type="button" class="btn-chip-primary" (click)="navigate('/manage-schedule')">+ Slots</button>
+          <button type="button" class="btn-chip-ghost" (click)="navigate('/my-classes')">All Classes</button>
+        </div>
       </div>
 
-      <div class="timeline" *ngIf="upcomingClasses.length; else noUpcoming">
-        <div class="timeline-item" *ngFor="let cls of upcomingClasses; let i = index"
-          [style.animation-delay]="(i * 0.04) + 's'">
-          <div class="timeline-date">
-            <span class="day">{{ cls.date | date:'dd' }}</span>
-            <span class="month">{{ cls.date | date:'MMM' }}</span>
+      <div class="panel-scroll-body" *ngIf="upcomingClasses.length > 0; else emptyUpcoming">
+        <div class="session-item" *ngFor="let cls of upcomingClasses">
+          <div class="session-date-box">
+            <span>{{ cls.date | date:'EEE' }}</span>
+            <strong>{{ cls.date | date:'dd MMM' }}</strong>
           </div>
-          <div class="timeline-card">
-            <div class="pill success">{{ cls.status }}</div>
-            <h4>{{ cls.subject }}</h4>
-            <p class="muted">{{ cls.startTime }} - {{ cls.endTime }} | {{ cls.classType }}</p>
-            <p class="muted">Student: {{ cls.studentName || cls.studentId }}</p>
-            <div class="card-actions">
-              <button class="ghost-btn" (click)="navigate('/my-classes')">Details</button>
-              <button class="pill-btn" (click)="navigate('/manage-schedule')">Reschedule</button>
+
+          <div class="session-details">
+            <div class="session-title-line">
+              <strong>{{ cls.subject }}</strong>
+              <span class="status-dot-pill confirmed">{{ cls.status }}</span>
             </div>
+            <p class="session-meta">
+              👤 {{ cls.studentName || 'UK Student' }} • {{ cls.startTime }}–{{ cls.endTime }} ({{ cls.mode || 'ONLINE' }})
+            </p>
+          </div>
+
+          <div class="session-cta">
+            <a *ngIf="cls.meetingLink"
+               [href]="cls.meetingLink"
+               target="_blank"
+               rel="noopener"
+               class="btn-join-mini">
+              Launch
+            </a>
+            <button *ngIf="!cls.meetingLink"
+                    type="button"
+                    class="btn-mini-outline"
+                    (click)="navigate('/my-classes')">
+              Open
+            </button>
           </div>
         </div>
       </div>
+
+      <ng-template #emptyUpcoming>
+        <div class="panel-empty">
+          <div class="empty-emoji">🗓️</div>
+          <h3>No upcoming classes scheduled</h3>
+          <p>Publish your weekly UK availability slots so students can book 1-to-1 sessions.</p>
+          <button type="button" class="btn-chip-primary lg" (click)="navigate('/manage-schedule')">+ Manage Availability</button>
+        </div>
+      </ng-template>
     </article>
 
-    <article class="panel slim">
-      <div class="panel-header">
+    <!-- COLUMN 2: Pending Student Booking Requests (Actionable) -->
+    <article class="bento-panel">
+      <div class="panel-head">
         <div>
-          <p class="mini-label">Platform</p>
-          <h3>Events</h3>
+          <span class="panel-kicker">Action Required</span>
+          <h2>Pending Booking Requests ({{ pendingRequests.length }})</h2>
         </div>
-        <button class="ghost-btn" (click)="navigate('/timetable')">Open timetable</button>
+        <button type="button" class="btn-chip-ghost" (click)="navigate('/my-classes')">Manage All</button>
       </div>
 
-      <div class="stacked-list" *ngIf="timetableEvents.length; else noEvents">
-        <div class="stacked-item" *ngFor="let ev of timetableEvents; let i = index"
-          [style.animation-delay]="(i * 0.03) + 's'">
-          <div>
-            <p class="stacked-title">{{ ev.title }}</p>
-            <p class="muted">{{ ev.date | date:'MMM dd' }} | {{ ev.startTime }} - {{ ev.endTime }}</p>
-          </div>
-          <span class="pill neutral">{{ ev.type || 'Event' }}</span>
-        </div>
-      </div>
-    </article>
-
-    <article class="panel">
-      <div class="panel-header">
-        <div>
-          <p class="mini-label">Decisions</p>
-          <h3>Pending requests</h3>
-        </div>
-      </div>
-      <div class="stacked-list" *ngIf="pendingRequests.length; else noPending">
-        <div class="stacked-item pending" *ngFor="let req of pendingRequests; let i = index"
-          [style.animation-delay]="(i * 0.04) + 's'">
-          <div>
-            <p class="stacked-title">{{ req.subject }}</p>
-            <p class="muted">{{ req.date | date:'MMM dd, yyyy' }} | {{ req.startTime }} - {{ req.endTime }}</p>
-            <p class="muted">Student: {{ req.studentName || req.studentId }}</p>
-          </div>
-          <div class="pending-actions">
-            <button class="ghost-btn" (click)="acceptRequest(req)">Accept</button>
-            <button class="ghost-btn danger" (click)="rejectRequest(req)">Decline</button>
-            <button class="ghost-btn" (click)="navigate('/manage-schedule')">Reschedule</button>
-          </div>
-        </div>
-      </div>
-    </article>
-
-
-    <section class="panel-grid">
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <p class="mini-label">Feedback</p>
-            <h3>Recent reviews</h3>
-          </div>
-          <button class="ghost-btn" (click)="navigate('/reviews-ratings')">View all</button>
-        </div>
-        <div class="stacked-list" *ngIf="recentReviews.length; else noReviews">
-          <div class="stacked-item" *ngFor="let review of recentReviews; let i = index"
-            [style.animation-delay]="(i * 0.04) + 's'">
+      <div class="panel-scroll-body" *ngIf="pendingRequests.length > 0; else emptyRequests">
+        <div class="request-item-card" *ngFor="let req of pendingRequests">
+          <div class="req-top">
             <div>
-              <p class="stacked-title">{{ review.studentName }}</p>
-              <p class="muted">"{{ review.text }}"</p>
+              <strong>{{ req.studentName || 'UK Student' }}</strong>
+              <span class="req-subj">{{ req.subject }} • £{{ req.price || teacherProfile?.hourlyRate || 35 }}</span>
             </div>
-            <span class="pill success">{{ review.rating }} / 5</span>
+            <span class="status-dot-pill pending">Pending</span>
           </div>
-        </div>
-      </article>
-
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <p class="mini-label">This week</p>
-            <h3>Momentum</h3>
+          <p class="req-time">📅 {{ req.date | date:'EEE, dd MMM yyyy' }} • ⏰ {{ req.startTime }}–{{ req.endTime }}</p>
+          <div class="req-actions">
+            <button type="button" class="btn-accept-mini" (click)="acceptRequest(req)">✓ Confirm Booking</button>
+            <button type="button" class="btn-decline-mini" (click)="rejectRequest(req)">Decline</button>
           </div>
-        </div>
-        <div class="stat-bites">
-          <div class="bite">
-            <p class="meta-label">Classes</p>
-            <h4>{{ weekStats.classesThisWeek }}</h4>
-            <p class="meta-sub">Scheduled this week</p>
-          </div>
-          <div class="bite">
-            <p class="meta-label">Students</p>
-            <h4>{{ weekStats.studentsThisWeek }}</h4>
-            <p class="meta-sub">Booked with you</p>
-          </div>
-          <div class="bite">
-            <p class="meta-label">Earnings</p>
-            <h4>LKR {{ weekStats.earningsThisWeek | number:'1.0-0' }}</h4>
-            <p class="meta-sub">Past 7 days</p>
-          </div>
-        </div>
-      </article>
-
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <p class="mini-label">Payments</p>
-            <h3>Recent payment activity</h3>
-          </div>
-          <button class="ghost-btn" (click)="navigate('/my-classes')">Open bookings</button>
-        </div>
-        <div class="stacked-list" *ngIf="recentPayments.length; else noPayments">
-          <div class="stacked-item" *ngFor="let payment of recentPayments">
-            <div>
-              <p class="stacked-title">{{ payment.studentName }}</p>
-              <p class="muted">{{ payment.subject }} • {{ payment.paymentMethod }} • {{ payment.sessionDate | date:'MMM dd' }}</p>
-            </div>
-            <div class="mini-actions">
-              <span class="pill" [ngClass]="payment.paymentStatus === 'Paid' ? 'success' : 'neutral'">{{ payment.paymentStatus }}</span>
-              <strong>LKR {{ payment.amount | number:'1.0-0' }}</strong>
-            </div>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <p class="mini-label">Shortcuts</p>
-          <h3>Quick actions</h3>
         </div>
       </div>
-      <div class="action-grid">
-        <button class="action" (click)="navigate('/teacher/analytics')">Analytics</button>
-        <button class="action" (click)="navigate('/teacher/students')">Students</button>
-        <button class="action" (click)="navigate('/teacher/lesson-planner')">Lesson planner</button>
-        <button class="action" (click)="navigate('/teacher/attendance')">Attendance</button>
-        <button class="action" (click)="navigate('/teacher/messages')">Messages</button>
-        <button class="action" (click)="navigate('/manage-profile')">Profile</button>
-        <button class="action" (click)="navigate('/manage-schedule')">Schedule</button>
-        <button class="action" (click)="navigate('/my-classes')">Classes</button>
-        <button class="action" (click)="navigate('/resources-upload')">Resources</button>
-      </div>
-    </section>
-  </main>
+
+      <ng-template #emptyRequests>
+        <div class="panel-empty">
+          <div class="empty-emoji">✨</div>
+          <h3>All booking requests handled!</h3>
+          <p>New student 1-to-1 requests will appear here for one-click confirmation.</p>
+        </div>
+      </ng-template>
+    </article>
+
+    <!-- COLUMN 3: Stacked 6-Month GBP Revenue Trend + Recent Reviews & Payments -->
+    <div class="bento-col-stack">
+      <!-- Top Half: 6-Month GBP Revenue Trend -->
+      <article class="bento-panel compact">
+        <div class="panel-head">
+          <div>
+            <span class="panel-kicker">Financial Performance</span>
+            <h2>6-Month GBP Revenue</h2>
+          </div>
+          <button type="button" class="btn-chip-ghost" (click)="navigate('/teacher/analytics')">Analytics →</button>
+        </div>
+
+        <div class="mini-bars-grid">
+          <div class="mini-bar-col" *ngFor="let item of monthlyEarnings">
+            <div class="mini-bar-shell">
+              <div class="mini-bar-fill" [style.height.%]="getBarHeight(item.earnings)"></div>
+            </div>
+            <strong>{{ item.month }}</strong>
+            <span>£{{ item.earnings | number:'1.0-0' }}</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Bottom Half: Recent Student Reviews & GBP Payouts -->
+      <article class="bento-panel compact">
+        <div class="panel-head">
+          <div>
+            <span class="panel-kicker">Feedback & Settlements</span>
+            <h2>Recent Reviews & Payouts</h2>
+          </div>
+          <button type="button" class="btn-chip-ghost" (click)="navigate('/reviews-ratings')">Reviews</button>
+        </div>
+
+        <div class="panel-scroll-body">
+          <div class="mini-feed-row" *ngFor="let rev of recentReviews.slice(0, 2)">
+            <div class="mini-feed-left">
+              <strong>⭐ {{ rev.rating }}/5 — {{ rev.studentName || 'UK Student' }}</strong>
+              <span>{{ rev.text || 'Great 1-to-1 GCSE/A-Level session!' }}</span>
+            </div>
+            <span class="event-type-badge">Review</span>
+          </div>
+
+          <div class="mini-feed-row" *ngFor="let pay of recentPayments.slice(0, 2)">
+            <div class="mini-feed-left">
+              <strong>💷 £{{ pay.amount | number:'1.2-2' }} ({{ pay.paymentMethod }})</strong>
+              <span>{{ pay.createdAt | date:'dd MMM yyyy' }}</span>
+            </div>
+            <span class="status-dot-pill" [ngClass]="(pay.paymentStatus || 'paid').toLowerCase()">{{ pay.paymentStatus || 'Paid' }}</span>
+          </div>
+
+          <div class="mini-feed-row" *ngIf="recentReviews.length === 0 && recentPayments.length === 0">
+            <div class="mini-feed-left">
+              <strong>🇬🇧 UK Academic Term Active</strong>
+              <span>Complete sessions to view student reviews & GBP settlements</span>
+            </div>
+            <span class="event-type-badge">Info</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
 </div>
-
-<ng-template #noUpcoming>
-  <div class="empty">
-    <p>No upcoming classes scheduled.</p>
-  </div>
-</ng-template>
-
-<ng-template #noEvents>
-  <div class="empty">
-    <p>No platform events yet.</p>
-  </div>
-</ng-template>
-
-<ng-template #noPending>
-  <div class="empty">
-    <p>No pending requests. Nice work.</p>
-  </div>
-</ng-template>
-
-<ng-template #noReviews>
-  <div class="empty">
-    <p>No reviews yet. Invite students to share feedback.</p>
-  </div>
-</ng-template>
-
-<ng-template #noPayments>
-  <div class="empty">
-    <p>No payment records yet.</p>
-  </div>
-</ng-template>

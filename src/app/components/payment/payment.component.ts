@@ -39,6 +39,19 @@ export class PaymentComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    const sessionId = this.route.snapshot.queryParamMap.get('session_id');
+    if (sessionId) {
+      this.isProcessing = true;
+      this.paymentService.verifyStripePayment(sessionId).subscribe({
+        next: result => {
+          this.isProcessing = false;
+          if (result.paid) { this.notificationService.showSuccess('Payment completed successfully.'); this.router.navigate(['/my-bookings']); }
+          else this.notificationService.showWarning('Payment is still processing. Refresh your bookings shortly.');
+        },
+        error: () => { this.isProcessing = false; this.notificationService.showError('Payment could not be verified.'); }
+      });
+      return;
+    }
     const bookingId = this.route.snapshot.paramMap.get('bookingId');
     if (!bookingId) {
       this.notificationService.showWarning('No booking selected for payment.');
@@ -87,21 +100,21 @@ export class PaymentComponent implements OnInit {
   submitPayment(): void {
     if (!this.booking) return;
 
-    if (this.paymentMethod === 'Card' && !this.isCardValid()) {
-      this.notificationService.showWarning('Please complete the card details before paying.');
+    if (this.paymentMethod === 'Card') {
+      this.isProcessing = true;
+      this.paymentService.createStripeCheckout(this.booking.id).subscribe({
+        next: ({ url }) => window.location.assign(url),
+        error: err => { this.isProcessing = false; this.notificationService.showError(err?.error?.message || 'Unable to start secure card checkout.'); }
+      });
       return;
     }
 
     const payload: PaymentRequestDto = {
       bookingId: this.booking.id,
       amount: this.amount,
-      currency: 'LKR',
+      currency: 'GBP',
       paymentMethod: this.paymentMethod
     };
-
-    if (this.paymentMethod === 'Card') {
-      payload.card = { ...this.cardDetails };
-    }
 
     this.isProcessing = true;
     this.paymentService.processPayment(payload).subscribe({
@@ -126,16 +139,6 @@ export class PaymentComponent implements OnInit {
   markCash(): void {
     this.paymentMethod = 'Cash';
     this.submitPayment();
-  }
-
-  private isCardValid(): boolean {
-    return !!(
-      this.cardDetails.cardholderName &&
-      this.cardDetails.cardNumber &&
-      this.cardDetails.expiryMonth &&
-      this.cardDetails.expiryYear &&
-      this.cardDetails.cvv
-    );
   }
 
   get currentUserName(): string {

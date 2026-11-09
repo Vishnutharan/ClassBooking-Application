@@ -45,11 +45,7 @@ export function errorInterceptor(
       notificationService.showError(errorMessage);
       console.error('HTTP Error:', error);
 
-      return throwError(() => ({
-        status: error.status,
-        message: errorMessage,
-        details: error.error
-      }));
+      return throwError(() => error);
     })
   );
 }

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { throwError, Observable, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TimetableEvent } from '../models/shared.models';
 
@@ -16,7 +16,7 @@ export class TimetableService {
     if (from) params = params.set('from', from.toISOString());
     if (to) params = params.set('to', to.toISOString());
     return this.http.get<TimetableEvent[]>(`${this.apiUrl}/timetable`, { params }).pipe(
-      catchError(() => of([]))
+      catchError(error => throwError(() => error))
     );
   }
 
@@ -26,25 +26,25 @@ export class TimetableService {
     if (from) params = params.set('from', from.toISOString());
     if (to) params = params.set('to', to.toISOString());
     return this.http.get<TimetableEvent[]>(`${this.apiUrl}/admin/timetable`, { params }).pipe(
-      catchError(() => of([]))
+      catchError(error => throwError(() => error))
     );
   }
 
   createEvent(evt: Partial<TimetableEvent>): Observable<TimetableEvent> {
     return this.http.post<TimetableEvent>(`${this.apiUrl}/admin/timetable`, evt).pipe(
-      catchError(() => of(evt as TimetableEvent))
+      catchError(error => throwError(() => error))
     );
   }
 
   updateEvent(id: string, evt: Partial<TimetableEvent>): Observable<TimetableEvent> {
     return this.http.put<TimetableEvent>(`${this.apiUrl}/admin/timetable/${id}`, evt).pipe(
-      catchError(() => of({ ...(evt as TimetableEvent), id }))
+      catchError(error => throwError(() => error))
     );
   }
 
   deleteEvent(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/admin/timetable/${id}`).pipe(
-      catchError(() => of(true))
+      catchError(error => throwError(() => error))
     );
   }
 }

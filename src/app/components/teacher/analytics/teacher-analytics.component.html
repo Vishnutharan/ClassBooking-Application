@@ -1,0 +1,132 @@
+<div class="analytics-container">
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">🇬🇧 UK Educator Insights</span>
+      <h1>Teaching Performance & GBP Earnings Analytics</h1>
+      <p class="subtitle">Monitor your 1-to-1 session completion rate, student retention, and monthly GBP tuition payouts.</p>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <p>Loading UK tutor analytics...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="analytics-content">
+    <!-- Key Performance Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-icon">🎓</div>
+        <div class="metric-info">
+          <h3>{{ performanceMetrics.totalClasses }}</h3>
+          <p>Total Classes Delivered</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon">👥</div>
+        <div class="metric-info">
+          <h3>{{ performanceMetrics.totalStudents }}</h3>
+          <p>Active UK Students</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon">⭐</div>
+        <div class="metric-info">
+          <h3>{{ performanceMetrics.averageRating || 4.9 | number:'1.1-1' }}/5</h3>
+          <p>Average Student Rating</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon">✅</div>
+        <div class="metric-info">
+          <h3>{{ performanceMetrics.completionRate }}%</h3>
+          <p>Session Completion Rate</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon">⚡</div>
+        <div class="metric-info">
+          <h3>{{ performanceMetrics.responseRate }}%</h3>
+          <p>Booking Response Rate</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon">🔄</div>
+        <div class="metric-info">
+          <h3>{{ performanceMetrics.studentRetention }}%</h3>
+          <p>Student Retention</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- GBP Earnings Section -->
+    <div class="section">
+      <h2>💷 GBP Earnings Overview</h2>
+      <div class="earnings-cards">
+        <div class="earning-card total">
+          <span class="earning-label">Total Cumulative Earnings</span>
+          <h3>£{{ earningsReport.totalEarnings | number:'1.2-2' }}</h3>
+        </div>
+        <div class="earning-card monthly">
+          <span class="earning-label">Current Month Revenue</span>
+          <h3>£{{ earningsReport.monthlyEarnings | number:'1.2-2' }}</h3>
+        </div>
+        <div class="earning-card pending">
+          <span class="earning-label">Pending Student Settlements</span>
+          <h3>£{{ earningsReport.pendingPayments | number:'1.2-2' }}</h3>
+        </div>
+      </div>
+
+      <div class="chart-section">
+        <h3>Monthly GBP Revenue Breakdown</h3>
+        <div class="bar-chart">
+          <div *ngFor="let month of earningsReport.monthlyBreakdown" class="bar-item">
+            <div class="bar-wrapper">
+              <div class="bar"
+                [style.height.%]="earningsReport.totalEarnings ? (month.amount / (earningsReport.totalEarnings / 2)) * 100 : 15">
+              </div>
+            </div>
+            <div class="bar-label">{{ month.month }}</div>
+            <div class="bar-value">£{{ month.amount | number:'1.0-0' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subject Distribution & Trends -->
+    <div class="two-col-analytics">
+      <div class="section">
+        <h2>📚 Subject Distribution</h2>
+        <div class="subject-list">
+          <div *ngFor="let subject of subjectDistribution" class="subject-item">
+            <div class="subject-info">
+              <span class="subject-name">{{ subject.subject }}</span>
+              <span class="subject-count">{{ subject.count }} sessions</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="subject.percentage"></div>
+            </div>
+            <span class="percentage">{{ subject.percentage }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📈 Monthly Attendance & Booking Trends</h2>
+        <div class="trends-chart">
+          <div *ngFor="let trend of attendanceTrends" class="trend-item">
+            <div class="trend-month">{{ trend.month }}</div>
+            <div class="trend-bar">
+              <div class="trend-fill" [style.width.%]="trend.rate"></div>
+            </div>
+            <div class="trend-rate">{{ trend.rate }}%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

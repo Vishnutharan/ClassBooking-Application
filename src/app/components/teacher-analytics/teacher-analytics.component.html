@@ -1,93 +1,93 @@
 <div class="analytics-container">
-    <div class="analytics-header">
-        <div>
-            <p class="eyebrow">Performance</p>
-            <h1>Teacher Analytics</h1>
-            <p class="lede">See how your classes, students, and earnings are progressing.</p>
-        </div>
-        <button class="link-btn" (click)="loadAnalytics()">Refresh data</button>
+  <div class="analytics-header">
+    <div>
+      <p class="eyebrow">🇬🇧 UK Educator Performance</p>
+      <h1>Teacher GBP Earnings & Class Analytics</h1>
+      <p class="lede">Monitor your 1-to-1 UK tuition sessions, student satisfaction, and GBP revenue breakdown.</p>
+    </div>
+    <button class="link-btn" (click)="loadAnalytics()">↻ Refresh Data</button>
+  </div>
+
+  <div class="kpi-grid" *ngIf="metrics">
+    <div class="kpi-card">
+      <div class="kpi-icon chip-green">👥 Students</div>
+      <h3>{{ metrics.totalStudents }}</h3>
+      <p>Active UK Students</p>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon chip-blue">🎓 Classes</div>
+      <h3>{{ metrics.completedClasses }}</h3>
+      <p>Classes Completed</p>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon chip-amber">⭐ Rating</div>
+      <h3>{{ metrics.averageRating | number:'1.1-1' }}/5</h3>
+      <p>Average Tutor Rating</p>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon chip-purple">✅ Attendance</div>
+      <h3>{{ metrics.averageAttendance }}%</h3>
+      <p>Session Attendance Rate</p>
+    </div>
+  </div>
+
+  <div class="section" *ngIf="earnings">
+    <h2>💷 GBP Earnings Analytics</h2>
+    <div class="earnings-summary">
+      <div class="summary-card">
+        <h4>Total Earnings</h4>
+        <p class="big-number">£{{ earnings.totalEarnings | number:'1.0-0' }}</p>
+      </div>
+      <div class="summary-card">
+        <h4>Projected Monthly</h4>
+        <p class="big-number">£{{ earnings.projectedEarnings | number:'1.0-0' }}</p>
+      </div>
+      <div class="summary-card">
+        <h4>Avg Hourly Rate</h4>
+        <p class="big-number">£{{ earnings.averageHourlyRate | number:'1.0-0' }}/hr</p>
+      </div>
+      <div class="summary-card">
+        <h4>Total Hours Taught</h4>
+        <p class="big-number">{{ earnings.totalHoursTeaching }}h</p>
+      </div>
     </div>
 
-    <div class="kpi-grid" *ngIf="metrics">
-        <div class="kpi-card">
-            <div class="kpi-icon chip-green">Students</div>
-            <h3>{{ metrics.totalStudents }}</h3>
-            <p>Total students</p>
+    <h3>GBP Revenue by Subject</h3>
+    <div class="subject-earnings">
+      <div class="subject-bar" *ngFor="let subj of earnings.earningsBySubject">
+        <div class="subject-label">{{ subj.subject }}</div>
+        <div class="bar-container">
+          <div class="bar" [style.width.%]="subj.percentage"></div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-icon chip-blue">Classes</div>
-            <h3>{{ metrics.completedClasses }}</h3>
-            <p>Classes completed</p>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-icon chip-amber">Rating</div>
-            <h3>{{ metrics.averageRating | number:'1.1-1' }}</h3>
-            <p>Average rating</p>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-icon chip-purple">Attendance</div>
-            <h3>{{ metrics.averageAttendance }}%</h3>
-            <p>Avg attendance</p>
-        </div>
+        <div class="subject-value">£{{ subj.earnings | number:'1.0-0' }}</div>
+      </div>
     </div>
+  </div>
 
-    <div class="section" *ngIf="earnings">
-        <h2>Earnings analytics</h2>
-        <div class="earnings-summary">
-            <div class="summary-card">
-                <h4>Total earnings</h4>
-                <p class="big-number">LKR {{ earnings.totalEarnings | number:'1.0-0' }}</p>
-            </div>
-            <div class="summary-card">
-                <h4>Projected</h4>
-                <p class="big-number">LKR {{ earnings.projectedEarnings | number:'1.0-0' }}</p>
-            </div>
-            <div class="summary-card">
-                <h4>Avg hourly rate</h4>
-                <p class="big-number">LKR {{ earnings.averageHourlyRate | number:'1.0-0' }}</p>
-            </div>
-            <div class="summary-card">
-                <h4>Total hours</h4>
-                <p class="big-number">{{ earnings.totalHoursTeaching }}</p>
-            </div>
+  <div class="section" *ngIf="subjectPerformance && subjectPerformance.length > 0">
+    <h2>📚 Subject Performance</h2>
+    <div class="performance-grid">
+      <div class="performance-card" *ngFor="let perf of subjectPerformance">
+        <h3>{{ perf.subject }}</h3>
+        <div class="perf-stats">
+          <div class="perf-stat">
+            <span class="label">Students</span>
+            <span class="value">{{ perf.totalStudents }}</span>
+          </div>
+          <div class="perf-stat">
+            <span class="label">Avg Score</span>
+            <span class="value">{{ perf.averageScore | number:'1.0-0' }}%</span>
+          </div>
+          <div class="perf-stat">
+            <span class="label">Pass Rate</span>
+            <span class="value">{{ perf.passRate | number:'1.0-0' }}%</span>
+          </div>
+          <div class="perf-stat">
+            <span class="label">Satisfaction</span>
+            <span class="value">{{ perf.studentSatisfaction | number:'1.1-1' }}/5</span>
+          </div>
         </div>
-
-        <h3>Earnings by subject</h3>
-        <div class="subject-earnings">
-            <div class="subject-bar" *ngFor="let subj of earnings.earningsBySubject">
-                <div class="subject-label">{{ subj.subject }}</div>
-                <div class="bar-container">
-                    <div class="bar" [style.width.%]="subj.percentage"></div>
-                </div>
-                <div class="subject-value">LKR {{ subj.earnings | number:'1.0-0' }}</div>
-            </div>
-        </div>
+      </div>
     </div>
-
-    <div class="section" *ngIf="subjectPerformance && subjectPerformance.length > 0">
-        <h2>Subject performance</h2>
-        <div class="performance-grid">
-            <div class="performance-card" *ngFor="let perf of subjectPerformance">
-                <h3>{{ perf.subject }}</h3>
-                <div class="perf-stats">
-                    <div class="perf-stat">
-                        <span class="label">Students</span>
-                        <span class="value">{{ perf.totalStudents }}</span>
-                    </div>
-                    <div class="perf-stat">
-                        <span class="label">Avg Score</span>
-                        <span class="value">{{ perf.averageScore | number:'1.0-0' }}%</span>
-                    </div>
-                    <div class="perf-stat">
-                        <span class="label">Pass Rate</span>
-                        <span class="value">{{ perf.passRate | number:'1.0-0' }}%</span>
-                    </div>
-                    <div class="perf-stat">
-                        <span class="label">Satisfaction</span>
-                        <span class="value">{{ perf.studentSatisfaction | number:'1.1-1' }}/5</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>

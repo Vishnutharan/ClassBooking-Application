@@ -34,6 +34,8 @@ namespace ClassBooking.API.Services
 
         public async Task<PaymentRecord> ProcessPaymentAsync(string studentId, PaymentRequest request)
         {
+            if (!string.Equals(request.PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("Card payments must use secure Stripe Checkout.");
             if (string.IsNullOrWhiteSpace(request.BookingId))
             {
                 throw new ArgumentException("BookingId is required.");
@@ -56,19 +58,17 @@ namespace ClassBooking.API.Services
                 ? booking.DurationMinutes
                 : CalculateDurationMinutes(booking.StartTime, booking.EndTime);
 
-            var amount = request.Amount > 0
-                ? request.Amount
-                : booking.Price > 0
-                    ? booking.Price
-                    : CalculatePriceFromRate(teacherProfile?.HourlyRate, durationMinutes);
+            if (booking.Status != "Confirmed" || booking.Price <= 0)
+                throw new ArgumentException("Only confirmed classes with a positive price can be paid.");
+            if ((await _feeRepository.GetByBookingIdAsync(booking.Id)).Any(p => p.Status == "Paid"))
+                throw new ArgumentException("This booking has already been paid.");
+            var amount = booking.Price;
 
             var paymentStatus = string.Equals(request.PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase)
                 ? "Pending"
                 : "Paid";
 
-            var transactionRef = string.Equals(request.PaymentMethod, "Cash", StringComparison.OrdinalIgnoreCase)
-                ? $"CASH-{DateTime.UtcNow.Ticks}"
-                : $"CARD-{DateTime.UtcNow.Ticks}";
+            var transactionRef = $"CASH-{Guid.NewGuid():N}";
 
             var metadata = new PaymentMetadata
             {
@@ -87,7 +87,7 @@ namespace ClassBooking.API.Services
                 StudentName = student?.FullName ?? "Student",
                 StudentEmail = student?.Email ?? string.Empty,
                 PaymentMethod = request.PaymentMethod,
-                Currency = string.IsNullOrWhiteSpace(request.Currency) ? "LKR" : request.Currency,
+                Currency = string.IsNullOrWhiteSpace(request.Currency) ? "GBP" : request.Currency,
                 Amount = amount,
                 TransactionReference = transactionRef,
                 CardSnapshot = request.Card == null ? null : new CardSnapshot
@@ -118,7 +118,6 @@ namespace ClassBooking.API.Services
             booking.PaymentStatus = paymentStatus;
             booking.Price = amount;
             booking.DurationMinutes = durationMinutes;
-            booking.Status = booking.Status == "Pending" ? "Confirmed" : booking.Status;
             await _bookingRepository.UpdateAsync(booking);
 
             return await MapToRecordAsync(transaction, booking, student, teacherUser);

@@ -17,7 +17,7 @@ export class ExamResultsComponent implements OnInit {
 
     // Form model
     newResult: Partial<ExamResult> = {
-        examName: 'Term Test 1',
+        examName: 'GCSE Mock Assessment',
         subject: 'Mathematics',
         date: new Date()
     };
@@ -29,13 +29,13 @@ export class ExamResultsComponent implements OnInit {
     }
 
     loadDemoData() {
-        // Sri Lankan context demo data
+        // UK National Curriculum Assessment demo data
         this.results = [
             {
                 id: 'RES-001',
                 studentId: 'ST-2023001',
-                studentName: 'Kasun Perera',
-                examName: 'Term Test 1',
+                studentName: 'Oliver Smith',
+                examName: 'GCSE Mock Assessment',
                 subject: 'Mathematics',
                 marks: 85,
                 grade: 'A',
@@ -45,8 +45,8 @@ export class ExamResultsComponent implements OnInit {
             {
                 id: 'RES-002',
                 studentId: 'ST-2023002',
-                studentName: 'Nimali Fernando',
-                examName: 'Term Test 1',
+                studentName: 'Amelia Jones',
+                examName: 'GCSE Mock Assessment',
                 subject: 'Mathematics',
                 marks: 78,
                 grade: 'A',
@@ -56,8 +56,8 @@ export class ExamResultsComponent implements OnInit {
             {
                 id: 'RES-003',
                 studentId: 'ST-2023003',
-                studentName: 'Ruwan Silva',
-                examName: 'Term Test 1',
+                studentName: 'Harry Wilson',
+                examName: 'GCSE Mock Assessment',
                 subject: 'Mathematics',
                 marks: 65,
                 grade: 'B',
@@ -67,8 +67,8 @@ export class ExamResultsComponent implements OnInit {
             {
                 id: 'RES-004',
                 studentId: 'ST-2023001',
-                studentName: 'Kasun Perera',
-                examName: 'Term Test 1',
+                studentName: 'Oliver Smith',
+                examName: 'GCSE Mock Assessment',
                 subject: 'Science',
                 marks: 92,
                 grade: 'A',
@@ -99,7 +99,7 @@ export class ExamResultsComponent implements OnInit {
     closeAddModal() {
         this.showAddModal = false;
         this.newResult = {
-            examName: 'Term Test 1',
+            examName: 'GCSE Mock Assessment',
             subject: 'Mathematics',
             date: new Date()
         };

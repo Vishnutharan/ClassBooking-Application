@@ -36,7 +36,8 @@ namespace ClassBooking.API.Repositories
             // Based on "Upload Resources that specifc students has to get", strict filtering seems appropriate.
             
             return await _context.Resources
-                .Where(r => r.StudentId == studentId)
+                .Where(r => r.StudentId == studentId || r.IsPublic ||
+                    _context.StudentProfiles.Any(s => s.Id == studentId && s.UserId == r.StudentId))
                 .OrderByDescending(r => r.UploadedAt)
                 .ToListAsync();
         }

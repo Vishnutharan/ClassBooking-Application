@@ -60,7 +60,6 @@
             <option value="" disabled>Select your role</option>
             <option value="Student">Student</option>
             <option value="Teacher">Teacher</option>
-            <option value="Admin">Admin</option>
           </select>
           <span class="error-message" *ngIf="authForm.get('role')?.invalid && authForm.get('role')?.touched">
             Please select a role

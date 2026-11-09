@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, of, map } from 'rxjs';
+import { throwError, Observable, catchError, of, map } from 'rxjs';
 import { TeacherProfile, TeacherSubject, TeacherAvailability, TeacherAvailabilitySlot } from '../models/shared.models';
 import { environment } from '../../../environments/environment';
-import { MockDataService } from './mock-data.service';
 import { AuthService } from './auth.service';
 
 export interface UpdateTeacherRequest {
@@ -20,29 +19,37 @@ export interface UpdateTeacherRequest {
 })
 export class TeacherService {
   private http = inject(HttpClient);
-  private mockData = inject(MockDataService);
   private authService = inject(AuthService);
   private apiUrl = `${environment.apiUrl}/teacher`; // Use /teacher endpoint
   private publicApiUrl = `${environment.apiUrl}/teachers`; // Use /teachers for public APIs
 
   getAllTeachers(): Observable<TeacherProfile[]> {
-    return this.http.get<TeacherProfile[]>(this.publicApiUrl);
+    return this.http.get<TeacherProfile[]>(this.publicApiUrl).pipe(
+      map(teachers => teachers && teachers.length > 0 ? teachers : []),
+      catchError(error => throwError(() => error))
+    );
   }
 
   getTeachersBySubject(subject: string): Observable<TeacherProfile[]> {
     return this.http.get<TeacherProfile[]>(`${this.publicApiUrl}/search`, {
       params: { subject }
-    });
+    }).pipe(
+      catchError(error => throwError(() => error))
+    );
   }
 
   getTeachersByLevel(level: string): Observable<TeacherProfile[]> {
     return this.http.get<TeacherProfile[]>(`${this.publicApiUrl}/search`, {
       params: { level }
-    });
+    }).pipe(
+      catchError(error => throwError(() => error))
+    );
   }
 
   getTeacherById(id: string): Observable<TeacherProfile> {
-    return this.http.get<TeacherProfile>(`${this.publicApiUrl}/${id}`);
+    return this.http.get<TeacherProfile>(`${this.publicApiUrl}/${id}`).pipe(
+      catchError(error => throwError(() => error))
+    );
   }
 
   // PROFILE MANAGEMENT (uses private teacher management API)
@@ -79,7 +86,7 @@ export class TeacherService {
 
   deleteAvailabilitySlot(slotId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/availability/slots/${slotId}`).pipe(
-      catchError(() => of(void 0))
+      catchError(error => throwError(() => error))
     );
   }
 

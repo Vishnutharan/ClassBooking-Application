@@ -58,6 +58,28 @@ namespace ClassBooking.API.Controllers
             }
         }
 
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            var userId = User.FindFirst("userId")?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+            try { await _authService.ChangePasswordAsync(userId, request); return NoContent(); }
+            catch (UnauthorizedAccessException ex) { return Unauthorized(new { message = ex.Message }); }
+            catch (ArgumentException ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
+        [Authorize]
+        [HttpPost("deactivate-account")]
+        public async Task<IActionResult> DeactivateAccount([FromBody] PasswordConfirmationRequest request)
+        {
+            var userId = User.FindFirst("userId")?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+            try { await _authService.DeactivateAccountAsync(userId, request.CurrentPassword); return NoContent(); }
+            catch (UnauthorizedAccessException ex) { return Unauthorized(new { message = ex.Message }); }
+            catch (ArgumentException ex) { return BadRequest(new { message = ex.Message }); }
+        }
+
         // DEBUG ENDPOINT - Check what claims are in your JWT
         [Authorize]
         [HttpGet("debug/claims")]

@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using ClassBooking.API.Models.Dto;
 using ClassBooking.API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -13,16 +17,19 @@ namespace ClassBooking.API.Controllers
         private readonly IAdminService _adminService;
 
         private readonly ITimetableService _timetableService;
+        private readonly AdminReportExportService _reportExporter;
 
-        public AdminController(IAdminService adminService, ITimetableService timetableService)
+        public AdminController(IAdminService adminService, ITimetableService timetableService, AdminReportExportService reportExporter)
         {
             _adminService = adminService;
             _timetableService = timetableService;
+            _reportExporter = reportExporter;
         }
 
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 100)
         {
+            if (page < 1 || pageSize < 1 || pageSize > 200) return BadRequest(new { message = "Page must be positive and page size must be between 1 and 200." });
             var users = await _adminService.GetAllUsersAsync();
             var paged = users.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             return Ok(new { users = paged, total = users.Count });
@@ -194,30 +201,27 @@ namespace ClassBooking.API.Controllers
         }
 
         [HttpGet("reports/bookings")]
-        public IActionResult ExportBookingReport([FromQuery] string format = "pdf")
+        public async Task<IActionResult> ExportBookingReport([FromQuery] string format = "pdf")
         {
-            var bytes = Array.Empty<byte>();
-            var contentType = format == "excel" ? "application/vnd.ms-excel" : "application/pdf";
-            var fileName = $"bookings-report-{DateTime.UtcNow:yyyyMMdd}.{(format == "excel" ? "xlsx" : "pdf")}";
-            return File(bytes, contentType, fileName);
+            var report = await _reportExporter.ExportAsync("bookings", format);
+            await _adminService.CreateReportHistoryAsync("Booking Report", report.Extension, User.FindFirst("userId")?.Value ?? "Admin");
+            return File(report.Content, report.ContentType, $"bookings-report-{DateTime.UtcNow:yyyyMMdd}.{report.Extension}");
         }
 
         [HttpGet("reports/users")]
-        public IActionResult ExportUserReport([FromQuery] string format = "pdf")
+        public async Task<IActionResult> ExportUserReport([FromQuery] string format = "pdf")
         {
-            var bytes = Array.Empty<byte>();
-            var contentType = format == "excel" ? "application/vnd.ms-excel" : "application/pdf";
-            var fileName = $"users-report-{DateTime.UtcNow:yyyyMMdd}.{(format == "excel" ? "xlsx" : "pdf")}";
-            return File(bytes, contentType, fileName);
+            var report = await _reportExporter.ExportAsync("users", format);
+            await _adminService.CreateReportHistoryAsync("User Report", report.Extension, User.FindFirst("userId")?.Value ?? "Admin");
+            return File(report.Content, report.ContentType, $"users-report-{DateTime.UtcNow:yyyyMMdd}.{report.Extension}");
         }
 
         [HttpGet("reports/revenue")]
-        public IActionResult ExportRevenueReport([FromQuery] string format = "pdf")
+        public async Task<IActionResult> ExportRevenueReport([FromQuery] string format = "pdf")
         {
-            var bytes = Array.Empty<byte>();
-            var contentType = format == "excel" ? "application/vnd.ms-excel" : "application/pdf";
-            var fileName = $"revenue-report-{DateTime.UtcNow:yyyyMMdd}.{(format == "excel" ? "xlsx" : "pdf")}";
-            return File(bytes, contentType, fileName);
+            var report = await _reportExporter.ExportAsync("revenue", format);
+            await _adminService.CreateReportHistoryAsync("Revenue Report", report.Extension, User.FindFirst("userId")?.Value ?? "Admin");
+            return File(report.Content, report.ContentType, $"revenue-report-{DateTime.UtcNow:yyyyMMdd}.{report.Extension}");
         }
 
         // Placeholder endpoints for features to be implemented later
@@ -403,25 +407,36 @@ namespace ClassBooking.API.Controllers
             return Ok(new { message = "Exam season deleted" });
         }
 
-        [HttpGet("reports")]
-        public IActionResult GetReports([FromQuery] ReportRequest? request)
+        [HttpGet("reports/history")]
+        public async Task<IActionResult> GetReportHistory()
         {
-            // TODO: Implement report generation
-            return Ok(new { message = "Report generation not yet implemented", request });
+            var history = await _adminService.GetReportHistoryAsync();
+            return Ok(history);
+        }
+
+        [HttpGet("reports")]
+        public async Task<IActionResult> GetReports([FromQuery] ReportRequest? request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.ReportType)) return BadRequest(new { message = "ReportType is required." });
+            try
+            {
+                var report = await _reportExporter.ExportAsync(request.ReportType, request.Format ?? "pdf");
+                await _adminService.CreateReportHistoryAsync(request.ReportType + " Report", report.Extension, User.FindFirst("userId")?.Value ?? "Admin");
+                return File(report.Content, report.ContentType, $"{request.ReportType.ToLowerInvariant()}-report-{DateTime.UtcNow:yyyyMMdd}.{report.Extension}");
+            }
+            catch (ArgumentException ex) { return BadRequest(new { message = ex.Message }); }
         }
 
         [HttpGet("fees")]
-        public IActionResult GetFees()
+        public async Task<IActionResult> GetFees([FromServices] IPaymentService payments)
         {
-            // TODO: Implement fee management overview for admin
-            return Ok(new List<object>());
+            return Ok(await payments.GetAllPaymentsAsync());
         }
 
         [HttpGet("exams")]
-        public IActionResult GetExams()
+        public async Task<IActionResult> GetExams([FromServices] IExamService exams, [FromQuery] string? examType = null)
         {
-            // TODO: Implement exam management for admin
-            return Ok(new List<object>());
+            return Ok(await exams.GetExamPreparationsAsync(examType));
         }
     }
 

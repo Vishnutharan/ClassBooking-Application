@@ -1,2 +1,83 @@
-<app-notifications-toast></app-notifications-toast>
-<router-outlet />
+<div class="app-shell" [class.with-workspace-navbar]="showWorkspaceNavbar">
+  <app-notifications-toast></app-notifications-toast>
+
+  <!-- Unified Single Top Navigation Bar across Dashboards & All Inner Pages -->
+  <header class="global-topbar" *ngIf="showWorkspaceNavbar">
+    <div class="global-topbar-inner">
+      <div class="topbar-brand-group">
+        <button *ngIf="!isDashboardPage" type="button" class="topbar-back-btn" (click)="goBack()" title="Go back">
+          ← Back
+        </button>
+        <a class="topbar-brand" (click)="goHome()">
+          <span class="brand-logo-mark">CB</span>
+          <div class="brand-text">
+            <span class="brand-title">ClassBooking <span class="uk-badge">UK</span></span>
+            <span class="brand-subtitle">{{ userRole }} Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Student All-in-One Navigation Bar -->
+      <nav class="topbar-links" *ngIf="userRole === 'Student'" aria-label="Student navigation">
+        <a routerLink="/dashboard/student" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
+        <a routerLink="/book-class" routerLinkActive="active">Book a Class</a>
+        <a routerLink="/find-teacher" routerLinkActive="active">Find UK Tutor</a>
+        <a routerLink="/my-bookings" routerLinkActive="active">My Bookings</a>
+        <a routerLink="/timetable" routerLinkActive="active">Timetable</a>
+        <a routerLink="/student/progress" routerLinkActive="active">Progress</a>
+        <a routerLink="/student/lesson-plans" routerLinkActive="active">Lesson Plans</a>
+        <a routerLink="/student/resources" routerLinkActive="active">Resources</a>
+        <a routerLink="/exam-materials" routerLinkActive="active">GCSE/A-Level Prep</a>
+        <a routerLink="/past-papers" routerLinkActive="active">Past Papers</a>
+        <a routerLink="/my-reviews" routerLinkActive="active">Reviews</a>
+      </nav>
+
+      <!-- Teacher All-in-One Navigation Bar -->
+      <nav class="topbar-links" *ngIf="userRole === 'Teacher'" aria-label="Teacher navigation">
+        <a routerLink="/dashboard/teacher" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
+        <a routerLink="/my-classes" routerLinkActive="active">My Classes</a>
+        <a routerLink="/manage-schedule" routerLinkActive="active">Availability</a>
+        <a routerLink="/timetable" routerLinkActive="active">Timetable</a>
+        <a routerLink="/teacher/students" routerLinkActive="active">Students</a>
+        <a routerLink="/teacher/attendance" routerLinkActive="active">Attendance</a>
+        <a routerLink="/teacher/lesson-planner" routerLinkActive="active">Lesson Planner</a>
+        <a routerLink="/resources-upload" routerLinkActive="active">Resources</a>
+        <a routerLink="/teacher/analytics" routerLinkActive="active">GBP Analytics</a>
+        <a routerLink="/teacher/messages" routerLinkActive="active">Messages</a>
+        <a routerLink="/reviews-ratings" routerLinkActive="active">Reviews</a>
+      </nav>
+
+      <!-- Admin All-in-One Navigation Bar -->
+      <nav class="topbar-links" *ngIf="userRole === 'Admin'" aria-label="Admin navigation">
+        <a routerLink="/dashboard/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Dashboard</a>
+        <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+        <a routerLink="/admin/timetable" routerLinkActive="active">Timetable</a>
+        <a routerLink="/admin/fees" routerLinkActive="active">Fees (GBP)</a>
+        <a routerLink="/admin/exams" routerLinkActive="active">Exam Results</a>
+        <a routerLink="/admin/reports" routerLinkActive="active">Reports</a>
+        <a routerLink="/admin/settings" routerLinkActive="active">Settings</a>
+      </nav>
+
+      <!-- Profile & Sign Out Actions -->
+      <div class="topbar-actions">
+        <div class="topbar-user-pill"
+             *ngIf="currentUser"
+             (click)="navigateTo(userRole === 'Student' ? '/student/details' : '/manage-profile')"
+             title="Open Profile Settings">
+          <span class="user-avatar-mini">{{ userInitials }}</span>
+          <div class="user-pill-info">
+            <span class="user-name-mini">{{ userName }}</span>
+            <span class="user-role-mini">{{ userRole }}</span>
+          </div>
+        </div>
+        <button type="button" class="topbar-logout-btn" (click)="logout()" title="Sign out">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main-viewport">
+    <router-outlet />
+  </main>
+</div>

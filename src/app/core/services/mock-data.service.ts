@@ -502,8 +502,8 @@ export class MockDataService {
       userId: user.id,
       fullName: user.fullName,
       email: user.email,
-      phoneNumber: user.phoneNumber || '+94770000000',
-      qualifications: ['B.Ed', 'PGDE'],
+      phoneNumber: user.phoneNumber || '+44 7700 900077',
+      qualifications: ['PGCE (Secondary Maths)', 'BSc (Hons) First Class', 'QTS'],
       subjects,
       hourlyRate: rate,
       experienceYears: 6,
@@ -527,11 +527,11 @@ export class MockDataService {
       userId: user.id,
       fullName: user.fullName,
       email: user.email,
-      phoneNumber: user.phoneNumber || '+94770000001',
-      gradeLevel: 'OLevel',
-      school: 'Lake View College',
+      phoneNumber: user.phoneNumber || '+44 7700 900078',
+      gradeLevel: 'Year 11 (GCSE)',
+      school: 'King''s College School, Wimbledon',
       focusAreas: ['Mathematics', 'Science'],
-      targetExams: ['2025 O/L'],
+      targetExams: ['GCSE 2025 (Edexcel/AQA)', 'A-Level 2027'],
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -576,8 +576,8 @@ export class MockDataService {
       { email: adminUser.email, password: 'Password123', userId: adminUser.id }
     ];
 
-    const mathSubject: TeacherSubject = { id: 'sub-math', name: 'Mathematics', medium: 'English', level: 'OLevel', grades: 'Grade 10, Grade 11' };
-    const sciSubject: TeacherSubject = { id: 'sub-sci', name: 'Science', medium: 'English', level: 'OLevel', grades: 'Grade 10, Grade 11' };
+    const mathSubject: TeacherSubject = { id: 'sub-math', name: 'Mathematics', medium: 'English', level: 'GCSE', grades: 'Year 10 (GCSE), Year 11 (GCSE)' };
+    const sciSubject: TeacherSubject = { id: 'sub-sci', name: 'Science', medium: 'English', level: 'GCSE', grades: 'Year 10 (GCSE), Year 11 (GCSE)' };
     const availability: TeacherAvailability[] = [
       { dayOfWeek: 'Monday', startTime: '09:00', endTime: '15:00' },
       { dayOfWeek: 'Wednesday', startTime: '10:00', endTime: '16:00' },
@@ -585,7 +585,7 @@ export class MockDataService {
     ];
 
     this.teachers = [
-      this.buildTeacherProfile(teacherUser, [mathSubject, sciSubject], availability, 1500),
+      this.buildTeacherProfile(teacherUser, [mathSubject, sciSubject], availability, 35),
       this.buildTeacherProfile(
         {
           ...teacherUser,
@@ -616,8 +616,8 @@ export class MockDataService {
         classType: 'OneTime',
         mode: 'ONLINE',
         locationOrLink: 'https://meet.google.com/mock',
-        bookingGradeLevel: 'O-Level',
-        price: 1500,
+        bookingGradeLevel: 'GCSE',
+        price: 35,
         durationMinutes: 60,
         notes: 'Algebra basics',
         meetingLink: 'https://meet.example.com/mock',
@@ -638,8 +638,8 @@ export class MockDataService {
         classType: 'OneTime',
         mode: 'ONLINE',
         locationOrLink: 'https://meet.google.com/mock',
-        bookingGradeLevel: 'O-Level',
-        price: 1500,
+        bookingGradeLevel: 'GCSE',
+        price: 35,
         durationMinutes: 60,
         notes: 'Physics revision',
         createdAt: new Date(),
@@ -659,8 +659,8 @@ export class MockDataService {
         classType: 'OneTime',
         mode: 'ONLINE',
         locationOrLink: 'https://meet.google.com/mock',
-        bookingGradeLevel: 'O-Level',
-        price: 1500,
+        bookingGradeLevel: 'GCSE',
+        price: 35,
         durationMinutes: 60,
         createdAt: new Date(),
         updatedAt: new Date()
@@ -668,42 +668,65 @@ export class MockDataService {
     ];
 
     this.resources = [
-      { id: 'res-1', title: 'Algebra 101', type: 'PDF', url: '#', description: 'Algebra basics', uploadedAt: new Date() },
-      { id: 'res-2', title: 'Mechanics Video', type: 'Video', url: '#', description: 'Physics mechanics', uploadedAt: new Date() },
-      { id: 'res-3', title: 'Math Past Paper 2023', type: 'PastPaper', url: '#', uploadedAt: new Date() }
+      { id: 'res-1', title: 'Mathematics 2024 Past Paper 1 & 2', type: 'PastPaper', url: 'https://example.com/math-2024.pdf', description: 'Official specimen paper with complete step-by-step marking scheme', uploadedAt: new Date() },
+      { id: 'res-2', title: 'Pure Mathematics Summary Revision Guide', type: 'Notes', url: 'https://example.com/pure-math.pdf', description: 'Formulas, key derivations, and calculus exam tips', uploadedAt: new Date() },
+      { id: 'res-3', title: 'Science Model Paper with Answers 2024', type: 'PastPaper', url: 'https://example.com/science-2024.pdf', description: 'Chemistry, Physics & Biology question bank', uploadedAt: new Date() },
+      { id: 'res-4', title: 'Physics Mechanics & Waves Masterclass', type: 'Notes', url: 'https://example.com/physics-notes.pdf', description: 'Detailed derivations and exam problems', uploadedAt: new Date() },
+      { id: 'res-5', title: 'Chemistry Organic Reactions Chart', type: 'Notes', url: 'https://example.com/chemistry-chart.pdf', description: 'Reaction mechanisms and synthesis pathways', uploadedAt: new Date() },
+      { id: 'res-6', title: 'English Language Reading & Essay Practice', type: 'PDF', url: 'https://example.com/english-practice.pdf', description: 'Model essays and comprehension tests', uploadedAt: new Date() }
     ];
 
     this.examPreparations = [
       {
         id: 'exam-1',
-        examType: 'OLevel',
+        examType: 'GCSE',
         subject: 'Mathematics',
-        description: 'Structured plan for O/L Maths',
-        resources: this.resources
+        description: 'Structured preparation plan for GCSE Mathematics (Edexcel/AQA) with past papers & model answers',
+        resources: [this.resources[0], this.resources[1]]
       },
       {
         id: 'exam-2',
-        examType: 'OLevel',
+        examType: 'GCSE',
         subject: 'Science',
-        description: 'Science revision bundle',
-        resources: this.resources
+        description: 'Science revision bundle covering Biology, Chemistry, and Physics fundamentals',
+        resources: [this.resources[2]]
+      },
+      {
+        id: 'exam-3',
+        examType: 'GCSE',
+        subject: 'English',
+        description: 'Comprehensive English language and essay writing exam masterclass',
+        resources: [this.resources[5]]
+      },
+      {
+        id: 'exam-4',
+        examType: 'ALevel',
+        subject: 'Physics',
+        description: 'Advanced Level Physics unit-by-unit past paper questions and worked solutions',
+        resources: [this.resources[3]]
+      },
+      {
+        id: 'exam-5',
+        examType: 'ALevel',
+        subject: 'Chemistry',
+        description: 'Organic, Inorganic, and Physical Chemistry master exam preparation bundle',
+        resources: [this.resources[4]]
       }
     ];
 
     this.holidays = [
-      { id: 'holiday-1', name: 'Independence Day', date: new Date('2025-02-04'), description: 'National holiday' },
-      { id: 'holiday-2', name: 'Sinhala & Tamil New Year', date: new Date('2025-04-14'), description: 'National holiday' }
+      { id: 'holiday-1', name: 'Good Friday', date: new Date('2025-04-18'), description: 'UK Bank Holiday' }, { id: 'holiday-2', name: 'Easter Monday', date: new Date('2025-04-21'), description: 'UK Bank Holiday' }, { id: 'holiday-3', name: 'Summer Bank Holiday', date: new Date('2025-08-25'), description: 'UK Bank Holiday' }
     ];
 
     this.examSeasons = [
-      { id: 'exam-season-1', name: 'O/L 2025', startDate: new Date('2025-08-01'), endDate: new Date('2025-12-01'), examType: 'OLevel' }
+      { id: 'exam-season-1', name: 'GCSE Summer 2025', startDate: new Date('2025-08-01'), endDate: new Date('2025-12-01'), examType: 'GCSE' }
     ];
 
     this.systemSettings = {
       id: 'settings-1',
       platformName: 'ClassBooking',
       platformEmail: 'support@classbooking.com',
-      defaultHourlyRate: 1500,
+      defaultHourlyRate: 35,
       maxClassDurationMinutes: 120,
       minClassDurationMinutes: 30,
       cancellationDeadlineHours: 12,

@@ -17,11 +17,27 @@ namespace ClassBooking.API.Models.Dto
         public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Role is required")]
-        [RegularExpression("^(Student|Teacher|Admin)$", ErrorMessage = "Role must be Student, Teacher, or Admin")]
+        [RegularExpression("^(Student|Teacher)$", ErrorMessage = "Registration is available for students and teachers only")]
         public string Role { get; set; } = "Student";
 
         [Phone(ErrorMessage = "Invalid phone number format")]
         public string? PhoneNumber { get; set; }
+    }
+
+    public class ChangePasswordRequest
+    {
+        [Required]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required]
+        [MinLength(8)]
+        public string NewPassword { get; set; } = string.Empty;
+    }
+
+    public class PasswordConfirmationRequest
+    {
+        [Required]
+        public string CurrentPassword { get; set; } = string.Empty;
     }
 
     public class LoginRequest

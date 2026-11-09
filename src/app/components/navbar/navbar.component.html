@@ -1,86 +1,41 @@
 <nav class="navbar">
-      <div class="navbar-container">
-        <div class="navbar-left">
-          <div class="logo" (click)="navigate('/dashboard')">
-            <span class="logo-icon">🎓</span>
-            <span class="logo-text">ClassBooking</span>
-          </div>
-
-          <div class="search-bar">
-            <span class="search-icon">🔍</span>
-            <input
-              type="text"
-              placeholder="Search teachers, subjects..."
-              [(ngModel)]="searchQuery"
-              (keyup.enter)="onSearch()"
-            />
-          </div>
-        </div>
-
-        <div class="navbar-right">
-          <!-- Theme Toggle -->
-          <button class="icon-btn" (click)="toggleTheme()" title="Toggle Theme">
-            {{ isDarkMode ? '☀️' : '🌙' }}
-          </button>
-
-          <!-- Notifications -->
-          <div class="notification-wrapper">
-            <button class="icon-btn notification-btn" (click)="toggleNotifications()">
-              🔔
-              <span class="badge" *ngIf="notificationCount > 0">{{ notificationCount }}</span>
-            </button>
-            
-            <div class="dropdown notifications-dropdown" *ngIf="showNotifications">
-              <div class="dropdown-header">
-                <h3>Notifications</h3>
-                <button class="text-btn" (click)="clearNotifications()">Clear All</button>
-              </div>
-              <div class="notifications-list">
-                <div class="notification-item" *ngFor="let notification of notifications">
-                  <div class="notification-icon">{{ notification.icon }}</div>
-                  <div class="notification-content">
-                    <p class="notification-title">{{ notification.title }}</p>
-                    <p class="notification-time">{{ notification.time }}</p>
-                  </div>
-                </div>
-                <div class="empty-state" *ngIf="notifications.length === 0">
-                  <p>No new notifications</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- User Profile Dropdown -->
-          <div class="user-wrapper">
-            <button class="user-btn" (click)="toggleUserMenu()">
-              <img
-                [src]="currentUser?.profilePicture || 'https://via.placeholder.com/40'"
-                alt="User Avatar"
-                class="user-avatar"
-              />
-              <div class="user-info">
-                <span class="user-name">{{ currentUser?.fullName || 'User' }}</span>
-                <span class="user-role">{{ currentUser?.role }}</span>
-              </div>
-              <span class="dropdown-arrow">{{ showUserMenu ? '▲' : '▼' }}</span>
-            </button>
-
-            <div class="dropdown user-dropdown" *ngIf="showUserMenu">
-              <div class="dropdown-item" (click)="navigate('/manage-profile')">
-                <span class="item-icon">👤</span>
-                <span>My Profile</span>
-              </div>
-              <div class="dropdown-item" (click)="navigate('/settings')">
-                <span class="item-icon">⚙️</span>
-                <span>Settings</span>
-              </div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-item logout" (click)="logout()">
-                <span class="item-icon">🚪</span>
-                <span>Logout</span>
-              </div>
-            </div>
-          </div>
+  <div class="navbar-container">
+    <div class="navbar-left">
+      <button type="button" class="logo" (click)="navigateToHome()" aria-label="Go to your dashboard">
+        <span class="logo-icon" aria-hidden="true">CB</span><span class="logo-text">ClassBooking</span>
+      </button>
+      <form class="search-bar" *ngIf="currentUser?.role === 'Student'" (ngSubmit)="onSearch()">
+        <span class="search-icon" aria-hidden="true">Search</span>
+        <input type="search" name="teacherSearch" aria-label="Search teachers by name or subject"
+          placeholder="Search teachers or subjects" [(ngModel)]="searchQuery" />
+        <button type="submit" class="search-submit" [disabled]="!searchQuery.trim()">Search</button>
+      </form>
+    </div>
+    <div class="navbar-right">
+      <button type="button" class="icon-btn" (click)="toggleTheme()" [attr.aria-pressed]="isDarkMode"
+        [attr.aria-label]="isDarkMode ? 'Switch to light theme' : 'Switch to dark theme'" title="Toggle theme">
+        {{ isDarkMode ? 'Light' : 'Dark' }}
+      </button>
+      <div class="notification-wrapper">
+        <button type="button" class="icon-btn notification-btn" (click)="toggleNotifications()"
+          [attr.aria-expanded]="showNotifications" aria-label="Notifications">Notifications</button>
+        <div class="dropdown notifications-dropdown" *ngIf="showNotifications" role="region" aria-label="Notifications">
+          <div class="dropdown-header"><h3>Notifications</h3></div>
+          <div class="notifications-list"><p class="empty-state">No new notifications</p></div>
         </div>
       </div>
-    </nav>
+      <div class="user-wrapper" *ngIf="currentUser">
+        <button type="button" class="user-btn" (click)="toggleUserMenu()" [attr.aria-expanded]="showUserMenu" aria-label="Open user menu">
+          <span class="user-avatar initials" aria-hidden="true">{{ currentUser.fullName.charAt(0).toUpperCase() }}</span>
+          <span class="user-info"><span class="user-name">{{ currentUser.fullName }}</span><span class="user-role">{{ currentUser.role }}</span></span>
+          <span class="dropdown-arrow" aria-hidden="true">{{ showUserMenu ? 'Close' : 'Menu' }}</span>
+        </button>
+        <div class="dropdown user-dropdown" *ngIf="showUserMenu">
+          <button *ngIf="currentUser.role !== 'Admin'" type="button" class="dropdown-item" (click)="navigate('/manage-profile')">My Profile</button>
+          <button *ngIf="currentUser.role === 'Admin'" type="button" class="dropdown-item" (click)="navigate('/admin/settings')">Settings</button>
+          <button type="button" class="dropdown-item logout" (click)="logout()">Log out</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

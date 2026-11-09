@@ -3,56 +3,56 @@
     <div class="brand">
       <div class="brand-mark"></div>
       <div>
-        <p class="brand-title">ClassBooking</p>
-        <p class="brand-sub">Admin space</p>
+        <p class="brand-title">ClassBooking UK</p>
+        <p class="brand-sub">Admin Control</p>
       </div>
     </div>
 
     <div class="nav-group">
       <p class="nav-label">Overview</p>
-      <button class="nav-item active">Dashboard</button>
-      <button class="nav-item" (click)="navigate('/admin/users')">Users</button>
-      <button class="nav-item" (click)="navigate('/admin/timetable')">Timetable</button>
-      <button class="nav-item" (click)="navigate('/admin/fees')">Fees</button>
-      <button class="nav-item" (click)="navigate('/admin/exams')">Exam results</button>
-      <button class="nav-item" (click)="navigate('/admin/reports')">Reports</button>
+      <button class="nav-item active" type="button">Dashboard</button>
+      <button class="nav-item" type="button" (click)="navigate('/admin/users')">Users &amp; Tutors</button>
+      <button class="nav-item" type="button" (click)="navigate('/admin/timetable')">Timetable</button>
+      <button class="nav-item" type="button" (click)="navigate('/admin/fees')">GBP Fees &amp; Billing</button>
+      <button class="nav-item" type="button" (click)="navigate('/admin/exams')">Exam Results</button>
+      <button class="nav-item" type="button" (click)="navigate('/admin/reports')">Reports</button>
     </div>
 
     <div class="nav-group">
       <p class="nav-label">System</p>
-      <button class="nav-item" (click)="navigate('/admin/settings')">Settings</button>
-      <button class="nav-item" (click)="navigate('/timetable')">Public timetable</button>
+      <button class="nav-item" type="button" (click)="navigate('/admin/settings')">Platform Settings</button>
+      <button class="nav-item" type="button" (click)="navigate('/timetable')">Public Timetable</button>
     </div>
 
     <div class="nav-footer">
-      <p class="nav-hint">Need to export data?</p>
-      <button class="pill-btn" (click)="navigate('/admin/reports/view')">Open reports</button>
+      <p class="nav-hint">Export UK platform data</p>
+      <button class="pill-btn" type="button" (click)="navigate('/admin/reports/view')">Open Reports</button>
     </div>
 
-    <button class="logout-btn" (click)="logout()">Logout</button>
+    <button class="logout-btn" type="button" (click)="logout()">Sign Out</button>
   </aside>
 
   <main class="dashboard-main">
     <header class="page-header">
       <div>
-        <p class="eyebrow">{{ today | date:'EEE, MMM d' }}</p>
-        <h1>Hello, Admin</h1>
-        <p class="lede">Track platform health, revenue, and fast actions in one place.</p>
+        <p class="eyebrow">{{ today | date:'EEEE, d MMMM yyyy' }} • UK Administration</p>
+        <h1>Platform Administration</h1>
+        <p class="lede">Monitor UK tutor operations, GBP revenue, student enrolments, and system health in real time.</p>
         <div class="chip-row">
-          <button class="chip" (click)="navigate('/admin/users')">Manage users</button>
-          <button class="chip" (click)="navigate('/admin/timetable')">Timetable</button>
-          <button class="chip" (click)="navigate('/admin/fees')">Fees</button>
-          <button class="chip" (click)="navigate('/admin/settings')">Settings</button>
+          <button class="chip" type="button" (click)="navigate('/admin/users')">Manage Users</button>
+          <button class="chip" type="button" (click)="navigate('/admin/timetable')">Timetable</button>
+          <button class="chip" type="button" (click)="navigate('/admin/fees')">Fee Management (£)</button>
+          <button class="chip" type="button" (click)="navigate('/admin/settings')">System Settings</button>
         </div>
       </div>
       <div class="hero-card">
-        <p class="mini-label">Total revenue</p>
-        <h3>LKR {{ stats.totalRevenue | number:'1.0-0' }}</h3>
-        <p class="small-text">Average rating {{ stats.averageRating | number:'1.1-1' }}/5</p>
+        <p class="mini-label">Total Revenue (GBP)</p>
+        <h3>£{{ stats.totalRevenue | number:'1.0-0' }}</h3>
+        <p class="small-text">Platform Rating {{ stats.averageRating | number:'1.1-1' }}/5</p>
         <div class="spark-bar">
           <div class="spark-fill" [style.width.%]="ratingWidth(stats.averageRating)"></div>
         </div>
-        <button class="ghost-btn" (click)="navigate('/admin/reports')">View reports</button>
+        <button class="ghost-btn" type="button" (click)="navigate('/admin/reports')">View Reports</button>
       </div>
     </header>
 
@@ -63,7 +63,7 @@
           <span class="meta-dot success"></span>
         </div>
         <h2>{{ stats.totalUsers }}</h2>
-        <p class="meta-sub">Total platform users</p>
+        <p class="meta-sub">Total registered accounts</p>
       </div>
       <div class="stat-card">
         <div class="stat-meta">
@@ -71,15 +71,15 @@
           <span class="meta-dot info"></span>
         </div>
         <h2>{{ stats.totalStudents }}</h2>
-        <p class="meta-sub">Active students</p>
+        <p class="meta-sub">Active UK students</p>
       </div>
       <div class="stat-card">
         <div class="stat-meta">
-          <p class="meta-label">Teachers</p>
+          <p class="meta-label">Tutors</p>
           <span class="meta-dot warning"></span>
         </div>
         <h2>{{ stats.totalTeachers }}</h2>
-        <p class="meta-sub">Verified teachers</p>
+        <p class="meta-sub">Verified UK tutors</p>
       </div>
       <div class="stat-card">
         <div class="stat-meta">
@@ -87,7 +87,7 @@
           <span class="meta-dot neutral"></span>
         </div>
         <h2>{{ stats.totalBookings }}</h2>
-        <p class="meta-sub">Confirmed and pending</p>
+        <p class="meta-sub">Confirmed &amp; pending</p>
       </div>
       <div class="stat-card">
         <div class="stat-meta">
@@ -95,7 +95,7 @@
           <span class="meta-dot warning"></span>
         </div>
         <h2>{{ stats.pendingBookings }}</h2>
-        <p class="meta-sub">Bookings awaiting action</p>
+        <p class="meta-sub">Awaiting tutor action</p>
       </div>
       <div class="stat-card">
         <div class="stat-meta">
@@ -103,25 +103,26 @@
           <span class="meta-dot success"></span>
         </div>
         <h2>{{ stats.completedBookings }}</h2>
-        <p class="meta-sub">Finished bookings</p>
+        <p class="meta-sub">Finished tuition sessions</p>
       </div>
     </section>
 
-    <!-- <section class="panel-grid">
+    <section class="panel-grid">
       <article class="panel">
         <div class="panel-header">
           <div>
-            <p class="mini-label">Bookings</p>
-            <h3>6 month trend</h3>
+            <p class="mini-label">Top Tutors</p>
+            <h3>Leaderboard by Rating</h3>
           </div>
+          <button class="ghost-btn" type="button" (click)="navigate('/admin/users')">View All</button>
         </div>
-        <div class="bar-grid" *ngIf="bookingTrends.length">
-          <div class="bar-item" *ngFor="let item of bookingTrends">
-            <div class="bar-shell">
-              <div class="bar-fill" [style.height.%]="(item.bookings / 250) * 100"></div>
+        <div class="stacked-list" *ngIf="topTeachers.length; else noTopTeachers">
+          <div class="stacked-item" *ngFor="let teacher of topTeachers">
+            <div>
+              <p class="stacked-title">{{ teacher.name }}</p>
+              <p class="muted">{{ teacher.classes }} sessions delivered</p>
             </div>
-            <p class="bar-label">{{ item.month }}</p>
-            <p class="muted">{{ item.bookings }} bookings</p>
+            <span class="pill success">★ {{ teacher.rating | number:'1.1-1' }} / 5</span>
           </div>
         </div>
       </article>
@@ -129,39 +130,26 @@
       <article class="panel">
         <div class="panel-header">
           <div>
-            <p class="mini-label">Users</p>
-            <h3>Growth trend</h3>
+            <p class="mini-label">Infrastructure</p>
+            <h3>UK Cloud &amp; Service Health</h3>
           </div>
         </div>
-        <div class="dual-bars" *ngIf="userGrowth.length">
-          <div class="dual-row" *ngFor="let item of userGrowth">
-            <div class="dual-label">{{ item.month }}</div>
-            <div class="dual-meter">
-              <div class="fill students" [style.width.%]="(item.students / 200) * 100"></div>
-              <div class="fill teachers" [style.width.%]="(item.teachers / 60) * 100"></div>
-            </div>
-            <div class="dual-values">
-              <span>{{ item.students }} students</span>
-              <span>{{ item.teachers }} teachers</span>
-            </div>
+        <div class="health-grid">
+          <div class="health-item">
+            <span>Database (SQL Server)</span>
+            <span class="health-badge">Online</span>
           </div>
-        </div>
-      </article>
-
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <p class="mini-label">Revenue</p>
-            <h3>Monthly</h3>
+          <div class="health-item">
+            <span>ASP.NET Core API</span>
+            <span class="health-badge">Online</span>
           </div>
-        </div>
-        <div class="bar-grid" *ngIf="revenueData.length">
-          <div class="bar-item" *ngFor="let item of revenueData">
-            <div class="bar-shell">
-              <div class="bar-fill" [style.height.%]="(item.revenue / 100000) * 100"></div>
-            </div>
-            <p class="bar-label">{{ item.month }}</p>
-            <p class="muted">LKR {{ item.revenue | number:'1.0-0' }}</p>
+          <div class="health-item">
+            <span>GBP Payment Gateway</span>
+            <span class="health-badge">Online</span>
+          </div>
+          <div class="health-item">
+            <span>Resource Storage</span>
+            <span class="health-badge">Online</span>
           </div>
         </div>
       </article>
@@ -171,17 +159,23 @@
       <article class="panel">
         <div class="panel-header">
           <div>
-            <p class="mini-label">Top teachers</p>
-            <h3>By rating</h3>
+            <p class="mini-label">Payments (GBP)</p>
+            <h3>Latest Payment Records</h3>
           </div>
+          <button class="ghost-btn" type="button" (click)="navigate('/admin/fees')">Manage Fees</button>
         </div>
-        <div class="stacked-list" *ngIf="topTeachers.length">
-          <div class="stacked-item" *ngFor="let teacher of topTeachers">
+        <div class="stacked-list" *ngIf="latestPayments.length; else noPayments">
+          <div class="stacked-item" *ngFor="let pay of latestPayments">
             <div>
-              <p class="stacked-title">{{ teacher.name }}</p>
-              <p class="muted">{{ teacher.classes }} classes</p>
+              <p class="stacked-title">{{ pay.studentName }} → {{ pay.teacherName }}</p>
+              <p class="muted">{{ pay.subject }} • {{ pay.paymentMethod }} • {{ pay.sessionDate | date:'d MMM' }}</p>
             </div>
-            <span class="pill success">{{ teacher.rating | number:'1.1-1' }} / 5</span>
+            <div class="mini-actions">
+              <span class="pill" [ngClass]="pay.paymentStatus === 'Paid' ? 'success' : 'warning'">
+                {{ pay.paymentStatus }}
+              </span>
+              <strong>£{{ pay.amount | number:'1.2-2' }}</strong>
+            </div>
           </div>
         </div>
       </article>
@@ -189,101 +183,54 @@
       <article class="panel">
         <div class="panel-header">
           <div>
-            <p class="mini-label">System health</p>
-            <h3>Status</h3>
+            <p class="mini-label">Moderation</p>
+            <h3>Student Reviews Control</h3>
           </div>
+          <div class="pill neutral" *ngIf="reviews.length">{{ reviews.length }} total</div>
         </div>
-        <div class="health-grid">
-          <div class="health-item">
-            <span>Database</span>
-            <span class="health-badge">Online</span>
+
+        <div *ngIf="reviewsLoading" class="loading-spinner"></div>
+
+        <div class="reviews-list" *ngIf="!reviewsLoading">
+          <div class="review-row" *ngFor="let review of reviews">
+            <div class="review-meta">
+              <p class="stacked-title">{{ review.studentName }}</p>
+              <p class="muted">Tutor: {{ review.teacherName }}</p>
+              <p class="muted">{{ review.createdAt | date:'d MMM yyyy' }}</p>
+            </div>
+            <div class="review-edit">
+              <ng-container *ngIf="editingReviewId !== review.id; else editBlock">
+                <p class="stacked-title">★ {{ review.rating }} / 5</p>
+                <p class="muted">{{ review.comment || 'No comment' }}</p>
+                <div class="row-actions">
+                  <button class="ghost-btn" type="button" (click)="startEdit(review)">Edit</button>
+                  <button class="ghost-btn danger" type="button" (click)="deleteReview(review.id)">Delete</button>
+                </div>
+              </ng-container>
+              <ng-template #editBlock>
+                <select [(ngModel)]="editRating" class="inline-input">
+                  <option *ngFor="let r of [5,4,3,2,1]" [value]="r">{{ r }} stars</option>
+                </select>
+                <textarea rows="2" class="inline-textarea" [(ngModel)]="editComment"></textarea>
+                <div class="row-actions">
+                  <button class="ghost-btn" type="button" (click)="saveReview()">Save</button>
+                  <button class="ghost-btn danger" type="button" (click)="cancelEdit()">Cancel</button>
+                </div>
+              </ng-template>
+            </div>
           </div>
-          <div class="health-item">
-            <span>API Server</span>
-            <span class="health-badge">Online</span>
-          </div>
-          <div class="health-item">
-            <span>Email Service</span>
-            <span class="health-badge">Online</span>
-          </div>
-          <div class="health-item">
-            <span>Storage</span>
-            <span class="health-badge">Online</span>
-          </div>
+          <div *ngIf="reviews.length === 0" class="empty">No reviews recorded yet.</div>
         </div>
       </article>
-    </section> -->
-
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <p class="mini-label">Payments</p>
-          <h3>Latest payment records</h3>
-          <p class="muted">Full detail is visible per booking.</p>
-        </div>
-        <button class="ghost-btn" (click)="navigate('/admin/fees')">Manage fees</button>
-      </div>
-      <div class="stacked-list" *ngIf="latestPayments.length; else noPayments">
-        <div class="stacked-item" *ngFor="let pay of latestPayments">
-          <div>
-            <p class="stacked-title">{{ pay.studentName }} → {{ pay.teacherName }}</p>
-            <p class="muted">{{ pay.subject }} | {{ pay.paymentMethod }} | {{ pay.sessionDate | date:'MMM dd' }}</p>
-          </div>
-          <div class="mini-actions">
-            <span class="pill" [ngClass]="pay.paymentStatus === 'Paid' ? 'success' : 'warning'">
-              {{ pay.paymentStatus }}
-            </span>
-            <strong>LKR {{ pay.amount | number:'1.0-0' }}</strong>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="panel-header">
-        <div>
-          <p class="mini-label">Reviews</p>
-          <h3>Admin control</h3>
-          <p class="muted">Edit or delete any review from one place.</p>
-        </div>
-        <div class="pill neutral" *ngIf="reviews.length">{{ reviews.length }} total</div>
-      </div>
-
-      <div *ngIf="reviewsLoading" class="loading-spinner"></div>
-
-      <div class="reviews-list" *ngIf="!reviewsLoading">
-        <div class="review-row" *ngFor="let review of reviews">
-          <div class="review-meta">
-            <p class="stacked-title">{{ review.studentName }}</p>
-            <p class="muted">Teacher: {{ review.teacherName }}</p>
-            <p class="muted">{{ review.createdAt | date:'MMM dd, yyyy' }}</p>
-          </div>
-          <div class="review-edit">
-            <ng-container *ngIf="editingReviewId !== review.id; else editBlock">
-              <p class="stacked-title">{{ review.rating }} / 5</p>
-              <p class="muted">{{ review.comment || 'No comment' }}</p>
-              <div class="row-actions">
-                <button class="ghost-btn" (click)="startEdit(review)">Edit</button>
-                <button class="ghost-btn danger" (click)="deleteReview(review.id)">Delete</button>
-              </div>
-            </ng-container>
-            <ng-template #editBlock>
-              <select [(ngModel)]="editRating" class="inline-input">
-                <option *ngFor="let r of [5,4,3,2,1]" [value]="r">{{ r }} stars</option>
-              </select>
-              <textarea rows="2" class="inline-textarea" [(ngModel)]="editComment"></textarea>
-              <div class="row-actions">
-                <button class="ghost-btn" (click)="saveReview()">Save</button>
-                <button class="ghost-btn danger" (click)="cancelEdit()">Cancel</button>
-              </div>
-            </ng-template>
-          </div>
-        </div>
-        <div *ngIf="reviews.length === 0" class="empty">No reviews found.</div>
-      </div>
     </section>
   </main>
 </div>
+
+<ng-template #noTopTeachers>
+  <div class="empty">
+    <p>Tutor rankings will appear as reviews are submitted.</p>
+  </div>
+</ng-template>
 
 <ng-template #noPayments>
   <div class="empty">

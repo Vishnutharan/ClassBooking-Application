@@ -123,7 +123,7 @@ namespace ClassBooking.API.Entities
         public string? TargetUniversity { get; set; }
         
         [MaxLength(50)]
-        public string? Medium { get; set; } // Sinhala, Tamil, English
+        public string? Medium { get; set; } // English, Bilingual, French, Spanish, German
         
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
@@ -221,7 +221,7 @@ namespace ClassBooking.API.Entities
         
         [Required]
         [MaxLength(10)]
-        public string Currency { get; set; } = "LKR";
+        public string Currency { get; set; } = "GBP";
         
         [Required]
         [MaxLength(50)]

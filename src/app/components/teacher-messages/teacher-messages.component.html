@@ -1,57 +1,72 @@
 <div class="messages-container">
-    <div class="header">
-        <h1>💬 Messages & Announcements</h1>
-        <button class="btn-primary" (click)="createAnnouncement()">📢 New Announcement</button>
+  <header class="header">
+    <div><p class="eyebrow">Teacher tools</p><h1>Messages and announcements</h1><p>Reply to students and share class updates.</p></div>
+    <button type="button" class="btn-primary" (click)="showAnnouncementForm = !showAnnouncementForm" aria-expanded="showAnnouncementForm">New announcement</button>
+  </header>
+
+  <form *ngIf="showAnnouncementForm" class="announcement-form" (ngSubmit)="createAnnouncement()">
+    <label for="announcement-title">Title</label>
+    <input id="announcement-title" name="title" required maxlength="200" [(ngModel)]="announcementDraft.title" />
+    <label for="announcement-content">Message</label>
+    <textarea id="announcement-content" name="content" required maxlength="2000" rows="4" [(ngModel)]="announcementDraft.content"></textarea>
+    <p class="form-hint">Announcements are stored here, but student delivery is not connected yet.</p>
+    <div class="form-actions">
+      <button class="btn-primary" type="submit" [disabled]="isSavingAnnouncement">{{ isSavingAnnouncement ? 'Publishing...' : 'Publish' }}</button>
+      <button type="button" class="btn-secondary" (click)="showAnnouncementForm = false">Cancel</button>
     </div>
+  </form>
 
-    <div class="tabs">
-        <button class="tab" [class.active]="activeTab === 'messages'" (click)="activeTab = 'messages'">
-            Messages <span class="badge">{{ unreadCount }}</span>
-        </button>
-        <button class="tab" [class.active]="activeTab === 'announcements'" (click)="activeTab = 'announcements'">
-            Announcements
-        </button>
+  <div class="tabs" role="tablist" aria-label="Teacher communication">
+    <button type="button" class="tab" role="tab" [attr.aria-selected]="activeTab === 'messages'" [class.active]="activeTab === 'messages'" (click)="activeTab = 'messages'; selectedConversation = null">
+      Messages <span class="badge" *ngIf="unreadCount">{{ unreadCount }} unread</span>
+    </button>
+    <button type="button" class="tab" role="tab" [attr.aria-selected]="activeTab === 'announcements'" [class.active]="activeTab === 'announcements'" (click)="activeTab = 'announcements'; selectedConversation = null">Announcements</button>
+  </div>
+
+  <section *ngIf="activeTab === 'messages' && !selectedConversation" class="messages-list" aria-label="Conversations">
+    <p *ngIf="conversations.length === 0" class="empty-state">No conversations yet. A message thread will appear here when a student contacts you.</p>
+    <article class="conversation-card" *ngFor="let conversation of conversations">
+      <button type="button" class="conversation-open" (click)="openConversation(conversation)" [attr.aria-label]="'Open conversation with ' + conversationName(conversation)">
+        <span class="avatar" aria-hidden="true">{{ conversationName(conversation).charAt(0).toUpperCase() }}</span>
+        <span class="conversation-summary">
+          <strong>{{ conversationName(conversation) }}</strong>
+          <span class="subject">{{ conversation.subject || 'Class messages' }}</span>
+          <span class="last-message">{{ conversation.lastMessage?.content || 'No messages yet' }}</span>
+        </span>
+        <span class="conversation-meta">
+          <span class="unread-badge" *ngIf="conversation.unreadCount > 0">{{ conversation.unreadCount }} unread</span>
+          <time *ngIf="conversation.updatedAt" [attr.datetime]="conversation.updatedAt">{{ conversation.updatedAt | date:'MMM d, h:mm a' }}</time>
+          <span aria-hidden="true">Open</span>
+        </span>
+      </button>
+    </article>
+  </section>
+
+  <section *ngIf="activeTab === 'messages' && selectedConversation as conversation" class="thread-panel" aria-label="Message thread">
+    <header class="thread-header">
+      <button type="button" class="btn-secondary" (click)="closeConversation()">Back to messages</button>
+      <div><h2>{{ conversationName(conversation) }}</h2><p>{{ conversation.subject || 'Class messages' }}</p></div>
+    </header>
+    <div class="thread-messages" aria-live="polite" [attr.aria-busy]="isLoadingMessages">
+      <p *ngIf="isLoadingMessages">Loading messages...</p>
+      <p *ngIf="!isLoadingMessages && messages.length === 0" class="empty-state">No messages in this conversation yet.</p>
+      <article *ngFor="let message of messages" class="message-bubble" [class.own-message]="isOwnMessage(message)">
+        <p>{{ message.content }}</p><small>{{ message.senderName }} � {{ message.sentAt | date:'MMM d, h:mm a' }}</small>
+      </article>
     </div>
+    <form class="reply-form" (ngSubmit)="sendReply()">
+      <label for="reply-message">Your message</label>
+      <textarea id="reply-message" name="reply" rows="3" maxlength="4000" required [(ngModel)]="replyText" placeholder="Write a reply"></textarea>
+      <button type="submit" class="btn-primary" [disabled]="isSendingMessage || !replyText.trim()">{{ isSendingMessage ? 'Sending...' : 'Send message' }}</button>
+    </form>
+  </section>
 
-    <!-- Messages Tab -->
-    <div *ngIf="activeTab === 'messages'" class="messages-list">
-        <div class="conversation-card" *ngFor="let conv of conversations">
-            <div class="conversation-header">
-                <div class="participant-info">
-                    <div class="avatar">{{ (conv.participants[1].name || '?')[0] }}</div>
-                    <div>
-                        <h3>{{ conv.participants[1].name || 'Unknown' }}</h3>
-                        <p class="subject">{{ conv.subject }}</p>
-                    </div>
-                </div>
-                <span *ngIf="conv.unreadCount > 0" class="unread-badge">{{ conv.unreadCount }}</span>
-            </div>
-            <p class="last-message">{{ conv.lastMessage.content || 'No messages yet' }}</p>
-            <small class="timestamp">{{ conv.updatedAt | date:'MMM dd, yyyy HH:mm' }}</small>
-        </div>
-
-        <div *ngIf="conversations.length === 0" class="empty-state">
-            <p>No conversations yet</p>
-        </div>
-    </div>
-
-    <!-- Announcements Tab -->
-    <div *ngIf="activeTab === 'announcements'" class="announcements-list">
-        <div class="announcement-card" *ngFor="let ann of announcements">
-            <div class="announcement-header">
-                <h3>{{ ann.title }}</h3>
-                <span *ngIf="ann.isPinned" class="pin-icon">📌</span>
-            </div>
-            <p>{{ ann.content }}</p>
-            <div class="announcement-meta">
-                <span>👥 {{ ann.recipientType }}</span>
-                <span>👁️ {{ ann.viewCount }} views</span>
-                <span>{{ ann.sentAt | date:'MMM dd, yyyy' }}</span>
-            </div>
-        </div>
-
-        <div *ngIf="announcements.length === 0" class="empty-state">
-            <p>No announcements yet</p>
-        </div>
-    </div>
+  <section *ngIf="activeTab === 'announcements'" class="announcements-list" aria-label="Announcements">
+    <p *ngIf="announcements.length === 0" class="empty-state">No announcements yet.</p>
+    <article class="announcement-item" *ngFor="let announcement of announcements">
+      <h2>{{ announcement.title }}</h2><p>{{ announcement.content }}</p>
+      <small>{{ announcement.recipientType }} � {{ announcement.sentAt | date:'MMM d, yyyy' }}</small>
+    </article>
+  </section>
 </div>
+

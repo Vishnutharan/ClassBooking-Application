@@ -104,25 +104,25 @@ export class LandingComponent implements OnInit {
 
   testimonials = [
     {
-      name: 'Ayesha Perera',
-      role: 'Parent & Student',
-      avatar: 'AP',
+      name: 'Eleanor Vance',
+      role: 'GCSE Parent (London)',
+      avatar: 'EV',
       rating: 5,
       text:
         'We book two classes a week and everything from reminders to results is in one dashboard.'
     },
     {
-      name: 'Ruwan Silva',
-      role: 'Teacher',
-      avatar: 'RS',
+      name: 'James Thornton',
+      role: 'AQA & Edexcel Maths Tutor',
+      avatar: 'JT',
       rating: 5,
       text:
         'Scheduling, messaging, and resource sharing are finally in one place. My no-shows dropped dramatically.'
     },
     {
-      name: 'Meera Jayasinghe',
-      role: 'Academic Coordinator',
-      avatar: 'MJ',
+      name: 'Dr. Alistair Davies',
+      role: 'Sixth Form Academic Mentor (Oxford)',
+      avatar: 'AD',
       rating: 5,
       text: 'ClassBooking keeps attendance, fees, and teacher performance transparent for our team.'
     }

@@ -20,7 +20,7 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit {
   private authService = inject(AuthService);
-  private router = inject(Router);
+  private notificationService = inject(NotificationService);
   private platformId = inject(PLATFORM_ID);
   private isBrowser: boolean;
 
@@ -35,7 +35,9 @@ export class SidebarComponent implements OnInit {
     { icon: '??', label: 'My Bookings', route: '/my-bookings', roles: ['Student'] },
     { icon: '??', label: 'Lesson Planner', route: '/student/lesson-plans', roles: ['Student'] },
     { icon: '??', label: 'Exam Prep', route: '/exam-preparation', roles: ['Student'] },
-    { icon: '??', label: 'Educational Content', route: '/educational-content', roles: ['Student'] }
+    { icon: '??', label: 'Educational Content', route: '/educational-content', roles: ['Student'] },
+    { icon: '??', label: 'Progress', route: '/student/progress', roles: ['Student'] },
+    { icon: '??', label: 'Timetable', route: '/timetable', roles: ['Student'] }
   ];
 
   private teacherMenuItems: MenuItem[] = [
@@ -107,7 +109,7 @@ export class SidebarComponent implements OnInit {
   }
 
   openSupport(): void {
-    this.router.navigate(['/support']);
+    this.notificationService.showInfo('For account or booking help, contact your platform administrator.');
   }
 }
 

@@ -1,106 +1,85 @@
-<div class="exam-materials-container">
-    <div class="header">
-        <h1>📚 Exam Materials</h1>
-        <p>Study materials and resources for your exams</p>
+<div class="exam-materials-page">
+  <div class="exam-materials-shell">
+    <header class="page-hero">
+      <div>
+        <span class="eyebrow">🇬🇧 UK Exam Board Prep Hub</span>
+        <h1>GCSE, A-Level & 11+ Revision Materials</h1>
+        <p>Access structured revision notes, topic quizzes, and video walkthroughs aligned with AQA, Edexcel, and OCR specifications.</p>
+      </div>
+      <div class="hero-stat">
+        <strong>{{ filteredResources.length }}</strong>
+        <span>Study Packs</span>
+      </div>
+    </header>
+
+    <!-- Exam Qualification Tabs -->
+    <div class="qualification-tabs">
+      <button type="button" class="qual-tab" [class.active]="selectedExam === 'OLevel'" (click)="selectedExam = 'OLevel'; onExamChange()">
+        📘 GCSE (Years 10–11)
+      </button>
+      <button type="button" class="qual-tab" [class.active]="selectedExam === 'ALevel'" (click)="selectedExam = 'ALevel'; onExamChange()">
+        🎓 A-Level & AS (Years 12–13)
+      </button>
+      <button type="button" class="qual-tab" [class.active]="selectedExam === 'Scholarship'" (click)="selectedExam = 'Scholarship'; onExamChange()">
+        🏅 11+ Grammar & Entrance
+      </button>
     </div>
 
-    <div class="exam-tabs">
-        <button [class.active]="selectedExam === 'OLevel'" (click)="selectedExam = 'OLevel'; onExamChange()"
-            class="tab-btn">
-            O-Level
-        </button>
-        <button [class.active]="selectedExam === 'ALevel'" (click)="selectedExam = 'ALevel'; onExamChange()"
-            class="tab-btn">
-            A-Level
-        </button>
-        <button [class.active]="selectedExam === 'Scholarship'" (click)="selectedExam = 'Scholarship'; onExamChange()"
-            class="tab-btn">
-            Scholarship
-        </button>
-    </div>
+    <!-- Filter Bar -->
+    <section class="filters-bar">
+      <div class="filter-field search">
+        <label>Search Topic or Title</label>
+        <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Search revision guides, formulas, videos..." />
+      </div>
 
-    <div class="filters">
-        <input type="text" [(ngModel)]="searchTerm" (keyup)="onSearch()" placeholder="Search materials..."
-            class="search-input">
-
-        <select [(ngModel)]="selectedSubject" (change)="onFilterChange()" class="filter-select">
-            <option *ngFor="let subject of subjects" [value]="subject">{{ subject }}</option>
+      <div class="filter-field">
+        <label>UK Subject</label>
+        <select [(ngModel)]="selectedSubject" (change)="onFilterChange()">
+          <option *ngFor="let subject of subjects" [value]="subject">{{ subject }}</option>
         </select>
+      </div>
 
-        <select [(ngModel)]="selectedResourceType" (change)="onFilterChange()" class="filter-select">
-            <option *ngFor="let type of resourceTypes" [value]="type">{{ type }}</option>
+      <div class="filter-field">
+        <label>Material Format</label>
+        <select [(ngModel)]="selectedResourceType" (change)="onFilterChange()">
+          <option *ngFor="let rType of resourceTypes" [value]="rType">{{ rType }}</option>
         </select>
+      </div>
+    </section>
+
+    <div *ngIf="isLoading" class="empty-card">
+      <p>Loading UK exam preparation resources...</p>
     </div>
 
-    <div *ngIf="isLoading" class="loading-spinner">Loading...</div>
-
-    <div class="content" *ngIf="!isLoading">
-        <div class="sidebar">
-            <div class="subjects-list">
-                <h3>📖 Subjects</h3>
-                <div class="subject-item" *ngFor="let prep of preparations"
-                    [class.active]="selectedSubject === prep.subject"
-                    (click)="selectedSubject = prep.subject; onFilterChange()">
-                    <div class="subject-header">
-                        <span class="subject-name">{{ prep.subject }}</span>
-                    </div>
-                    <div class="resource-count">
-                        {{ getResourcesBySubject(prep.subject).length }} materials
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="resources-grid" *ngIf="filteredResources.length > 0; else noResources">
-                <div class="resource-card" *ngFor="let resource of filteredResources">
-                    <div class="resource-header">
-                        <span class="type-badge">{{ getResourceTypeIcon(resource.type) }} {{ resource.type }}</span>
-                        <button class="bookmark-btn" [class.bookmarked]="bookmarkedResources.has(resource.id)"
-                            (click)="toggleBookmark(resource)" title="Bookmark">
-                            ♥
-                        </button>
-                    </div>
-
-                    <div class="resource-body">
-                        <h3>{{ resource.title }}</h3>
-                        <p class="description">{{ resource.description }}</p>
-                        <p class="upload-info" *ngIf="resource.uploadedAt">
-                            <small>Uploaded: {{ resource.uploadedAt | date:'MMM dd, yyyy' }}</small>
-                        </p>
-                    </div>
-
-                    <div class="resource-actions">
-                        <button class="action-btn view" (click)="openResource(resource)">
-                            👁️ View
-                        </button>
-                        <button class="action-btn download" (click)="downloadResource(resource)">
-                            ⬇️ Download
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <ng-template #noResources>
-                <div class="empty-state">
-                    <div class="empty-icon">📚</div>
-                    <h3>No Materials Found</h3>
-                    <p>No study materials match your current filters.</p>
-                    <button class="reset-btn"
-                        (click)="selectedResourceType = 'All'; selectedSubject = 'All'; searchTerm = ''; onFilterChange()">
-                        Reset Filters
-                    </button>
-                </div>
-            </ng-template>
-        </div>
+    <div *ngIf="!isLoading && filteredResources.length === 0" class="empty-card">
+      <div class="empty-icon">📚</div>
+      <h3>No revision materials match your current filter</h3>
+      <p>Try selecting "All" under Subject or Material Format above.</p>
     </div>
 
-    <div class="bookmarked-section" *ngIf="bookmarkedResources.size > 0">
-        <h2>⭐ Bookmarked Materials ({{ bookmarkedResources.size }})</h2>
-        <div class="bookmarked-list">
-            <div class="bookmarked-item" *ngFor="let resource of filteredResources">
-                <span *ngIf="bookmarkedResources.has(resource.id)">📌 {{ resource.title }}</span>
-            </div>
+    <!-- Resources Grid -->
+    <section class="materials-grid" *ngIf="!isLoading && filteredResources.length > 0">
+      <article class="material-card" *ngFor="let resource of filteredResources">
+        <div class="card-top">
+          <div class="type-icon">{{ getResourceTypeIcon(resource.type) }}</div>
+          <div class="top-badges">
+            <span class="type-pill">{{ resource.type }}</span>
+            <button type="button" class="bookmark-btn" [class.saved]="bookmarkedResources.has(resource.id)" (click)="toggleBookmark(resource)" title="Bookmark">
+              {{ bookmarkedResources.has(resource.id) ? '★ Saved' : '☆ Save' }}
+            </button>
+          </div>
         </div>
-    </div>
+
+        <div class="card-body">
+          <h3>{{ resource.title }}</h3>
+          <p>{{ resource.description || 'Structured UK curriculum revision material and exam technique guide.' }}</p>
+        </div>
+
+        <div class="card-footer">
+          <button type="button" class="btn-outline" (click)="openResource(resource)">Preview</button>
+          <button type="button" class="btn-primary" (click)="downloadResource(resource)">↓ Download</button>
+        </div>
+      </article>
+    </section>
+  </div>
 </div>

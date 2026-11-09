@@ -124,28 +124,28 @@ export class AdminDashboardComponent implements OnInit {
     ];
 
     this.revenueData = [
-      { month: 'Jan', revenue: 45000 },
-      { month: 'Feb', revenue: 52000 },
-      { month: 'Mar', revenue: 61000 },
-      { month: 'Apr', revenue: 58000 },
-      { month: 'May', revenue: 72000 },
-      { month: 'Jun', revenue: 85000 }
+      { month: 'Jan', revenue: 4250 },
+      { month: 'Feb', revenue: 5180 },
+      { month: 'Mar', revenue: 6420 },
+      { month: 'Apr', revenue: 5890 },
+      { month: 'May', revenue: 7350 },
+      { month: 'Jun', revenue: 8640 }
     ];
 
-    // Mock top teachers
     this.topTeachers = [
-      { name: 'Mr. Fernando', rating: 4.8, classes: 85 },
-      { name: 'Ms. Silva', rating: 4.7, classes: 72 },
-      { name: 'Dr. Perera', rating: 4.9, classes: 95 }
+      { name: 'Dr. Alistair Perera', rating: 4.9, classes: 95 },
+      { name: 'Ms. Kaveesha Jayawardena', rating: 4.8, classes: 84 },
+      { name: 'Mr. James Sanje', rating: 4.8, classes: 78 },
+      { name: 'Mr. Mohamed Farook', rating: 4.7, classes: 66 }
     ];
   }
 
   private loadActivities(): void {
     this.recentActivities = [
-      { icon: '*', message: 'New student registered', time: '5 minutes ago' },
-      { icon: '*', message: 'Class booking confirmed', time: '15 minutes ago' },
-      { icon: '*', message: 'Booking cancelled', time: '1 hour ago' },
-      { icon: '*', message: 'Teacher verified', time: '2 hours ago' }
+      { icon: '🎓', message: 'New UK GCSE student registered', time: '5 minutes ago' },
+      { icon: '📅', message: '1-to-1 A-Level Maths session confirmed', time: '15 minutes ago' },
+      { icon: '💷', message: 'GBP Tuition payment settled (£45.00)', time: '1 hour ago' },
+      { icon: '✅', message: 'Tutor DBS & QTS verification approved', time: '2 hours ago' }
     ];
   }
 

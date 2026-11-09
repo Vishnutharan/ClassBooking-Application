@@ -1,5 +1,5 @@
    <aside class="sidebar" [class.collapsed]="isCollapsed">
-      <button class="toggle-btn" (click)="toggleSidebar()">
+      <button type="button" class="toggle-btn" (click)="toggleSidebar()" [attr.aria-expanded]="!isCollapsed" [attr.aria-label]="isCollapsed ? 'Expand navigation' : 'Collapse navigation'">
         {{ isCollapsed ? '☰' : '✕' }}
       </button>
 
@@ -28,7 +28,7 @@
           <div class="help-icon">💡</div>
           <h4>Need Help?</h4>
           <p>Contact support for assistance</p>
-          <button class="help-btn" (click)="openSupport()">Get Help</button>
+          <button type="button" class="help-btn" (click)="openSupport()">Get Help</button>
         </div>
       </div>
     </aside>

@@ -1,20 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TeacherProfile } from '../../core/models/shared.models';
 import { TeacherService } from '../../core/services/teacher.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { finalize } from 'rxjs';
 
 interface TeacherCardView {
   id: string;
   name: string;
-  subjects: string;
-  grades: string;
-  district: string;
-  medium: string;
+  subjects: string[];
+  grades: string[];
+  medium: string[];
   teachingMode: string;
-  classType: string;
+  classTypes: string[];
   rate: number;
   rating: number;
   profilePicture?: string;
@@ -32,200 +32,101 @@ export class FindTeacherComponent implements OnInit {
   private teacherService = inject(TeacherService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
-  filters = {
-    subject: '',
-    grade: '',
-    district: '',
-    medium: '',
-    teachingMode: '',
-    classType: ''
-  };
-
+  filters = { subject: '', grade: '', medium: '', teachingMode: '', classType: '' };
   teacherCards: TeacherCardView[] = [];
   filteredCards: TeacherCardView[] = [];
   isLoading = false;
-
   subjectOptions: string[] = [];
-  gradeOptions = [
-    'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 
-    'Grade 10', 'Grade 11', 
-    'Grade 12', 'Grade 13', 'A-Level'
+  gradeOptions = ['Year 7 (KS3)', 'Year 8 (KS3)', 'Year 9 (KS3)', 'Year 10 (GCSE)', 'Year 11 (GCSE)', 'Year 12 (A-Level)', 'Year 13 (A-Level)', '11+ Prep', 'Primary (KS1/KS2)', 'University'];
+  mediumOptions = ['English', 'Bilingual', 'French', 'Spanish', 'German', 'Mandarin'];
+  teachingModeOptions = [
+    { value: 'ONLINE', label: 'Online' },
+    { value: 'IN_PERSON', label: 'In person' },
+    { value: 'BOTH', label: 'Online or in person' }
   ];
-  districtOptions = ['Colombo', 'Gampaha', 'Kandy', 'Galle', 'Kalutara', 'Matara', 'Kurunegala'];
-  mediumOptions = ['English', 'Sinhala', 'Tamil', 'Bilingual'];
-  teachingModeOptions = ['Online & Physical', 'Online', 'Physical'];
-  classTypeOptions = ['Individual & Group classes', 'Individual classes', 'Group classes'];
+  classTypeOptions = [
+    { value: 'PERSONAL_1_1', label: 'One to one' },
+    { value: 'GROUP', label: 'Group' }
+  ];
 
   ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      const search = params.get('search') || params.get('subject');
+      if (search) this.filters.subject = search;
+      this.applyFilters(false);
+    });
     this.fetchTeachers();
   }
 
   fetchTeachers(): void {
     this.isLoading = true;
-    this.teacherService.getAllTeachers().subscribe({
-      next: (teachers) => {
+    this.teacherService.getAllTeachers().pipe(finalize(() => this.isLoading = false)).subscribe({
+      next: teachers => {
         this.teacherCards = this.mapToCards(teachers || []);
-        this.subjectOptions = this.buildSubjectOptions(teachers || []);
+        this.subjectOptions = Array.from(new Set(this.teacherCards.flatMap(card => card.subjects))).sort();
         this.applyFilters(false);
       },
       error: () => {
-        this.notificationService.showError('Could not load teachers right now.');
+        this.notificationService.showError('Could not load teachers right now. Please try again.');
         this.filteredCards = [];
       },
-      complete: () => {
-        this.isLoading = false;
-      }
     });
   }
 
-  refreshList(): void {
-    this.fetchTeachers();
-  }
+  refreshList(): void { this.fetchTeachers(); }
 
-  applyFilters(showMessages: boolean = true): void {
-    this.filteredCards = this.teacherCards.filter(card => {
-      const matchesSubject = !this.filters.subject ||
-        card.subjects.toLowerCase().includes(this.filters.subject.toLowerCase());
-
-      // Strict grade matching if possible, or string inclusion
-      // Since card.grades is "Grade 6, Grade 7", searching for "Grade 6" matches.
-      // Searching for "Grade 1" might match "Grade 10" - be careful.
-      // Better to check tokenized.
-      let matchesGrade = true;
-      if (this.filters.grade) {
-         const cardGrades = card.grades.split(',').map(g => g.trim());
-         matchesGrade = cardGrades.includes(this.filters.grade);
-      }
-
-      const matchesDistrict = !this.filters.district ||
-        card.district === this.filters.district;
-
-      const matchesMedium = !this.filters.medium ||
-        card.medium.toLowerCase().includes(this.filters.medium.toLowerCase());
-
-      const matchesMode = !this.filters.teachingMode ||
-        card.teachingMode === this.filters.teachingMode;
-
-      const matchesClassType = !this.filters.classType ||
-        card.classType === this.filters.classType;
-
-      return (
-        matchesSubject &&
-        matchesGrade &&
-        matchesDistrict &&
-        matchesMedium &&
-        matchesMode &&
-        matchesClassType
-      );
-    });
-
-    if (!this.filteredCards.length && showMessages) {
-      this.notificationService.showInfo('No teachers match those filters yet. Try adjusting a filter.');
+  applyFilters(showMessages = true): void {
+    const subject = this.filters.subject.trim().toLowerCase();
+    this.filteredCards = this.teacherCards.filter(card =>
+      (!subject || card.subjects.some(value => value.toLowerCase().includes(subject)) || card.name.toLowerCase().includes(subject)) &&
+      (!this.filters.grade || card.grades.includes(this.filters.grade)) &&
+      (!this.filters.medium || card.medium.includes(this.filters.medium)) &&
+      (!this.filters.teachingMode || card.teachingMode === this.filters.teachingMode) &&
+      (!this.filters.classType || card.classTypes.includes(this.filters.classType))
+    );
+    if (!this.filteredCards.length && showMessages && this.teacherCards.length) {
+      this.notificationService.showInfo('No teachers match these filters. Try removing a filter.');
     }
   }
 
   clearFilters(): void {
-    this.filters = {
-      subject: '',
-      grade: '',
-      district: '',
-      medium: '',
-      teachingMode: '',
-      classType: ''
-    };
+    this.filters = { subject: '', grade: '', medium: '', teachingMode: '', classType: '' };
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { search: null, subject: null }, queryParamsHandling: 'merge' });
     this.filteredCards = [...this.teacherCards];
   }
 
+  formatClassTypes(types: string[]): string {
+    return types.map(type => type === 'PERSONAL_1_1' ? 'One to one' : type === 'GROUP' ? 'Group' : type).join(', ') || 'Class type not listed';
+  }
+
   viewProfile(teacherId: string): void {
-    if (!teacherId) {
-      this.notificationService.showInfo('Teacher profile is not available yet.');
-      return;
-    }
-    // Pass filters as query params to pre-select in booking
-    this.router.navigate(['/teacher-profile', teacherId], {
-        queryParams: {
-            subject: this.filters.subject,
-            grade: this.filters.grade
-        }
+    if (!teacherId) return;
+    void this.router.navigate(['/teacher-profile', teacherId], {
+      queryParams: { subject: this.filters.subject || null, grade: this.filters.grade || null }
     });
+  }
+
+  bookClass(teacherId: string): void {
+    if (!teacherId) return;
+    void this.router.navigate(['/book-class'], { queryParams: { teacherId } });
   }
 
   private mapToCards(teachers: TeacherProfile[]): TeacherCardView[] {
-    const fallbackDistricts = this.districtOptions;
-
-    return teachers.map((teacher, index) => {
-      const subjects = this.formatSubjects(teacher);
-      const grades = this.getGrades(teacher);
-      const medium = this.getMediums(teacher);
-      const district = fallbackDistricts[index % fallbackDistricts.length];
-      const teachingMode = this.teachingModeOptions[index % this.teachingModeOptions.length];
-      const classType = this.classTypeOptions[index % this.classTypeOptions.length];
-
-      return {
-        id: teacher.id,
-        name: teacher.fullName,
-        subjects,
-        grades,
-        district,
-        medium: medium || 'All mediums',
-        teachingMode,
-        classType,
-        rate: teacher.hourlyRate ?? 0,
-        rating: teacher.averageRating ?? 0,
-        profilePicture: teacher.profilePicture,
-        verified: teacher.verificationStatus === 'Verified'
-      };
-    });
-  }
-
-  private formatSubjects(teacher: TeacherProfile): string {
-    const subjectNames = (teacher.subjects || []).map(s => s.name).filter(Boolean);
-    if (!subjectNames.length) {
-      return 'Multiple subjects';
-    }
-    const uniqueNames = Array.from(new Set(subjectNames));
-    return uniqueNames.join(', ');
-  }
-
-  private getMediums(teacher: TeacherProfile): string {
-    const mediums = (teacher.subjects || [])
-      .map(s => s.medium)
-      .filter(Boolean);
-    const unique = Array.from(new Set(mediums));
-    return unique.join(', ');
-  }
-
-  private getGrades(teacher: TeacherProfile): string {
-    const allGrades = new Set<string>();
-
-    (teacher.subjects || []).forEach(sub => {
-       if (sub.grades) {
-           sub.grades.split(',').forEach(g => allGrades.add(g.trim()));
-       } else if (sub.level) {
-           // Fallback if grades not set
-           allGrades.add(sub.level);
-       }
-    });
-
-    if (allGrades.size === 0) {
-        return 'All grades';
-    }
-
-    // Sort to make it look nice? 'Grade 6', 'Grade 10'
-    // Natural sort might be hard, alphabetical is okay for now
-    return Array.from(allGrades).join(', ');
-  }
-
-  private buildSubjectOptions(teachers: TeacherProfile[]): string[] {
-    const options = new Set<string>();
-    teachers.forEach(teacher => {
-      (teacher.subjects || []).forEach(sub => {
-        if (sub.name) {
-          options.add(sub.name);
-        }
-      });
-    });
-    return Array.from(options);
+    return teachers.map(teacher => ({
+      id: teacher.id,
+      name: teacher.fullName || 'Teacher',
+      subjects: [...new Set((teacher.subjects || []).map(subject => subject.name).filter(Boolean))],
+      grades: [...new Set((teacher.subjects || []).flatMap(subject =>
+        (subject.grades || '').split(',').map(grade => grade.trim()).filter(Boolean)))],
+      medium: [...new Set((teacher.subjects || []).map(subject => subject.medium).filter(Boolean))],
+      teachingMode: teacher.teachingMode || 'ONLINE',
+      classTypes: [...new Set((teacher.subjects || []).flatMap(subject => subject.classTypes || []))],
+      rate: teacher.hourlyRate ?? 0,
+      rating: teacher.averageRating ?? 0,
+      profilePicture: teacher.profilePicture,
+      verified: teacher.verificationStatus === 'Verified'
+    }));
   }
 }

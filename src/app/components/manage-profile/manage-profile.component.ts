@@ -5,6 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { TeacherService } from '../../core/services/teacher.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { User, TeacherProfile, TeacherSubject } from '../../core/models/shared.models';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-manage-profile',
@@ -21,7 +22,6 @@ export class ManageProfileComponent implements OnInit {
 
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
-  privacyForm!: FormGroup;
 
   currentUser: User | null = null;
   currentProfile: TeacherProfile | null = null;
@@ -32,6 +32,7 @@ export class ManageProfileComponent implements OnInit {
 
   showDeleteModal = false;
   deleteConfirmEmail = '';
+  deactivatePassword = '';
 
   // Subject Management
   showSubjectModal = false;
@@ -43,11 +44,7 @@ export class ManageProfileComponent implements OnInit {
     classTypes: ['PERSONAL_1_1'] // Using defaults
   };
   
-  availableGrades = [
-    'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 
-    'Grade 10', 'Grade 11', 
-    'Grade 12', 'Grade 13'
-  ];
+  availableGrades = ['Year 7 (KS3)', 'Year 8 (KS3)', 'Year 9 (KS3)', 'Year 10 (GCSE)', 'Year 11 (GCSE)', 'Year 12 (A-Level)', 'Year 13 (A-Level)', '11+ Prep', 'Primary (KS1/KS2)', 'University'];
   selectedGrades: string[] = [];
 
   subjectOptionsList = [
@@ -82,11 +79,6 @@ export class ManageProfileComponent implements OnInit {
       confirmPassword: ['', Validators.required]
     });
 
-    this.privacyForm = this.fb.group({
-      profilePublic: [true],
-      showAvailability: [true],
-      allowNotifications: [true]
-    });
   }
 
   private loadProfile(): void {
@@ -193,21 +185,19 @@ export class ManageProfileComponent implements OnInit {
   }
 
   changePassword(): void {
-    if (this.passwordForm.get('newPassword')?.value !== this.passwordForm.get('confirmPassword')?.value) {
-      this.notificationService.showError('Passwords do not match');
-      return;
-    }
-    // Implement real password change via AuthService if available
-    this.notificationService.showWarning('Password change not implemented in this demo');
-  }
-
-  savePrivacy(): void {
-     // Implement privacy settings update if backend supports it
-     this.notificationService.showSuccess('Privacy settings saved (Local)');
+    if (this.passwordForm.invalid) { this.passwordForm.markAllAsTouched(); return; }
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.getRawValue();
+    if (newPassword !== confirmPassword) { this.notificationService.showError('Passwords do not match.'); return; }
+    this.isSaving = true;
+    this.authService.changePassword(currentPassword, newPassword).pipe(finalize(() => this.isSaving = false)).subscribe({
+      next: () => { this.passwordForm.reset(); this.notificationService.showSuccess('Password changed successfully.'); },
+      error: error => this.notificationService.showError(error?.error?.message || 'Could not change password. Check your current password and try again.')
+    });
   }
 
   openDeleteModal(): void {
     this.deleteConfirmEmail = '';
+    this.deactivatePassword = '';
     this.showDeleteModal = true;
   }
 
@@ -216,10 +206,16 @@ export class ManageProfileComponent implements OnInit {
   }
 
   confirmDelete(): void {
-    if (this.deleteConfirmEmail === this.currentUser?.email) {
-      this.notificationService.showSuccess('Account deleted');
-      this.authService.logout();
-    }
+    if (this.deleteConfirmEmail !== this.currentUser?.email || !this.deactivatePassword) return;
+    this.isSaving = true;
+    this.authService.deactivateAccount(this.deactivatePassword).pipe(finalize(() => this.isSaving = false)).subscribe({
+      next: () => {
+        this.showDeleteModal = false;
+        this.notificationService.showSuccess('Your account is deactivated. Contact an administrator if you need it restored.');
+        this.authService.logout();
+      },
+      error: error => this.notificationService.showError(error?.error?.message || 'Account could not be deactivated. Check your password and try again.')
+    });
   }
 
   // Subject Management Methods

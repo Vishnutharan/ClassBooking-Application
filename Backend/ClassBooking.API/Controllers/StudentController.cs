@@ -201,24 +201,8 @@ namespace ClassBooking.API.Controllers
             }).ToList());
         }
 
-        [HttpGet("progress")]
-        public async Task<ActionResult<object>> GetProgress()
-        {
-            var userId = User.FindFirst("userId")?.Value ?? throw new UnauthorizedAccessException();
-            
-            var progress = await _studentService.GetProgressAsync(userId);
-            
-            // Calculate overall progress
-            var overall = progress.Any() ? (int)progress.Average(p => p.AverageScore) : 0;
-            
-            return Ok(new
-            {
-                OverallProgress = overall,
-                SubjectsProgress = progress.Select(p => new { Subject = p.Subject, Progress = p.AverageScore }).ToList()
-            });
-        }
-
         [HttpGet("summary")]
+        [HttpGet("summary-stats")]
         public async Task<ActionResult<object>> GetSummary()
         {
             var userId = User.FindFirst("userId")?.Value ?? throw new UnauthorizedAccessException();
@@ -228,13 +212,15 @@ namespace ClassBooking.API.Controllers
 
             var total = bookings.Count;
             var completed = bookings.Count(b => b.Status == "Completed");
-            var upcoming = bookings.Count(b => b.Status == "Confirmed" && b.Date >= DateTime.UtcNow.Date);
+            var upcoming = bookings.Count(b => (b.Status == "Confirmed" || b.Status == "Pending") && b.Date >= DateTime.UtcNow.Date);
 
             double hours = bookings
                 .Where(b => b.Status == "Completed")
                 .Sum(b => GetDurationHours(b.StartTime, b.EndTime));
 
-            var overall = progress.Any() ? (int)progress.Average(p => p.AverageScore) : 0;
+            var overall = progress.Any()
+                ? (int)progress.Average(p => p.AverageScore)
+                : 0;
 
             return Ok(new
             {
@@ -243,7 +229,7 @@ namespace ClassBooking.API.Controllers
                 completedClasses = completed,
                 studyHours = Math.Round(hours, 1),
                 progressPercentage = overall,
-                averageRating = 0 // Can be expanded once teacher->student ratings exist
+                averageRating = 0
             });
         }
 
@@ -335,6 +321,9 @@ namespace ClassBooking.API.Controllers
         [HttpPost("reviews")]
         public async Task<ActionResult> SubmitReview([FromBody] SubmitReviewRequest request)
         {
+            if (!User.IsInRole("Student")) return Forbid();
+            if (request.Rating is < 1 or > 5 || string.IsNullOrWhiteSpace(request.Comment))
+                return BadRequest(new { message = "A rating from 1 to 5 and a comment are required." });
             var userId = User.FindFirst("userId")?.Value ?? throw new UnauthorizedAccessException();
             var profile = await _studentRepository.GetByUserIdAsync(userId);
             
@@ -347,6 +336,10 @@ namespace ClassBooking.API.Controllers
                 (b.Status == "Confirmed" || b.Status == "Completed"));
             if (!hasBooking)
                 return StatusCode(StatusCodes.Status403Forbidden, new { message = "You can only review teachers you have booked." });
+
+            var priorReviews = await _studentService.GetStudentReviewsAsync(userId);
+            if (priorReviews.Any(r => r.TeacherProfileId == request.TeacherId))
+                return Conflict(new { message = "You have already reviewed this teacher." });
 
             var review = new Entities.ReviewEntity
             {
@@ -367,6 +360,9 @@ namespace ClassBooking.API.Controllers
         [HttpPut("reviews/{reviewId}")]
         public async Task<ActionResult> UpdateReview(string reviewId, [FromBody] UpdateReviewRequest request)
         {
+            if (!User.IsInRole("Student")) return Forbid();
+            if (request.Rating is < 1 or > 5 || string.IsNullOrWhiteSpace(request.Comment))
+                return BadRequest(new { message = "A rating from 1 to 5 and a comment are required." });
             var userId = User.FindFirst("userId")?.Value ?? throw new UnauthorizedAccessException();
             var profile = await _studentRepository.GetByUserIdAsync(userId);
             
@@ -425,6 +421,7 @@ namespace ClassBooking.API.Controllers
         }
 
         // Progress Report endpoint
+        [HttpGet("progress")]
         [HttpGet("progress-report")]
         public async Task<ActionResult<object>> GetProgressReport()
         {

@@ -41,7 +41,7 @@ namespace ClassBooking.API.Repositories
 
             query = query.Where(e =>
                 e.Audience == "All" ||
-                string.Equals(e.Audience, audience, StringComparison.OrdinalIgnoreCase));
+                e.Audience.ToLower() == audience.ToLower());
 
             if (from.HasValue)
                 query = query.Where(e => e.Date.Date >= from.Value.Date);

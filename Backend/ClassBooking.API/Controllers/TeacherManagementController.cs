@@ -19,6 +19,8 @@ namespace ClassBooking.API.Controllers
         private readonly ILessonPlanService _lessonPlanService;
         private readonly IAnalyticsService _analyticsService;
         private readonly IUserRepository _userRepository;
+        private readonly IStudentService _studentService;
+        private readonly IBookingService _bookingService;
         private readonly ILogger<TeacherManagementController> _logger;
 
         public TeacherManagementController(
@@ -30,6 +32,8 @@ namespace ClassBooking.API.Controllers
             ILessonPlanService lessonPlanService,
             IAnalyticsService analyticsService,
             IUserRepository userRepository,
+            IStudentService studentService,
+            IBookingService bookingService,
             ILogger<TeacherManagementController> logger)
         {
             _teacherService = teacherService;
@@ -40,6 +44,8 @@ namespace ClassBooking.API.Controllers
             _lessonPlanService = lessonPlanService;
             _analyticsService = analyticsService;
             _userRepository = userRepository;
+            _studentService = studentService;
+            _bookingService = bookingService;
             _logger = logger;
         }
 
@@ -152,6 +158,11 @@ namespace ClassBooking.API.Controllers
         [HttpDelete("profile/subjects/{subjectId}")]
         public async Task<ActionResult> RemoveSubject(string subjectId)
         {
+            var userId = User.FindFirst("userId")?.Value;
+            var teacher = userId == null ? null : await EnsureTeacherProfile(userId);
+            if (teacher == null) return Unauthorized();
+            if (!(await _teacherRepository.GetTeacherSubjectsAsync(teacher.Id)).Any(s => s.Id == subjectId))
+                return NotFound("Subject not found");
             var result = await _teacherService.RemoveSubjectAsync(subjectId);
             if (!result)
                 return NotFound("Subject not found");
@@ -201,8 +212,13 @@ namespace ClassBooking.API.Controllers
             if (teacher == null)
                 return NotFound("Teacher profile not found");
 
-            if (request.Date.Date < DateTime.UtcNow.Date)
-                return BadRequest("Cannot add slots in the past");
+            if (!TimeOnly.TryParse(request.StartTime, out var start) || !TimeOnly.TryParse(request.EndTime, out var end) || end <= start || request.Date.Date.Add(start.ToTimeSpan()) <= DateTime.UtcNow)
+                return BadRequest(new { message = "Choose a future date and an end time after the start time." });
+            request.StartTime = start.ToString("HH:mm");
+            request.EndTime = end.ToString("HH:mm");
+            var slots = await _teacherService.GetAvailabilitySlotsAsync(teacher.Id, request.Date.Date, request.Date.Date);
+            if (slots.Any(s => TimeOnly.Parse(s.StartTime) < end && start < TimeOnly.Parse(s.EndTime)))
+                return Conflict(new { message = "This time overlaps an existing slot." });
 
             var existing = await _teacherService.FindAvailabilitySlotAsync(teacher.Id, request.Date, request.StartTime, request.EndTime);
             if (existing != null)
@@ -252,13 +268,17 @@ namespace ClassBooking.API.Controllers
         [HttpGet("students/{studentId}/progress")]
         public async Task<ActionResult> GetStudentProgress(string studentId)
         {
-            // Mock for now - would integrate with actual progress tracking system
-            return Ok(new
-            {
-                studentId,
-                overallPerformance = "Good",
-                subjects = new[] { new { name = "Math", score = 85 } }
-            });
+            if (!User.IsInRole("Teacher")) return Forbid();
+            var userId = User.FindFirst("userId")?.Value;
+            var teacher = userId == null ? null : await _teacherService.GetTeacherByUserIdAsync(userId);
+            if (teacher == null) return NotFound("Teacher profile not found");
+            var bookings = await _bookingService.GetBookingsForTeacherAsync(teacher.Id);
+            var student = await _userRepository.GetByIdAsync(studentId);
+            if (student == null || !bookings.Any(b => b.StudentId == student.Id && (b.Status == "Confirmed" || b.Status == "Completed")))
+                return NotFound("No active student relationship found");
+            var progress = await _studentService.GetProgressAsync(student.Id);
+            return Ok(new { studentId, overallProgress = progress.Count > 0 ? progress.Average(p => p.AverageScore) : 0,
+                subjects = progress.Select(p => new { name = p.Subject, score = p.AverageScore, totalClasses = p.TotalClasses, studyHours = p.StudyHours }) });
         }
 
         // Attendance
@@ -287,6 +307,12 @@ namespace ClassBooking.API.Controllers
             var teacher = await EnsureTeacherProfile(userId);
             if (teacher == null)
                 return NotFound("Teacher profile not found");
+
+            var bookings = await _bookingService.GetBookingsForTeacherAsync(teacher.Id);
+            var allowedStatuses = new[] { "Present", "Absent", "Late", "Excused" };
+            if (records.Count == 0 || records.Any(r => !allowedStatuses.Contains(r.Status) || r.ClassDate.Date > DateTime.UtcNow.Date ||
+                !bookings.Any(b => b.Id == r.ClassId && b.StudentId == r.StudentId && b.Date.Date == r.ClassDate.Date && b.Status == "Completed")))
+                return BadRequest(new { message = "Attendance must reference a completed class for this teacher and use a valid status." });
 
             var entities = records.Select(r => new Entities.AttendanceRecordEntity
             {
@@ -378,6 +404,11 @@ namespace ClassBooking.API.Controllers
         [HttpDelete("lesson-plans/{id}")]
         public async Task<ActionResult> DeleteLessonPlan(string id)
         {
+            var userId = User.FindFirst("userId")?.Value ?? User.FindFirst("sub")?.Value;
+            var teacher = userId == null ? null : await _teacherService.GetTeacherByUserIdAsync(userId);
+            var plan = await _lessonPlanService.GetByIdAsync(id);
+            if (teacher == null || plan == null || plan.TeacherProfileId != teacher.Id)
+                return NotFound("Lesson plan not found");
             var result = await _lessonPlanService.DeleteAsync(id);
             if (!result)
                 return NotFound("Lesson plan not found");
@@ -464,6 +495,24 @@ namespace ClassBooking.API.Controllers
 
             var message = await _messageService.SendMessageAsync(request.ConversationId, userId, userName, request.Content);
             return Ok(message);
+        }
+
+        [HttpGet("communication/conversations/{conversationId}/messages")]
+        public async Task<ActionResult> GetMessages(string conversationId)
+        {
+            var userId = User.FindFirst("userId")?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            try { return Ok(await _messageService.GetMessagesAsync(conversationId, userId)); }
+            catch (UnauthorizedAccessException) { return NotFound(); }
+        }
+
+        [HttpPost("communication/conversations/{conversationId}/read")]
+        public async Task<IActionResult> MarkConversationRead(string conversationId)
+        {
+            var userId = User.FindFirst("userId")?.Value ?? User.FindFirst("sub")?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+            try { await _messageService.MarkAsReadAsync(conversationId, userId); return NoContent(); }
+            catch (UnauthorizedAccessException) { return NotFound(); }
         }
 
         [HttpPost("communication/announcements")]

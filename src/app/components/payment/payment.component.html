@@ -31,31 +31,10 @@
       </div>
 
       <div *ngIf="paymentMethod === 'Card'" class="form-grid">
-        <label>
-          <span>Cardholder name</span>
-          <input type="text" [(ngModel)]="cardDetails.cardholderName" placeholder="As displayed on card">
-        </label>
-        <label>
-          <span>Card number</span>
-          <input type="text" [(ngModel)]="cardDetails.cardNumber" placeholder="1234 5678 9012 3456">
-        </label>
-        <div class="inline">
-          <label>
-            <span>Expiry month</span>
-            <input type="text" [(ngModel)]="cardDetails.expiryMonth" placeholder="MM">
-          </label>
-          <label>
-            <span>Expiry year</span>
-            <input type="text" [(ngModel)]="cardDetails.expiryYear" placeholder="YYYY">
-          </label>
-          <label>
-            <span>CVV</span>
-            <input type="password" [(ngModel)]="cardDetails.cvv" placeholder="***">
-          </label>
-        </div>
+        <p class="muted">Card payments open Stripe's secure test checkout. Card details are never collected or stored by ClassBooking.</p>
         <div class="actions">
           <button class="primary" [disabled]="isProcessing" (click)="submitPayment()">
-            {{ isProcessing ? 'Processing...' : 'Pay with Card' }}
+            {{ isProcessing ? 'Opening secure checkout...' : 'Continue to Stripe' }}
           </button>
         </div>
       </div>
@@ -101,7 +80,7 @@
       </ul>
       <div class="amount-due">
         <p>Amount due</p>
-        <h2>LKR {{ amount | number:'1.2-2' }}</h2>
+        <h2>£{{ amount | number:'1.2-2' }}</h2>
       </div>
       <div *ngIf="paymentResult" class="receipt">
         <p class="muted">Saved in system</p>

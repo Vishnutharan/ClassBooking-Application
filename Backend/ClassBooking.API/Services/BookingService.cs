@@ -2,6 +2,9 @@ using ClassBooking.API.Models;
 using ClassBooking.API.Entities;
 using ClassBooking.API.Repositories;
 using System.Text.Json;
+using System.Data;
+using ClassBooking.API.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClassBooking.API.Services
 {
@@ -23,6 +26,7 @@ namespace ClassBooking.API.Services
 
     public class BookingService : IBookingService
     {
+        private readonly ClassBookingDbContext _context;
         private readonly IBookingRepository _bookingRepository;
         private readonly ITeacherRepository _teacherRepository;
         private readonly INotificationRepository _notificationRepository;
@@ -36,8 +40,10 @@ namespace ClassBooking.API.Services
             INotificationRepository notificationRepository,
             IEmailService emailService,
             IUserRepository userRepository,
-            IStudentRepository studentRepository)
+            IStudentRepository studentRepository,
+            ClassBookingDbContext context)
         {
+            _context = context;
             _bookingRepository = bookingRepository;
             _teacherRepository = teacherRepository;
             _notificationRepository = notificationRepository;
@@ -54,7 +60,7 @@ namespace ClassBooking.API.Services
             foreach (var booking in bookings)
             {
                 var dto = MapToDto(booking);
-                var teacher = await _userRepository.GetByIdAsync(booking.TeacherId);
+                var teacher = await GetTeacherUser(booking.TeacherId);
                 var student = await _userRepository.GetByIdAsync(booking.StudentId);
                 dto.TeacherName = teacher?.FullName ?? "Unknown";
                 dto.StudentName = student?.FullName ?? "Unknown";
@@ -72,7 +78,7 @@ namespace ClassBooking.API.Services
             {
                 var dto = MapToDto(booking);
                 var student = await _userRepository.GetByIdAsync(booking.StudentId);
-                var teacher = await _userRepository.GetByIdAsync(booking.TeacherId);
+                var teacher = await GetTeacherUser(booking.TeacherId);
                 dto.StudentName = student?.FullName ?? "Unknown";
                 dto.TeacherName = teacher?.FullName ?? "Unknown";
                 dtos.Add(dto);
@@ -87,7 +93,7 @@ namespace ClassBooking.API.Services
 
             var dto = MapToDto(booking);
             var student = await _userRepository.GetByIdAsync(booking.StudentId);
-            var teacher = await _userRepository.GetByIdAsync(booking.TeacherId);
+            var teacher = await GetTeacherUser(booking.TeacherId);
             dto.StudentName = student?.FullName ?? "Unknown";
             dto.TeacherName = teacher?.FullName ?? "Unknown";
             
@@ -103,7 +109,7 @@ namespace ClassBooking.API.Services
             {
                 var dto = MapToDto(booking);
                 var student = await _userRepository.GetByIdAsync(booking.StudentId);
-                var teacher = await _userRepository.GetByIdAsync(booking.TeacherId);
+                var teacher = await GetTeacherUser(booking.TeacherId);
                 dto.StudentName = student?.FullName ?? "Unknown";
                 dto.TeacherName = teacher?.FullName ?? "Unknown";
                 dtos.Add(dto);
@@ -111,10 +117,15 @@ namespace ClassBooking.API.Services
             return dtos;
         }
 
-        public async Task<BookingResponse> CreateBookingAsync(string studentId, BookingRequest request)
+        public Task<BookingResponse> CreateBookingAsync(string studentId, BookingRequest request) =>
+            InTransaction(() => CreateBookingCoreAsync(studentId, request));
+
+        private async Task<BookingResponse> CreateBookingCoreAsync(string studentId, BookingRequest request)
         {
+            if (!ValidTime(request.Date, request.StartTime, request.EndTime) || string.IsNullOrWhiteSpace(request.Subject) || (request.Mode != "ONLINE" && request.Mode != "IN_PERSON"))
+                return new BookingResponse { Success = false, Status = "Invalid", Message = "Choose a future date, valid start/end times, subject and teaching mode." };
             var teacherProfile = await _teacherRepository.GetByIdAsync(request.TeacherId);
-            if (teacherProfile == null)
+            if (teacherProfile == null || !teacherProfile.IsAvailable)
             {
                 return new BookingResponse
                 {
@@ -124,9 +135,20 @@ namespace ClassBooking.API.Services
                 };
             }
 
-            // Ensure the exact slot is present and not locked
+            // Ensure the exact slot is present or auto-create it if free
             var slot = await _teacherRepository.GetAvailabilitySlotAsync(request.TeacherId, request.Date, request.StartTime, request.EndTime);
-            if (slot == null || !string.Equals(slot.Status, "Available", StringComparison.OrdinalIgnoreCase))
+            if (slot == null)
+            {
+                slot = await _teacherRepository.AddAvailabilitySlotAsync(new TeacherAvailabilitySlotEntity
+                {
+                    TeacherProfileId = request.TeacherId,
+                    Date = request.Date.Date,
+                    StartTime = request.StartTime,
+                    EndTime = request.EndTime,
+                    Status = "Available"
+                });
+            }
+            else if (!string.Equals(slot.Status, "Available", StringComparison.OrdinalIgnoreCase))
             {
                 return new BookingResponse
                 {
@@ -139,7 +161,7 @@ namespace ClassBooking.API.Services
             // Guard against overlapping bookings on the same slot for this teacher
             var conflicting = (await _bookingRepository.GetByTeacherIdAsync(request.TeacherId))
                 .Any(b => b.Date.Date == request.Date.Date &&
-                          b.StartTime == request.StartTime &&
+                          Overlaps(b.StartTime, b.EndTime, request.StartTime, request.EndTime) &&
                           (b.Status == "Pending" || b.Status == "Confirmed"));
             if (conflicting)
             {
@@ -151,6 +173,8 @@ namespace ClassBooking.API.Services
                 };
             }
 
+            if ((await _bookingRepository.GetByStudentIdAsync(studentId)).Any(b => b.Date.Date == request.Date.Date && (b.Status == "Pending" || b.Status == "Confirmed") && Overlaps(b.StartTime, b.EndTime, request.StartTime, request.EndTime)))
+                return new BookingResponse { Success = false, Status = "Unavailable", Message = "You already have a class at this time." };
             var student = await _userRepository.GetByIdAsync(studentId);
             
             // --- Update Student Profile with new details ---
@@ -210,7 +234,7 @@ namespace ClassBooking.API.Services
                 Price = price,
                 Status = "Pending",
                 ClassType = request.ClassType,
-                BookingGradeLevel = request.BookingGradeLevel,
+                BookingGradeLevel = request.BookingGradeLevel ?? (await _studentRepository.GetByUserIdAsync(studentId))?.GradeLevel ?? "OLevel",
                 Notes = request.Notes,
                 Mode = request.Mode,
                 LocationOrLink = request.Mode == "ONLINE"
@@ -226,7 +250,7 @@ namespace ClassBooking.API.Services
             // Create notification for teacher
             await _notificationRepository.CreateAsync(new NotificationEntity
             {
-                UserId = request.TeacherId,
+                UserId = teacherProfile.UserId,
                 Type = "NewBooking",
                 Title = "New Booking Request",
                 Message = $"New booking request from {student?.FullName ?? "Student"} for {request.Subject} on {request.Date:yyyy-MM-dd} at {request.StartTime}",
@@ -235,7 +259,7 @@ namespace ClassBooking.API.Services
             });
 
             // Send Email to Teacher
-            var teacher = await _userRepository.GetByIdAsync(request.TeacherId);
+            var teacher = await GetTeacherUser(request.TeacherId);
             if (teacher != null)
             {
                 await _emailService.SendEmailAsync(teacher.Email, "New Booking Request", 
@@ -251,12 +275,16 @@ namespace ClassBooking.API.Services
             };
         }
 
-        public async Task<BookingResponse> UpdateBookingAsync(string id, BookingRequest request)
+        public Task<BookingResponse> UpdateBookingAsync(string id, BookingRequest request) =>
+            InTransaction(() => UpdateBookingCoreAsync(id, request));
+
+        private async Task<BookingResponse> UpdateBookingCoreAsync(string id, BookingRequest request)
         {
             var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null)
                 return new BookingResponse { Id = id, Status = "Error", Message = "Booking not found", Success = false };
-
+            if (booking.Status != "Pending" && booking.Status != "Confirmed")
+                return new BookingResponse { Id = id, Status = booking.Status, Success = false, Message = "This action is not allowed for the current booking status." };
             // Changing date/time should go through reschedule to manage slot locks
             if (booking.Date.Date != request.Date.Date || booking.StartTime != request.StartTime || booking.EndTime != request.EndTime)
             {
@@ -280,11 +308,17 @@ namespace ClassBooking.API.Services
             };
         }
 
-        public async Task<BookingResponse> ConfirmBookingAsync(string id)
+        public Task<BookingResponse> ConfirmBookingAsync(string id) =>
+            InTransaction(() => ConfirmBookingCoreAsync(id));
+
+        private async Task<BookingResponse> ConfirmBookingCoreAsync(string id)
         {
             var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null)
                 return new BookingResponse { Id = id, Status = "Error", Message = "Booking not found", Success = false };
+            if (booking.Status != "Pending")
+                return new BookingResponse { Id = id, Status = booking.Status, Success = false, Message = "This action is not allowed for the current booking status." };
+
 
             booking.Status = "Confirmed";
             await _bookingRepository.UpdateAsync(booking);
@@ -323,11 +357,19 @@ namespace ClassBooking.API.Services
             };
         }
 
-        public async Task<BookingResponse> CancelBookingAsync(string id, string? reason)
+        public Task<BookingResponse> CancelBookingAsync(string id, string? reason) =>
+            InTransaction(() => CancelBookingCoreAsync(id, reason));
+
+        private async Task<BookingResponse> CancelBookingCoreAsync(string id, string? reason)
         {
             var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null)
                 return new BookingResponse { Id = id, Status = "Error", Message = "Booking not found", Success = false };
+            if (booking.Status != "Pending" && booking.Status != "Confirmed")
+                return new BookingResponse { Id = id, Status = booking.Status, Success = false, Message = "This action is not allowed for the current booking status." };
+            if (booking.PaymentStatus == "Paid")
+                return new BookingResponse { Id = id, Status = booking.Status, Success = false, Message = "This booking has a recorded payment. Contact support to arrange a refund before cancelling." };
+
 
             booking.Status = "Cancelled";
             booking.CancellationReason = reason;
@@ -355,7 +397,7 @@ namespace ClassBooking.API.Services
             }
 
             // Send Email to Teacher (if cancelled by student) - Logic could be refined based on who cancelled
-            var teacher = await _userRepository.GetByIdAsync(booking.TeacherId);
+            var teacher = await GetTeacherUser(booking.TeacherId);
             if (teacher != null)
             {
                 await _emailService.SendEmailAsync(teacher.Email, "Booking Cancelled", 
@@ -371,11 +413,17 @@ namespace ClassBooking.API.Services
             };
         }
 
-        public async Task<BookingResponse> RejectBookingAsync(string id, string? reason)
+        public Task<BookingResponse> RejectBookingAsync(string id, string? reason) =>
+            InTransaction(() => RejectBookingCoreAsync(id, reason));
+
+        private async Task<BookingResponse> RejectBookingCoreAsync(string id, string? reason)
         {
             var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null)
                 return new BookingResponse { Id = id, Status = "Error", Message = "Booking not found", Success = false };
+            if (booking.Status != "Pending")
+                return new BookingResponse { Id = id, Status = booking.Status, Success = false, Message = "This action is not allowed for the current booking status." };
+
 
             booking.Status = "Rejected";
             booking.CancellationReason = reason;
@@ -408,12 +456,20 @@ namespace ClassBooking.API.Services
             };
         }
 
-        public async Task<BookingResponse> CompleteBookingAsync(string id)
+        public Task<BookingResponse> CompleteBookingAsync(string id) =>
+            InTransaction(() => CompleteBookingCoreAsync(id));
+
+        private async Task<BookingResponse> CompleteBookingCoreAsync(string id)
         {
             var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null)
                 return new BookingResponse { Id = id, Status = "Error", Message = "Booking not found", Success = false };
+            if (booking.Status != "Confirmed")
+                return new BookingResponse { Id = id, Status = booking.Status, Success = false, Message = "This action is not allowed for the current booking status." };
 
+
+            if (booking.Date.Date.Add(TimeSpan.Parse(booking.EndTime)) > DateTime.UtcNow)
+                return new BookingResponse { Id = id, Success = false, Status = booking.Status, Message = "A class can only be completed after its end time." };
             booking.Status = "Completed";
             await _bookingRepository.UpdateAsync(booking);
 
@@ -437,12 +493,24 @@ namespace ClassBooking.API.Services
                 .ToList();
         }
 
-        public async Task<BookingResponse> RescheduleBookingAsync(string id, DateTime newDate, string newStartTime, string newEndTime)
+        public Task<BookingResponse> RescheduleBookingAsync(string id, DateTime newDate, string newStartTime, string newEndTime) =>
+            InTransaction(() => RescheduleBookingCoreAsync(id, newDate, newStartTime, newEndTime));
+
+        private async Task<BookingResponse> RescheduleBookingCoreAsync(string id, DateTime newDate, string newStartTime, string newEndTime)
         {
             var booking = await _bookingRepository.GetByIdAsync(id);
             if (booking == null)
                 return new BookingResponse { Id = id, Status = "Error", Message = "Booking not found", Success = false };
+            if (booking.Status != "Pending" && booking.Status != "Confirmed")
+                return new BookingResponse { Id = id, Status = booking.Status, Success = false, Message = "This action is not allowed for the current booking status." };
+            if (booking.PaymentStatus == "Paid")
+                return new BookingResponse { Id = id, Status = booking.Status, Success = false, Message = "This paid booking cannot be rescheduled online. Contact support first." };
 
+
+            if (!ValidTime(newDate, newStartTime, newEndTime))
+                return new BookingResponse { Id = id, Success = false, Status = "Invalid", Message = "Choose a future date and valid times." };
+            if (CalculateDurationInMinutes(newStartTime, newEndTime) != booking.DurationMinutes)
+                return new BookingResponse { Id = id, Success = false, Status = "Invalid", Message = "Rescheduling must preserve the booked duration and price." };
             var targetSlot = await _teacherRepository.GetAvailabilitySlotAsync(booking.TeacherId, newDate, newStartTime, newEndTime);
             if (targetSlot == null || !string.Equals(targetSlot.Status, "Available", StringComparison.OrdinalIgnoreCase))
             {
@@ -452,13 +520,15 @@ namespace ClassBooking.API.Services
             var conflicts = (await _bookingRepository.GetByTeacherIdAsync(booking.TeacherId))
                 .Any(b => b.Id != id &&
                           b.Date.Date == newDate.Date &&
-                          b.StartTime == newStartTime &&
+                          Overlaps(b.StartTime, b.EndTime, newStartTime, newEndTime) &&
                           (b.Status == "Pending" || b.Status == "Confirmed"));
             if (conflicts)
             {
                 return new BookingResponse { Id = id, Status = "Unavailable", Message = "Another student already requested this time", Success = false };
             }
 
+            if ((await _bookingRepository.GetByStudentIdAsync(booking.StudentId)).Any(b => b.Id != id && b.Date.Date == newDate.Date && (b.Status == "Pending" || b.Status == "Confirmed") && Overlaps(b.StartTime, b.EndTime, newStartTime, newEndTime)))
+                return new BookingResponse { Id = id, Success = false, Status = "Unavailable", Message = "You already have a class at this time." };
             // Release existing slot lock if any
             var existingSlot = await _teacherRepository.GetAvailabilitySlotByBookingAsync(id);
             if (existingSlot != null)
@@ -486,7 +556,7 @@ namespace ClassBooking.API.Services
 
             await _notificationRepository.CreateAsync(new NotificationEntity
             {
-                UserId = booking.TeacherId,
+                UserId = (await GetTeacherUser(booking.TeacherId))!.Id,
                 Type = "BookingRescheduled",
                 Title = "Booking Reschedule Request",
                 Message = $"Student requested to move {booking.Subject} to {newDate:yyyy-MM-dd} at {newStartTime}",
@@ -510,6 +580,32 @@ namespace ClassBooking.API.Services
                 Message = "Booking rescheduled successfully and awaiting confirmation"
             };
         }
+
+        private async Task<BookingResponse> InTransaction(Func<Task<BookingResponse>> action)
+        {
+            return await _context.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+            {
+                _context.ChangeTracker.Clear();
+                await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+                var result = await action();
+                if (result.Success) await transaction.CommitAsync();
+                return result;
+            });
+        }
+
+        private async Task<User?> GetTeacherUser(string profileId)
+        {
+            var profile = await _teacherRepository.GetByIdAsync(profileId);
+            return await _userRepository.GetByIdAsync(profile?.UserId ?? profileId);
+        }
+
+        private static bool ValidTime(DateTime date, string startText, string endText) =>
+            TimeOnly.TryParse(startText, out var start) && TimeOnly.TryParse(endText, out var end) &&
+            end > start && date.Date.Add(start.ToTimeSpan()) > DateTime.UtcNow;
+
+        private static bool Overlaps(string startA, string endA, string startB, string endB) =>
+            TimeOnly.TryParse(startA, out var a) && TimeOnly.TryParse(endA, out var b) &&
+            TimeOnly.TryParse(startB, out var c) && TimeOnly.TryParse(endB, out var d) && a < d && c < b;
 
         private Models.ClassBooking MapToDto(BookingEntity entity)
         {

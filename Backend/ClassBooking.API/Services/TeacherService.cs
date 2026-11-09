@@ -147,6 +147,39 @@ namespace ClassBooking.API.Services
         public async Task<List<TeacherAvailabilitySlot>> GetAvailabilitySlotsAsync(string teacherProfileId, DateTime? startDate, DateTime? endDate)
         {
             var slots = await _repository.GetAvailabilitySlotsAsync(teacherProfileId, startDate, endDate);
+            if (slots.Count == 0 && !string.IsNullOrWhiteSpace(teacherProfileId))
+            {
+                var teacher = await _repository.GetTeacherByIdAsync(teacherProfileId);
+                if (teacher != null)
+                {
+                    var fromDate = (startDate ?? DateTime.UtcNow).Date;
+                    var toDate = (endDate ?? fromDate.AddDays(14)).Date;
+                    if ((toDate - fromDate).TotalDays > 31) toDate = fromDate.AddDays(31);
+                    var defaultTimes = new (string Start, string End)[]
+                    {
+                        ("09:00", "10:00"),
+                        ("11:00", "12:00"),
+                        ("14:00", "15:00"),
+                        ("16:00", "17:00"),
+                        ("18:00", "19:00")
+                    };
+                    for (var day = fromDate; day <= toDate; day = day.AddDays(1))
+                    {
+                        foreach (var (s, e) in defaultTimes)
+                        {
+                            var created = await _repository.AddAvailabilitySlotAsync(new TeacherAvailabilitySlotEntity
+                            {
+                                TeacherProfileId = teacherProfileId,
+                                Date = day,
+                                StartTime = s,
+                                EndTime = e,
+                                Status = "Available"
+                            });
+                            slots.Add(created);
+                        }
+                    }
+                }
+            }
             return slots.Select(MapToSlotDto).ToList();
         }
 

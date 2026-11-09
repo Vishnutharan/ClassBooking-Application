@@ -268,3 +268,18 @@
     padding: 28px 22px 34px;
   }
 }
+/* Soft botanical sign-in theme. */
+.auth-shell { background:#f5f7ef; color:#203e35; }
+.auth-card { border:1px solid #dfe7dc; border-radius:24px; box-shadow:0 24px 70px #234c3510; }
+.auth-side { background:#e5eed8; }
+.side-content { color:#234e38; }
+.side-content h2 { font-family:Georgia,serif; font-size:36px; font-weight:400; letter-spacing:-1px; }
+.side-content p { line-height:1.8; }
+.side-btn { border-color:#8ba77a; color:#234e38; background:#f6faef; }
+.side-btn:hover { background:#fff; }
+.auth-header h1 { color:#203e35; letter-spacing:-1px; }
+.form-group input,.role-select,.toggle-password { background:#f8faf5; border-color:#dfe7dc; color:#203e35; }
+.form-group input:focus,.role-select:focus { border-color:#387d5b; box-shadow:0 0 0 4px #e8f1e1; }
+.submit-btn { background:#176b50; height:48px; }
+.forgot-password a { color:#176b50; }
+.toggle-password:hover { background:#eaf2e3; }

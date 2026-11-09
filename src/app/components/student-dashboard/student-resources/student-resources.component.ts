@@ -7,47 +7,194 @@ import { ResourceService, Resource } from '../../../core/services/resource.servi
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-      <h2 class="text-2xl font-bold mb-6 gradient-text">My Resources</h2>
-      
-      <div *ngIf="loading" class="text-center py-4 text-gray-500">Loading resources...</div>
-      
-      <div *ngIf="!loading && resources.length === 0" class="text-center py-8 bg-gray-50 rounded-lg">
-        <p class="text-gray-500">No resources assigned to you yet.</p>
-      </div>
+    <div class="resources-page">
+      <div class="resources-shell">
+        <header class="resources-hero">
+          <div>
+            <span class="eyebrow">🇬🇧 UK Tuition Library</span>
+            <h1>My Study Resources & Revision Packs</h1>
+            <p>Download teacher-uploaded GCSE & A-Level revision notes, worked solutions, and formula sheets.</p>
+          </div>
+          <div class="stat-pill">
+            <strong>{{ resources.length }}</strong>
+            <span>Available Files</span>
+          </div>
+        </header>
 
-      <div *ngIf="resources.length > 0" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <div *ngFor="let resource of resources" class="border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-shadow duration-300 bg-white group">
-          <div class="flex items-start justify-between">
-            <div class="p-2 rounded-lg" [ngClass]="getIconBackground(resource.type)">
-               <span class="text-2xl">{{ getIcon(resource.type) }}</span>
+        <div *ngIf="loading" class="empty-box">Loading UK study resources...</div>
+
+        <div *ngIf="!loading && resources.length === 0" class="empty-box">
+          <div class="empty-icon">📂</div>
+          <h3>No study resources assigned to you yet</h3>
+          <p>Resources uploaded by your UK tutors will appear here automatically.</p>
+        </div>
+
+        <div *ngIf="!loading && resources.length > 0" class="resources-grid">
+          <article *ngFor="let resource of resources" class="resource-card">
+            <div class="card-top">
+              <div class="type-icon">{{ getIcon(resource.type) }}</div>
+              <span class="subj-badge">{{ resource.subject }}</span>
             </div>
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{{ resource.subject }}</span>
-          </div>
-          
-          <h3 class="font-bold text-lg mt-3 mb-1 text-gray-800 group-hover:text-blue-600 transition-colors">{{ resource.title }}</h3>
-          <p class="text-sm text-gray-500 line-clamp-2 mb-3">{{ resource.description || 'No description' }}</p>
-          
-          <div class="flex items-center justify-between mt-auto pt-3 border-t border-gray-100">
-             <span class="text-xs text-gray-400">{{ resource.uploadedAt | date:'mediumDate' }}</span>
-             <a [href]="resource.filePath" target="_blank" class="download-btn flex items-center text-sm">
-                Download
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-             </a>
-          </div>
+
+            <div class="card-body">
+              <h3>{{ resource.title }}</h3>
+              <p>{{ resource.description || 'Structured UK curriculum revision material and practice exercises.' }}</p>
+            </div>
+
+            <div class="card-footer">
+              <span class="date-label">{{ resource.uploadedAt | date:'dd MMM yyyy' }}</span>
+              <a [href]="resource.filePath" target="_blank" rel="noopener" class="download-btn">
+                ↓ Download
+              </a>
+            </div>
+          </article>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .gradient-text {
-        @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600;
+    :host { display: block; }
+    .resources-page {
+      min-height: calc(100vh - 64px);
+      background: #f1f5f9;
+      padding: 1.5rem;
+    }
+    .resources-shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .resources-hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4f46e5 100%);
+      border-radius: 20px;
+      padding: 1.65rem 2rem;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.22rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      color: #e0e7ff;
+      margin-bottom: 0.45rem;
+    }
+    .resources-hero h1 {
+      color: #ffffff;
+      font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+      font-weight: 800;
+      margin: 0 0 0.25rem;
+    }
+    .resources-hero p {
+      color: #c7d2fe;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.75rem 1.25rem;
+      border-radius: 14px;
+      text-align: center;
+    }
+    .stat-pill strong {
+      display: block;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .stat-pill span {
+      font-size: 0.74rem;
+      color: #c7d2fe;
+    }
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.15rem;
+    }
+    .resource-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .type-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #eef2ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+    }
+    .subj-badge {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 0.22rem 0.65rem;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4f46e5;
+    }
+    .card-body h3 {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 0.3rem;
+    }
+    .card-body p {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin: 0;
+    }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.85rem;
+      border-top: 1px solid #f1f5f9;
+    }
+    .date-label {
+      font-size: 0.76rem;
+      color: #94a3b8;
     }
     .download-btn {
-        @apply text-blue-600 hover:text-blue-800 font-medium transition-colors px-3 py-1 rounded hover:bg-blue-50;
+      padding: 0.45rem 0.9rem;
+      border-radius: 9px;
+      background: #4f46e5;
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
     }
+    .empty-box {
+      background: #ffffff;
+      border: 1px dashed #cbd5e1;
+      border-radius: 18px;
+      padding: 3rem 1.5rem;
+      text-align: center;
+    }
+    .empty-icon { font-size: 2rem; margin-bottom: 0.4rem; }
   `]
 })
 export class StudentResourcesComponent implements OnInit {
@@ -70,21 +217,12 @@ export class StudentResourcesComponent implements OnInit {
   }
 
   getIcon(type: string): string {
-    switch (type.toLowerCase()) {
+    switch ((type || '').toLowerCase()) {
       case 'pdf': return '📄';
       case 'image': return '🖼️';
       case 'video': return '🎥';
       case 'quiz': return '📝';
       default: return '📁';
-    }
-  }
-
-  getIconBackground(type: string): string {
-     switch (type.toLowerCase()) {
-      case 'pdf': return 'bg-red-50 text-red-500';
-      case 'image': return 'bg-blue-50 text-blue-500';
-      case 'video': return 'bg-purple-50 text-purple-500';
-      default: return 'bg-gray-50 text-gray-500';
     }
   }
 }

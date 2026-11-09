@@ -26,9 +26,9 @@ export class EducationalContentComponent implements OnInit {
   searchTerm = '';
   bookmarkedContents: Set<string> = new Set();
 
-  subjects = ['Mathematics', 'Science', 'English', 'Sinhala', 'History', 'Geography'];
+  subjects = ['Mathematics', 'Further Maths', 'Physics', 'Chemistry', 'Biology', 'English Literature', 'History', 'Geography', 'Economics', 'Computer Science'];
   levels = ['Primary', 'OLevel', 'ALevel'];
-  mediums = ['Sinhala', 'Tamil', 'English'];
+  mediums = ['English', 'Bilingual', 'French', 'Spanish'];
 
   ngOnInit(): void {
     this.loadContents();

@@ -41,31 +41,31 @@ namespace ClassBooking.API.Middleware
                 {
                     statusCode = (int)HttpStatusCode.Unauthorized,
                     message = "Unauthorized access",
-                    details = exception.Message
+                    details = "The request could not be completed."
                 },
                 KeyNotFoundException => new
                 {
                     statusCode = (int)HttpStatusCode.NotFound,
                     message = "Resource not found",
-                    details = exception.Message
+                    details = "The request could not be completed."
                 },
                 ArgumentException => new
                 {
                     statusCode = (int)HttpStatusCode.BadRequest,
                     message = "Invalid argument",
-                    details = exception.Message
+                    details = "The request could not be completed."
                 },
                 InvalidOperationException => new
                 {
                     statusCode = (int)HttpStatusCode.BadRequest,
                     message = "Invalid operation",
-                    details = exception.Message
+                    details = "The request could not be completed."
                 },
                 _ => new
                 {
                     statusCode = (int)HttpStatusCode.InternalServerError,
                     message = "An error occurred while processing your request",
-                    details = exception.Message
+                    details = "The server could not complete the request."
                 }
             };
 

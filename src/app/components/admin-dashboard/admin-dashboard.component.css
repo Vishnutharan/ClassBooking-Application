@@ -585,3 +585,30 @@
     flex-direction: column;
   }
 }
+
+/* Modern UK SaaS Workspace Palette (Unified Top Navbar Mode) */
+:host {
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --primary: #4f46e5;
+  --primary-soft: #eef2ff;
+  --accent: #0ea5e9;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --muted: #64748b;
+  --shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.06);
+}
+.workspace, .dashboard-shell {
+  background: var(--bg);
+  background-image: none;
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  grid-template-columns: 1fr !important;
+}
+.sidebar {
+  display: none !important;
+}
+.stat-card, .card, .panel {
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}

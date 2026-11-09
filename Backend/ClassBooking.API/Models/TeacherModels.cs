@@ -32,7 +32,7 @@ namespace ClassBooking.API.Models
     {
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public string Medium { get; set; } = "English"; // Sinhala, Tamil, English
+        public string Medium { get; set; } = "English"; // English, Bilingual, French, Spanish, German
         public string Level { get; set; } = "OLevel"; // Primary, OLevel, ALevel, Secondary, Advanced
         public string? CurriculumBoard { get; set; }
         public string Grades { get; set; } = string.Empty;

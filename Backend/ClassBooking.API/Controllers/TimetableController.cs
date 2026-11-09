@@ -21,7 +21,9 @@ namespace ClassBooking.API.Controllers
         public async Task<IActionResult> GetTimetable([FromQuery] DateTime? from = null, [FromQuery] DateTime? to = null)
         {
             // Show all events to all authenticated users (teachers/students/admins)
-            var events = await _timetableService.GetEventsAsync(from, to);
+            var events = User.IsInRole("Admin")
+                ? await _timetableService.GetEventsAsync(from, to)
+                : await _timetableService.GetEventsForAudienceAsync(User.IsInRole("Teacher") ? "Teachers" : "Students", from, to);
             return Ok(events);
         }
     }

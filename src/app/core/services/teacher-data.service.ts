@@ -28,6 +28,7 @@ import {
 
 import {
     TeacherMessage,
+    ConversationMessage,
     Conversation,
     Announcement
 } from '../models/teacher-communication.models';
@@ -152,8 +153,16 @@ export class TeacherDataService {
         return this.http.get<Announcement[]>(`${this.apiUrl}/communication/announcements`);
     }
 
-    sendMessage(message: TeacherMessage): Observable<boolean> {
-        return this.http.post<boolean>(`${this.apiUrl}/communication/messages`, message);
+    sendMessage(conversationId: string, content: string): Observable<ConversationMessage> {
+        return this.http.post<ConversationMessage>(`${this.apiUrl}/communication/messages`, { conversationId, content });
+    }
+
+    getMessages(conversationId: string): Observable<ConversationMessage[]> {
+        return this.http.get<ConversationMessage[]>(`${this.apiUrl}/communication/conversations/${encodeURIComponent(conversationId)}/messages`);
+    }
+
+    markConversationRead(conversationId: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/communication/conversations/${encodeURIComponent(conversationId)}/read`, {});
     }
 
     createAnnouncement(announcement: Announcement): Observable<Announcement> {

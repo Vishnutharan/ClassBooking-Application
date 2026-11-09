@@ -16,6 +16,8 @@ namespace ClassBooking.API.Services
     {
         Task<AuthResponse> RegisterAsync(RegisterRequest request);
         Task<AuthResponse> LoginAsync(LoginRequest request);
+        Task ChangePasswordAsync(string userId, ChangePasswordRequest request);
+        Task DeactivateAccountAsync(string userId, string currentPassword);
     }
 
     public class AuthService : IAuthService
@@ -41,8 +43,28 @@ namespace ClassBooking.API.Services
             _context = context;
         }
 
+        public async Task ChangePasswordAsync(string userId, ChangePasswordRequest request)
+        {
+            var user = await _userRepository.GetByIdAsync(userId) ?? throw new UnauthorizedAccessException("Account not found.");
+            if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash)) throw new UnauthorizedAccessException("Current password is incorrect.");
+            if (BCrypt.Net.BCrypt.Verify(request.NewPassword, user.PasswordHash)) throw new ArgumentException("Choose a new password different from your current password.");
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            await _userRepository.UpdateUserAsync(user);
+        }
+
+        public async Task DeactivateAccountAsync(string userId, string currentPassword)
+        {
+            var user = await _userRepository.GetByIdAsync(userId) ?? throw new UnauthorizedAccessException("Account not found.");
+            if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash)) throw new UnauthorizedAccessException("Password is incorrect.");
+            if (!await _userRepository.UpdateUserStatusAsync(userId, "Inactive")) throw new ArgumentException("Account could not be deactivated.");
+        }
+
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
         {
+            if (request.Role != "Student" && request.Role != "Teacher")
+                throw new ArgumentException("Registration is available for students and teachers only.");
+            request.Email = request.Email.Trim().ToLowerInvariant();
+            request.FullName = request.FullName.Trim();
             var strategy = _context.Database.CreateExecutionStrategy();
             
             return await strategy.ExecuteAsync(async () =>
@@ -66,7 +88,8 @@ namespace ClassBooking.API.Services
                         Email = request.Email,
                         PasswordHash = passwordHash,
                         FullName = request.FullName,
-                        Role = request.Role
+                        Role = request.Role,
+                        PhoneNumber = request.PhoneNumber
                     };
 
                     string userId = await _userRepository.CreateUserAsync(newUser);
@@ -116,7 +139,7 @@ namespace ClassBooking.API.Services
                     return new AuthResponse
                     {
                         Token = token,
-                        RefreshToken = "dummy-refresh-token", // Implement real refresh token logic if needed
+                        RefreshToken = string.Empty,
                         User = MapToDto(newUser)
                     };
                 }
@@ -130,18 +153,20 @@ namespace ClassBooking.API.Services
 
         public async Task<AuthResponse> LoginAsync(LoginRequest request)
         {
-            var user = await _userRepository.GetByEmailAsync(request.Email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            var user = await _userRepository.GetByEmailAsync(request.Email.Trim().ToLowerInvariant());
+            if (user == null || user.Status != "Active" || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 throw new Exception("Invalid credentials.");
             }
 
+            user.LastLogin = DateTime.UtcNow;
+            await _userRepository.UpdateUserAsync(user);
             string token = GenerateJwtToken(user);
 
             return new AuthResponse
             {
                 Token = token,
-                RefreshToken = "dummy-refresh-token",
+                RefreshToken = string.Empty,
                 User = MapToDto(user)
             };
         }

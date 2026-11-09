@@ -191,3 +191,6 @@
         max-width: 260px;
       }
     }
+.nav-item.active { background:#eaf2e3; color:#245b3f; }
+.nav-item:hover { background:#f1f6ec; color:#245b3f; }
+.sidebar { border-color:#dfe7dc; }

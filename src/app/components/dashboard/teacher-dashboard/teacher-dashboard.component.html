@@ -1,0 +1,373 @@
+<div class="dashboard-layout">
+  <!-- Modern Left Sidebar -->
+  <aside class="dashboard-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">CB</div>
+      <div class="brand-info">
+        <span class="brand-name">ClassBooking <span class="uk-pill">UK</span></span>
+        <span class="brand-role">Educator Workspace</span>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="avatar">{{ userInitials }}</div>
+      <div class="profile-meta">
+        <strong>{{ userName }}</strong>
+        <span class="status-online">
+          <span class="dot"></span>
+          {{ teacherProfile?.verificationStatus || 'DBS Verified Tutor' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-label">Teaching Hub</p>
+      <nav class="sidebar-nav">
+        <a routerLink="/dashboard/teacher" class="nav-item active">
+          <span class="nav-icon">📊</span>
+          <span>Overview</span>
+        </a>
+        <a routerLink="/my-classes" class="nav-item">
+          <span class="nav-icon">🎓</span>
+          <span>My Classes</span>
+          <span class="nav-badge" *ngIf="pendingRequests.length > 0">{{ pendingRequests.length }}</span>
+        </a>
+        <a routerLink="/manage-schedule" class="nav-item">
+          <span class="nav-icon">🗓️</span>
+          <span>Manage Availability</span>
+        </a>
+        <a routerLink="/timetable" class="nav-item">
+          <span class="nav-icon">📅</span>
+          <span>Platform Timetable</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-label">Classroom & Students</p>
+      <nav class="sidebar-nav">
+        <a routerLink="/teacher/students" class="nav-item">
+          <span class="nav-icon">👥</span>
+          <span>My Students</span>
+        </a>
+        <a routerLink="/teacher/attendance" class="nav-item">
+          <span class="nav-icon">✅</span>
+          <span>Attendance Tracker</span>
+        </a>
+        <a routerLink="/teacher/lessons" class="nav-item">
+          <span class="nav-icon">📘</span>
+          <span>Lesson Planner</span>
+        </a>
+        <a routerLink="/resources-upload" class="nav-item">
+          <span class="nav-icon">📂</span>
+          <span>Study Resources</span>
+        </a>
+        <a routerLink="/teacher/analytics" class="nav-item">
+          <span class="nav-icon">💷</span>
+          <span>GBP Analytics</span>
+        </a>
+        <a routerLink="/teacher/messages" class="nav-item">
+          <span class="nav-icon">💬</span>
+          <span>Student Messages</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-label">Account</p>
+      <nav class="sidebar-nav">
+        <a routerLink="/manage-profile" class="nav-item">
+          <span class="nav-icon">⚙️</span>
+          <span>Tutor Profile & Rates</span>
+        </a>
+        <a routerLink="/reviews-ratings" class="nav-item">
+          <span class="nav-icon">⭐</span>
+          <span>Student Reviews</span>
+        </a>
+      </nav>
+    </div>
+
+    <button class="logout-btn" (click)="logout()">
+      <span>Sign Out</span>
+    </button>
+  </aside>
+
+  <!-- Main Workspace -->
+  <main class="dashboard-main">
+    <!-- Hero Banner -->
+    <header class="hero-card">
+      <div class="hero-copy">
+        <div class="hero-badge-row">
+          <span class="eyebrow-pill">{{ todayLabel }}</span>
+          <span class="curriculum-pill">🇬🇧 UK GCSE & A-Level Educator</span>
+        </div>
+        <h1>Welcome back, {{ userName }}!</h1>
+        <p class="subtitle">
+          Manage your 1-to-1 UK tuition schedule, review incoming student booking requests, upload GCSE/A-Level resources, and track GBP earnings.
+        </p>
+
+        <div class="hero-actions">
+          <button class="primary-btn" (click)="navigateTo('/manage-schedule')">
+            + Update Availability
+          </button>
+          <button class="secondary-btn" (click)="navigateTo('/my-classes')">
+            Manage Classes ({{ upcomingClasses.length }})
+          </button>
+          <button class="ghost-btn" (click)="navigateTo('/teacher/lessons')">
+            Lesson Planner
+          </button>
+          <button class="ghost-btn" (click)="navigateTo('/resources-upload')">
+            Upload Resources
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-progress-card">
+        <div class="progress-card-top">
+          <div>
+            <span class="progress-label">Hourly Tuition Rate</span>
+            <div class="progress-value">£{{ teacherProfile?.hourlyRate || 35 }}<small>/hr</small></div>
+          </div>
+          <span class="progress-badge">{{ teacherProfile?.verificationStatus || 'VERIFIED' }}</span>
+        </div>
+        <p class="progress-caption">
+          {{ teacherProfile?.qualification || 'PGCE & QTS Qualified UK Specialist' }}
+        </p>
+        <button class="progress-link-btn" (click)="navigateTo('/manage-profile')">
+          Edit Profile, Subjects & Rate →
+        </button>
+      </div>
+    </header>
+
+    <!-- 4 KPI Stat Cards -->
+    <section class="stats-grid" aria-label="Teacher summary">
+      <article class="stat-card" (click)="navigateTo('/teacher/students')">
+        <div class="stat-icon indigo">👥</div>
+        <div class="stat-body">
+          <span class="stat-label">Active Students</span>
+          <strong class="stat-value">{{ activeStudents }}</strong>
+          <small class="stat-note">Unique learners taught</small>
+        </div>
+      </article>
+
+      <article class="stat-card" (click)="navigateTo('/my-classes')">
+        <div class="stat-icon emerald">🎓</div>
+        <div class="stat-body">
+          <span class="stat-label">Completed Classes</span>
+          <strong class="stat-value">{{ completedClasses }}</strong>
+          <small class="stat-note">Delivered 1-to-1 sessions</small>
+        </div>
+      </article>
+
+      <article class="stat-card" (click)="navigateTo('/reviews-ratings')">
+        <div class="stat-icon amber">⭐</div>
+        <div class="stat-body">
+          <span class="stat-label">Tutor Rating</span>
+          <strong class="stat-value">{{ averageRating | number:'1.1-1' }}/5</strong>
+          <small class="stat-note">Verified student feedback</small>
+        </div>
+      </article>
+
+      <article class="stat-card" (click)="navigateTo('/teacher/analytics')">
+        <div class="stat-icon sky">💷</div>
+        <div class="stat-body">
+          <span class="stat-label">Monthly Earnings</span>
+          <strong class="stat-value">£{{ monthlyEarnings | number:'1.0-0' }}</strong>
+          <small class="stat-note">Current month GBP revenue</small>
+        </div>
+      </article>
+    </section>
+
+    <!-- Row 1: Upcoming Classes + Pending Booking Requests -->
+    <section class="panel-grid">
+      <article class="panel panel-wide">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Teaching Schedule</span>
+            <h2>Upcoming Confirmed & Scheduled Classes</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/my-classes')">Open All Classes</button>
+        </div>
+
+        <div class="task-list" *ngIf="upcomingClasses.length > 0; else emptyUpcoming">
+          <div class="task-row" *ngFor="let item of upcomingClasses">
+            <div class="task-date">
+              <span>{{ item.date | date:'EEE' }}</span>
+              <strong>{{ item.date | date:'dd MMM' }}</strong>
+            </div>
+
+            <div class="task-main">
+              <div class="task-title-row">
+                <strong>{{ item.subject }}</strong>
+                <span class="mode-chip">{{ item.mode || 'Online' }}</span>
+              </div>
+              <span>Student: {{ item.studentName || 'UK Student' }} • {{ item.startTime }} – {{ item.endTime }}</span>
+              <small *ngIf="item.notes">"{{ item.notes }}"</small>
+            </div>
+
+            <div class="task-meta">
+              <span class="status-pill" [class]="item.status.toLowerCase()">{{ item.status }}</span>
+              <a class="join-link" *ngIf="item.meetingLink" [href]="item.meetingLink" target="_blank" rel="noopener">
+                Launch Classroom
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyUpcoming>
+          <div class="empty-state">
+            <div class="empty-icon">🗓️</div>
+            <h3>No upcoming classes on your calendar</h3>
+            <p>Publish your weekly availability slots so UK students can book 1-to-1 sessions with you.</p>
+            <button class="primary-btn" (click)="navigateTo('/manage-schedule')">Add Availability Slots</button>
+          </div>
+        </ng-template>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Action Required</span>
+            <h2>Booking Requests ({{ pendingRequests.length }})</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/my-classes')">Manage</button>
+        </div>
+
+        <div class="request-list" *ngIf="pendingRequests.length > 0; else emptyRequests">
+          <div class="request-card" *ngFor="let request of pendingRequests">
+            <div class="request-top">
+              <div>
+                <strong>{{ request.studentName || 'UK Student' }}</strong>
+                <span>{{ request.subject }} • {{ request.date | date:'EEE, dd MMM' }} ({{ request.startTime }} – {{ request.endTime }})</span>
+              </div>
+              <span class="status-pill pending">Pending</span>
+            </div>
+            <p class="request-notes" *ngIf="request.notes">"{{ request.notes }}"</p>
+            <div class="request-actions">
+              <button class="accept-btn" (click)="acceptRequest(request)">✓ Confirm Booking</button>
+              <button class="decline-btn" (click)="declineRequest(request)">Decline</button>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyRequests>
+          <div class="empty-state compact">
+            <div class="empty-icon">✨</div>
+            <h3>All caught up!</h3>
+            <p>No pending student booking requests awaiting confirmation.</p>
+          </div>
+        </ng-template>
+      </article>
+    </section>
+
+    <!-- Row 2: Weekly Teaching Load + Recent GBP Payouts -->
+    <section class="panel-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Activity</span>
+            <h2>Weekly Teaching Load</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/teacher/analytics')">Full Analytics</button>
+        </div>
+
+        <div class="weekly-bars">
+          <div class="bar-column" *ngFor="let day of weeklyClasses">
+            <div class="bar-shell">
+              <div class="bar-value" [style.height.%]="getBarHeight(day.classes)"></div>
+            </div>
+            <strong>{{ day.day }}</strong>
+            <span>{{ day.classes }} cls</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel panel-wide">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">GBP Revenue</span>
+            <h2>Recent Student Payments</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/teacher/analytics')">Earnings Report</button>
+        </div>
+
+        <div class="payment-list" *ngIf="recentPayments.length > 0; else emptyPayments">
+          <div class="payment-row" *ngFor="let payment of recentPayments">
+            <div class="payment-left">
+              <div class="payment-icon">💷</div>
+              <div>
+                <strong>{{ payment.transactionId || 'TXN-UK-8821' }}</strong>
+                <span>{{ payment.paymentMethod }} • {{ payment.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+              </div>
+            </div>
+            <div class="payment-right">
+              <strong>£{{ payment.amount | number:'1.2-2' }}</strong>
+              <span class="status-pill" [class]="payment.status.toLowerCase()">{{ payment.status }}</span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #emptyPayments>
+          <div class="empty-state compact">
+            <p>No student payments recorded yet.</p>
+          </div>
+        </ng-template>
+      </article>
+    </section>
+
+    <!-- Row 3: Student Feedback + UK Academic Calendar -->
+    <section class="panel-grid">
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Reputation</span>
+            <h2>Recent Student Reviews</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/reviews-ratings')">All Reviews</button>
+        </div>
+
+        <div class="review-list" *ngIf="recentReviews.length > 0; else emptyReviews">
+          <div class="review-item" *ngFor="let review of recentReviews">
+            <div class="review-top">
+              <strong>{{ review.studentName }}</strong>
+              <span class="rating-pill">⭐ {{ review.rating }}/5</span>
+            </div>
+            <p>{{ review.comment || 'Excellent 1-to-1 tuition session!' }}</p>
+          </div>
+        </div>
+
+        <ng-template #emptyReviews>
+          <div class="empty-state compact">
+            <p>Student reviews will appear here after completed classes.</p>
+          </div>
+        </ng-template>
+      </article>
+
+      <article class="panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-kicker">Academic Calendar</span>
+            <h2>UK Exam Board & Term Dates</h2>
+          </div>
+          <button class="text-btn" (click)="navigateTo('/timetable')">Timetable</button>
+        </div>
+
+        <div class="event-list" *ngIf="upcomingEvents.length > 0; else emptyEvents">
+          <div class="event-item" *ngFor="let event of upcomingEvents">
+            <div class="event-left">
+              <strong>{{ event.title }}</strong>
+              <span>{{ event.date | date:'dd MMM yyyy' }} • {{ event.startTime }} – {{ event.endTime }}</span>
+            </div>
+            <span class="event-tag">{{ event.type }}</span>
+          </div>
+        </div>
+
+        <ng-template #emptyEvents>
+          <div class="empty-state compact">
+            <p>No upcoming academic calendar events.</p>
+          </div>
+        </ng-template>
+      </article>
+    </section>
+  </main>
+</div>

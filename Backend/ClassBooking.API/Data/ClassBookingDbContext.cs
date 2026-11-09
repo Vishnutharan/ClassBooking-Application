@@ -33,6 +33,7 @@ namespace ClassBooking.API.Data
         public DbSet<AnnouncementEntity> Announcements { get; set; }
         public DbSet<ResourceEntity> Resources { get; set; }
         public DbSet<ExamPreparationEntity> ExamPreparations { get; set; }
+        public DbSet<ReportHistoryEntity> ReportHistory { get; set; }
         public DbSet<TeacherAvailabilitySlotEntity> TeacherAvailabilitySlots { get; set; }
         public DbSet<TimetableEventEntity> TimetableEvents { get; set; }
 
@@ -82,6 +83,8 @@ namespace ClassBooking.API.Data
                     .WithOne(r => r.TeacherProfile)
                     .HasForeignKey(r => r.TeacherProfileId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.HourlyRate).HasColumnType("decimal(18,2)");
             });
 
             modelBuilder.Entity<TeacherQualificationEntity>(entity =>

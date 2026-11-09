@@ -23,6 +23,7 @@ namespace ClassBooking.API.Controllers
         [HttpPost]
         public async Task<ActionResult<PaymentRecord>> ProcessPayment([FromBody] PaymentRequest request)
         {
+            if (!User.IsInRole("Student")) return Forbid();
             var studentId = User.FindFirst("userId")?.Value;
             if (string.IsNullOrEmpty(studentId))
             {
@@ -45,6 +46,10 @@ namespace ClassBooking.API.Controllers
             catch (InvalidOperationException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException)
+            {
+                return Conflict(new { message = "A payment is already being recorded for this booking." });
             }
         }
 

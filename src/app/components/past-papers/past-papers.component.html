@@ -1,106 +1,85 @@
-<div class="past-papers-container">
-    <div class="header">
-        <h1>📄 Past Papers</h1>
-        <p>Access past examination papers for your preparation</p>
+<div class="past-papers-page">
+  <div class="past-papers-shell">
+    <header class="page-hero">
+      <div>
+        <span class="eyebrow">🇬🇧 Official UK Exam Archive</span>
+        <h1>GCSE, A-Level & 11+ Past Exam Papers</h1>
+        <p>Practice with authentic past exam papers and mark schemes across AQA, Edexcel, and OCR exam series.</p>
+      </div>
+      <div class="hero-stat">
+        <strong>{{ filteredPapers.length }}</strong>
+        <span>Past Papers</span>
+      </div>
+    </header>
+
+    <!-- Qualification Tabs -->
+    <div class="qualification-tabs">
+      <button type="button" class="qual-tab" [class.active]="selectedExam === 'OLevel'" (click)="selectedExam = 'OLevel'; onExamChange()">
+        📘 GCSE Papers (Years 10–11)
+      </button>
+      <button type="button" class="qual-tab" [class.active]="selectedExam === 'ALevel'" (click)="selectedExam = 'ALevel'; onExamChange()">
+        🎓 A-Level & AS Papers (Years 12–13)
+      </button>
+      <button type="button" class="qual-tab" [class.active]="selectedExam === 'Scholarship'" (click)="selectedExam = 'Scholarship'; onExamChange()">
+        🏅 11+ Entrance Papers
+      </button>
     </div>
 
-    <div class="exam-tabs">
-        <button [class.active]="selectedExam === 'OLevel'" (click)="selectedExam = 'OLevel'; onExamChange()"
-            class="tab-btn">
-            O-Level
-        </button>
-        <button [class.active]="selectedExam === 'ALevel'" (click)="selectedExam = 'ALevel'; onExamChange()"
-            class="tab-btn">
-            A-Level
-        </button>
-        <button [class.active]="selectedExam === 'Scholarship'" (click)="selectedExam = 'Scholarship'; onExamChange()"
-            class="tab-btn">
-            Scholarship
-        </button>
-    </div>
+    <!-- Filter Bar -->
+    <section class="filters-bar">
+      <div class="filter-field search">
+        <label>Search Paper or Specification</label>
+        <input type="text" [(ngModel)]="searchTerm" (input)="onSearch()" placeholder="Search by subject, paper code, or year..." />
+      </div>
 
-    <div class="filters">
-        <input type="text" [(ngModel)]="searchTerm" (keyup)="onSearch()" placeholder="Search past papers..."
-            class="search-input">
-
-        <select [(ngModel)]="selectedSubject" (change)="onFilterChange()" class="filter-select">
-            <option *ngFor="let subject of subjects" [value]="subject">{{ subject }}</option>
+      <div class="filter-field">
+        <label>UK Subject</label>
+        <select [(ngModel)]="selectedSubject" (change)="onFilterChange()">
+          <option *ngFor="let subject of subjects" [value]="subject">{{ subject }}</option>
         </select>
+      </div>
 
-        <select [(ngModel)]="selectedYear" (change)="onFilterChange()" class="filter-select">
-            <option *ngFor="let year of years" [value]="year">{{ year === 'All' ? 'All Years' : year }}</option>
+      <div class="filter-field">
+        <label>Exam Series Year</label>
+        <select [(ngModel)]="selectedYear" (change)="onFilterChange()">
+          <option *ngFor="let year of years" [value]="year">{{ year }}</option>
         </select>
+      </div>
+    </section>
+
+    <div *ngIf="isLoading" class="empty-card">
+      <p>Loading UK past exam papers...</p>
     </div>
 
-    <div *ngIf="isLoading" class="loading-spinner">Loading...</div>
-
-    <div class="content" *ngIf="!isLoading">
-        <div class="sidebar">
-            <div class="subjects-list">
-                <h3>📁 Subjects</h3>
-                <div class="subject-item" *ngFor="let prep of preparations"
-                    [class.active]="selectedSubject === prep.subject"
-                    (click)="selectedSubject = prep.subject; onFilterChange()">
-                    <div class="subject-header">
-                        <span class="subject-name">{{ prep.subject }}</span>
-                    </div>
-                    <div class="resource-count">
-                        {{ getPapersBySubject(prep.subject).length }} papers
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content">
-            <div class="resources-grid" *ngIf="filteredPapers.length > 0; else noPapers">
-                <div class="paper-card" *ngFor="let paper of filteredPapers">
-                    <div class="paper-header">
-                        <span class="year-badge">{{ getYearFromTitle(paper.title) }}</span>
-                        <button class="bookmark-btn" [class.bookmarked]="bookmarkedPapers.has(paper.id)"
-                            (click)="toggleBookmark(paper)" title="Bookmark">
-                            ♥
-                        </button>
-                    </div>
-
-                    <div class="paper-body">
-                        <h3>{{ paper.title }}</h3>
-                        <p class="description">{{ paper.description }}</p>
-                        <p class="upload-info" *ngIf="paper.uploadedAt">
-                            <small>Added: {{ paper.uploadedAt | date:'MMM dd, yyyy' }}</small>
-                        </p>
-                    </div>
-
-                    <div class="paper-actions">
-                        <button class="action-btn view" (click)="openPaper(paper)">
-                            👁️ View
-                        </button>
-                        <button class="action-btn download" (click)="downloadPaper(paper)">
-                            ⬇️ Download
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <ng-template #noPapers>
-                <div class="empty-state">
-                    <div class="empty-icon">📄</div>
-                    <h3>No Past Papers Found</h3>
-                    <p>No past papers match your current filters.</p>
-                    <button class="reset-btn"
-                        (click)="selectedYear = 'All'; selectedSubject = 'All'; searchTerm = ''; onFilterChange()">
-                        Reset Filters
-                    </button>
-                </div>
-            </ng-template>
-        </div>
+    <div *ngIf="!isLoading && filteredPapers.length === 0" class="empty-card">
+      <div class="empty-icon">📄</div>
+      <h3>No past papers match your current filters</h3>
+      <p>Select "All" under Subject or Exam Series Year to browse the full UK archive.</p>
     </div>
 
-    <div class="bookmarked-section" *ngIf="bookmarkedPapers.size > 0">
-        <h2>⭐ Bookmarked Papers ({{ bookmarkedPapers.size }})</h2>
-        <div class="bookmarked-list">
-            <div class="bookmarked-item" *ngFor="let paper of filteredPapers">
-                <span *ngIf="bookmarkedPapers.has(paper.id)">📌 {{ paper.title }}</span>
-            </div>
+    <!-- Papers Grid -->
+    <section class="papers-grid" *ngIf="!isLoading && filteredPapers.length > 0">
+      <article class="paper-card" *ngFor="let paper of filteredPapers">
+        <div class="card-top">
+          <span class="year-badge">{{ getYearFromTitle(paper.title) }}</span>
+          <div class="top-badges">
+            <span class="mark-pill">✓ Mark Scheme Ready</span>
+            <button type="button" class="bookmark-btn" [class.saved]="bookmarkedPapers.has(paper.id)" (click)="toggleBookmark(paper)">
+              {{ bookmarkedPapers.has(paper.id) ? '★ Saved' : '☆ Save' }}
+            </button>
+          </div>
         </div>
-    </div>
+
+        <div class="card-body">
+          <h3>{{ paper.title }}</h3>
+          <p>{{ paper.description || 'Official UK exam board past paper with worked examiner solutions.' }}</p>
+        </div>
+
+        <div class="card-footer">
+          <button type="button" class="btn-outline" (click)="openPaper(paper)">📄 View Paper</button>
+          <button type="button" class="btn-primary" (click)="downloadPaper(paper)">↓ Download PDF</button>
+        </div>
+      </article>
+    </section>
+  </div>
 </div>

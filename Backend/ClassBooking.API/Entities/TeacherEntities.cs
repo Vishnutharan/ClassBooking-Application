@@ -106,7 +106,7 @@ namespace ClassBooking.API.Entities
         
         [Required]
         [MaxLength(50)]
-        public string Medium { get; set; } = "English"; // Sinhala, Tamil, English
+        public string Medium { get; set; } = "English"; // English, Bilingual, French, Spanish, German
         
         [Required]
         [MaxLength(50)]

@@ -1,7 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using ClassBooking.API.Entities;
 using ClassBooking.API.Repositories;
 using ClassBooking.API.Models;
 using ClassBooking.API.Models.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace ClassBooking.API.Services
 {
@@ -26,6 +31,8 @@ namespace ClassBooking.API.Services
         Task<List<ReviewEntity>> GetAllReviewsAsync();
         Task<ReviewEntity?> UpdateReviewAsync(string id, int rating, string comment);
         Task<bool> DeleteReviewAsync(string id);
+        Task<List<ReportHistoryDto>> GetReportHistoryAsync();
+        Task<ReportHistoryDto> CreateReportHistoryAsync(string name, string type, string createdBy);
     }
 
     public class AdminService : IAdminService
@@ -35,19 +42,22 @@ namespace ClassBooking.API.Services
         private readonly IStudentRepository _studentRepository;
         private readonly IBookingRepository _bookingRepository;
         private readonly IFeeRepository _feeRepository;
+        private readonly IReportRepository _reportRepository;
 
         public AdminService(
             IUserRepository userRepository,
             ITeacherRepository teacherRepository,
             IStudentRepository studentRepository,
             IBookingRepository bookingRepository,
-            IFeeRepository feeRepository)
+            IFeeRepository feeRepository,
+            IReportRepository reportRepository)
         {
             _userRepository = userRepository;
             _teacherRepository = teacherRepository;
             _studentRepository = studentRepository;
             _bookingRepository = bookingRepository;
             _feeRepository = feeRepository;
+            _reportRepository = reportRepository;
         }
 
         public async Task<List<UserDto>> GetAllUsersAsync()
@@ -63,7 +73,7 @@ namespace ClassBooking.API.Services
             var students = await _studentRepository.GetAllStudentsAsync();
             var allBookings = await _bookingRepository.GetAllAsync();
             
-            var activeBookings = allBookings.Count(b => b.Status == "Confirmed" || b.Status == "Pending");
+            var activeBookings = allBookings.Count(b => b.Status == "Confirmed");
             var completedBookings = allBookings.Count(b => b.Status == "Completed");
 
             // Calculate new users this month
@@ -71,8 +81,8 @@ namespace ClassBooking.API.Services
             var users = await _userRepository.GetAllUsersAsync();
             var newUsersThisMonth = users.Count(u => u.CreatedAt >= firstDayOfMonth);
 
-            // Get total revenue (simplified - would need proper calculation)
-            var totalRevenue = 0m; // Placeholder - can implement proper revenue calculation
+            // Get total revenue
+            var totalRevenue = await _feeRepository.GetTotalRevenueAsync();
 
             return new SystemStatsDto
             {
@@ -184,6 +194,7 @@ namespace ClassBooking.API.Services
             var pending = bookings.Count(b => b.Status == "Pending");
             var confirmed = bookings.Count(b => b.Status == "Confirmed");
             var completed = bookings.Count(b => b.Status == "Completed");
+            var totalRevenue = await _feeRepository.GetTotalRevenueAsync();
 
             return new DashboardStatsDto
             {
@@ -191,9 +202,9 @@ namespace ClassBooking.API.Services
                 TotalStudents = students.Count,
                 TotalTeachers = teachers.Count,
                 TotalBookings = bookings.Count,
-                PendingBookings = pending + confirmed,
+                PendingBookings = pending,
                 CompletedBookings = completed,
-                TotalRevenue = 0, // Placeholder until fee/revenue implemented
+                TotalRevenue = totalRevenue,
                 AverageRating = teachers.Any() ? teachers.Average(t => t.AverageRating) : 0
             };
         }
@@ -261,6 +272,46 @@ namespace ClassBooking.API.Services
         public async Task<bool> DeleteReviewAsync(string id)
         {
             return await _teacherRepository.DeleteReviewAsync(id);
+        }
+
+        public async Task<List<ReportHistoryDto>> GetReportHistoryAsync()
+        {
+            var reports = await _reportRepository.GetAllAsync();
+            return reports.Select(r => new ReportHistoryDto
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Type = r.Type,
+                GeneratedAt = r.GeneratedAt,
+                FileSize = r.FileSize,
+                Status = r.Status,
+                CreatedBy = r.CreatedBy
+            }).ToList();
+        }
+
+        public async Task<ReportHistoryDto> CreateReportHistoryAsync(string name, string type, string createdBy)
+        {
+            var report = new ReportHistoryEntity
+            {
+                Name = name,
+                Type = type,
+                GeneratedAt = DateTime.UtcNow,
+                FileSize = "0 KB", // Placeholder
+                Status = "ready",
+                CreatedBy = createdBy
+            };
+
+            var created = await _reportRepository.CreateAsync(report);
+            return new ReportHistoryDto
+            {
+                Id = created.Id,
+                Name = created.Name,
+                Type = created.Type,
+                GeneratedAt = created.GeneratedAt,
+                FileSize = created.FileSize,
+                Status = created.Status,
+                CreatedBy = created.CreatedBy
+            };
         }
 
         private UserDto MapUserToDto(User user)

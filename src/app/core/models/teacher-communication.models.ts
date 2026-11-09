@@ -20,16 +20,25 @@ export interface TeacherMessage {
     priority: 'Normal' | 'High' | 'Urgent';
 }
 
+export interface ConversationMessage {
+    id: string;
+    senderId: string;
+    senderName: string;
+    content: string;
+    sentAt: Date;
+    isRead: boolean;
+}
+
 export interface Conversation {
     id: string;
     participants: ConversationParticipant[];
     subject: string;
-    lastMessage: TeacherMessage;
+    lastMessage: ConversationMessage | null;
     unreadCount: number;
-    messages: TeacherMessage[];
-    createdAt: Date;
+    messages?: ConversationMessage[];
+    createdAt?: Date;
     updatedAt: Date;
-    status: 'Active' | 'Archived';
+    status?: 'Active' | 'Archived';
 }
 
 export interface ConversationParticipant {

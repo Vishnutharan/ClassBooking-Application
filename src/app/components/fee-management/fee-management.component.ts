@@ -115,6 +115,6 @@ export class FeeManagementComponent implements OnInit {
 
     printReceipt(payment: FeePayment) {
         console.log('Printing receipt for', payment.id);
-        alert(`Receipt generated for ${payment.studentName} - ${payment.amount} LKR`);
+        alert(`Receipt generated for ${payment.studentName} - £${payment.amount}`);
     }
 }

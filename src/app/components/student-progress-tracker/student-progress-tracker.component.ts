@@ -110,7 +110,7 @@ export class StudentProgressTrackerComponent implements OnInit {
     }
 
     navigateToStudyGoals(): void {
-        this.router.navigate(['/student/study-goals']);
+        this.router.navigate(['/student/progress']);
     }
 
     navigateToBookClass(): void {

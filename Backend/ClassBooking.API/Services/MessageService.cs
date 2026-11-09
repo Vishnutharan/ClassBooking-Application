@@ -6,7 +6,7 @@ namespace ClassBooking.API.Services
     public interface IMessageService
     {
         Task<List<ConversationDto>> GetConversationsAsync(string userId);
-        Task<List<MessageDto>> GetMessagesAsync(string conversationId);
+        Task<List<MessageDto>> GetMessagesAsync(string conversationId, string userId);
         Task<MessageDto> SendMessageAsync(string conversationId, string senderId, string senderName, string content);
         Task<ConversationDto> CreateConversationAsync(string userId1, string userName1, string role1,
             string userId2, string userName2, string role2, string subject);
@@ -27,13 +27,17 @@ namespace ClassBooking.API.Services
             return await _messageRepository.GetConversationsAsync(userId);
         }
 
-        public async Task<List<MessageDto>> GetMessagesAsync(string conversationId)
+        public async Task<List<MessageDto>> GetMessagesAsync(string conversationId, string userId)
         {
+            if (!await _messageRepository.IsParticipantAsync(conversationId, userId)) throw new UnauthorizedAccessException();
             return await _messageRepository.GetMessagesAsync(conversationId);
         }
 
         public async Task<MessageDto> SendMessageAsync(string conversationId, string senderId, string senderName, string content)
         {
+            if (string.IsNullOrWhiteSpace(content) || content.Length > 4000)
+                throw new ArgumentException("Message must contain between 1 and 4000 characters.");
+            if (!await _messageRepository.IsParticipantAsync(conversationId, senderId)) throw new UnauthorizedAccessException();
             return await _messageRepository.SendMessageAsync(conversationId, senderId, senderName, content);
         }
 
@@ -45,6 +49,7 @@ namespace ClassBooking.API.Services
 
         public async Task MarkAsReadAsync(string conversationId, string userId)
         {
+            if (!await _messageRepository.IsParticipantAsync(conversationId, userId)) throw new UnauthorizedAccessException();
             await _messageRepository.MarkAsReadAsync(conversationId, userId);
         }
     }

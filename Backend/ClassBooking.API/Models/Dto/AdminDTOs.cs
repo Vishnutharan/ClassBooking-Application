@@ -123,4 +123,15 @@ namespace ClassBooking.API.Models.Dto
         public string ExamType { get; set; } = string.Empty; // Stored in Audience for now
         public string? Description { get; set; }
     }
+
+    public class ReportHistoryDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public DateTime GeneratedAt { get; set; }
+        public string FileSize { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string CreatedBy { get; set; } = string.Empty;
+    }
 }

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { finalize } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
 import { AuthResponse, LoginRequest } from '../../core/models/auth.models';
@@ -102,7 +103,9 @@ export class AuthComponent implements OnInit {
         password: formValue.password
       };
 
-      this.authService.login(credentials).subscribe({
+      this.authService.login(credentials).pipe(
+        finalize(() => this.isLoading = false)
+      ).subscribe({
         next: (response: AuthResponse) => {
           this.notificationService.showSuccess('Logged in successfully!');
 
@@ -131,9 +134,6 @@ export class AuthComponent implements OnInit {
             'Login failed. Please try again.';
           this.errorMessage = msg;
           this.notificationService.showError(msg);
-        },
-        complete: () => {
-          this.isLoading = false;
         }
       });
     } else {
@@ -147,7 +147,9 @@ export class AuthComponent implements OnInit {
         return;
       }
 
-      this.authService.register(registerData).subscribe({
+      this.authService.register(registerData).pipe(
+        finalize(() => this.isLoading = false)
+      ).subscribe({
         next: (response) => {
           this.notificationService.showSuccess('Account created successfully!');
           const role = response.user.role;
@@ -168,9 +170,6 @@ export class AuthComponent implements OnInit {
             'Registration failed. Please try again.';
           this.errorMessage = msg;
           this.notificationService.showError(msg);
-        },
-        complete: () => {
-          this.isLoading = false;
         }
       });
     }

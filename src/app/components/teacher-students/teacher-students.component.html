@@ -1,133 +1,133 @@
 <div class="students-container">
-    <div class="header">
-        <h1>My Students</h1>
-        <div class="filters">
-            <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="filterStudents()"
-                placeholder="Search students..." class="search-input">
-
-            <select [(ngModel)]="filterSubject" (ngModelChange)="filterStudents()" class="filter-select">
-                <option value="all">All Subjects</option>
-                <option value="Mathematics">Mathematics</option>
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Biology">Biology</option>
-            </select>
-
-            <select [(ngModel)]="filterGrade" (ngModelChange)="filterStudents()" class="filter-select">
-                <option value="all">All Grades</option>
-                <option value="Grade 10">Grade 10</option>
-                <option value="Grade 11">Grade 11</option>
-                <option value="O/L">O/L</option>
-                <option value="A/L 1st Year">A/L 1st Year</option>
-                <option value="A/L 2nd Year">A/L 2nd Year</option>
-            </select>
-        </div>
+  <div class="header">
+    <div>
+      <span class="eyebrow-pill">🇬🇧 UK Student Roster</span>
+      <h1>My Enrolled Students</h1>
     </div>
+    <div class="filters">
+      <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="filterStudents()"
+        placeholder="Search UK students..." class="search-input">
 
-    <div *ngIf="isLoading" class="loading">Loading students...</div>
+      <select [(ngModel)]="filterSubject" (ngModelChange)="filterStudents()" class="filter-select">
+        <option value="all">All Subjects</option>
+        <option value="Mathematics">Mathematics</option>
+        <option value="Physics">Physics</option>
+        <option value="Chemistry">Chemistry</option>
+        <option value="Biology">Biology</option>
+        <option value="English Literature">English Literature</option>
+        <option value="Computer Science">Computer Science</option>
+      </select>
 
-    <div class="students-grid" *ngIf="!isLoading">
-        <div class="student-card" *ngFor="let student of filteredStudents">
-            <div class="student-avatar">{{ student.fullName.charAt(0) }}</div>
-            <div class="student-info">
-                <h3>{{ student.fullName }}</h3>
-
-                <div class="details-row">
-                    <span class="grade">Grade: {{ student.grade }}</span>
-                    <span class="school" *ngIf="student.school">{{ student.school }}</span>
-                </div>
-
-                <div class="parent-info" *ngIf="student.parentName">
-                    <div>One Guardian: {{ student.parentName }}</div>
-                    <div *ngIf="student.parentContact">Tel: {{ student.parentContact }}</div>
-                </div>
-
-                <div class="subjects">
-                    <span class="subject-tag" *ngFor="let subject of student.subjects">{{ subject }}</span>
-                </div>
-
-                <div class="performance" [ngClass]="getPerformanceClass(student.performanceLevel)">
-                    {{ student.performanceLevel }}
-                </div>
-                <button class="view-details-btn" (click)="viewStudentDetails(student)">View Details</button>
-            </div>
-        </div>
+      <select [(ngModel)]="filterGrade" (ngModelChange)="filterStudents()" class="filter-select">
+        <option value="all">All UK Year Groups</option>
+        <option value="Year 9">Year 9 (KS3)</option>
+        <option value="Year 10">Year 10 (GCSE)</option>
+        <option value="Year 11">Year 11 (GCSE)</option>
+        <option value="Year 12">Year 12 (AS-Level)</option>
+        <option value="Year 13">Year 13 (A-Level)</option>
+      </select>
     </div>
+  </div>
 
-    <div class="modal-overlay" *ngIf="showDetails" (click)="closeDetails()">
-        <div class="modal-content" (click)="$event.stopPropagation()" *ngIf="selectedStudent">
-            <button class="close-btn" (click)="closeDetails()">&times;</button>
+  <div *ngIf="isLoading" class="loading">Loading UK student roster...</div>
 
-            <div class="modal-header">
-                <div class="student-avatar large">{{ selectedStudent.fullName.charAt(0) }}</div>
-                <div>
-                    <h2>{{ selectedStudent.fullName }}</h2>
-                    <p class="detail-row"><i class="icon">📧</i> {{ selectedStudent.email }}</p>
-                    <p class="detail-row"><i class="icon">📞</i> {{ selectedStudent.phoneNumber }}</p>
-                    <p class="detail-row" *ngIf="selectedStudent.school"><i class="icon">🏫</i> {{
-                        selectedStudent.school }}</p>
-                    <p class="detail-row" *ngIf="selectedStudent.id">ID: {{ selectedStudent.id }}</p>
+  <div class="students-grid" *ngIf="!isLoading">
+    <div class="student-card" *ngFor="let student of filteredStudents">
+      <div class="student-avatar">{{ student.fullName.charAt(0) }}</div>
+      <div class="student-info">
+        <h3>{{ student.fullName }}</h3>
 
-                    <div class="guardian-info" *ngIf="selectedStudent.parentName"
-                        style="margin-top: 1rem; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
-                        <h4 style="margin-top: 0;">Guardian Details</h4>
-                        <p><strong>Name:</strong> {{ selectedStudent.parentName }}</p>
-                        <p *ngIf="selectedStudent.parentContact"><strong>Contact:</strong> {{
-                            selectedStudent.parentContact }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-body" *ngIf="studentProgress">
-                <div class="progress-stats">
-                    <div class="stat">
-                        <h4>Overall Grade</h4>
-                        <p class="big-number">{{ studentProgress.overallGrade | number:'1.0-0' }}%</p>
-                    </div>
-                    <div class="stat">
-                        <h4>Attendance</h4>
-                        <p class="big-number">{{ studentProgress.attendanceRate | number:'1.0-0' }}%</p>
-                    </div>
-                    <div class="stat">
-                        <h4>Assignments</h4>
-                        <p class="big-number">{{ studentProgress.assignmentsCompleted }}/{{
-                            studentProgress.totalAssignments }}</p>
-                    </div>
-                    <div class="stat">
-                        <h4>Avg Score</h4>
-                        <p class="big-number">{{ studentProgress.averageScore | number:'1.0-0' }}%</p>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <h3>Recent Performance</h3>
-                    <div class="performance-list">
-                        <div class="performance-item" *ngFor="let perf of studentProgress.recentPerformance">
-                            <div>
-                                <strong>{{ perf.title }}</strong>
-                                <span class="type">{{ perf.type }}</span>
-                            </div>
-                            <div class="score">{{ perf.score }}/{{ perf.maxScore }} ({{ perf.percentage | number:'1.0-0'
-                                }}%)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="strengths-weaknesses">
-                    <div class="section">
-                        <h3>Strengths</h3>
-                        <ul>
-                            <li *ngFor="let strength of studentProgress.strengths">{{ strength }}</li>
-                        </ul>
-                    </div>
-                    <div class="section">
-                        <h3>Areas for Improvement</h3>
-                        <ul>
-                            <li *ngFor="let weakness of studentProgress.weaknesses">{{ weakness }}</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+        <div class="details-row">
+          <span class="grade">Level: {{ student.grade || 'Year 11 (GCSE)' }}</span>
+          <span class="school" *ngIf="student.school">{{ student.school }}</span>
         </div>
+
+        <div class="parent-info" *ngIf="student.parentName">
+          <div>Guardian: {{ student.parentName }}</div>
+          <div *ngIf="student.parentContact">Tel: {{ student.parentContact }}</div>
+        </div>
+
+        <div class="subjects">
+          <span class="subject-tag" *ngFor="let subject of student.subjects">{{ subject }}</span>
+        </div>
+
+        <div class="performance" [ngClass]="getPerformanceClass(student.performanceLevel)">
+          {{ student.performanceLevel }}
+        </div>
+        <button class="view-details-btn" (click)="viewStudentDetails(student)">View Academic Progress →</button>
+      </div>
     </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="showDetails" (click)="closeDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()" *ngIf="selectedStudent">
+      <button class="close-btn" (click)="closeDetails()">&times;</button>
+
+      <div class="modal-header">
+        <div class="student-avatar large">{{ selectedStudent.fullName.charAt(0) }}</div>
+        <div>
+          <h2>{{ selectedStudent.fullName }}</h2>
+          <p class="detail-row">📧 {{ selectedStudent.email }}</p>
+          <p class="detail-row">📞 {{ selectedStudent.phoneNumber }}</p>
+          <p class="detail-row" *ngIf="selectedStudent.school">🏫 {{ selectedStudent.school }}</p>
+
+          <div class="guardian-info" *ngIf="selectedStudent.parentName"
+            style="margin-top: 0.75rem; padding: 0.85rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+            <h4 style="margin: 0 0 0.3rem;">Parent / Guardian Safeguarding Contact</h4>
+            <p style="margin: 0;"><strong>Name:</strong> {{ selectedStudent.parentName }}</p>
+            <p *ngIf="selectedStudent.parentContact" style="margin: 0.2rem 0 0;"><strong>Contact:</strong> {{ selectedStudent.parentContact }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body" *ngIf="studentProgress">
+        <div class="progress-stats">
+          <div class="stat">
+            <h4>Overall Grade</h4>
+            <p class="big-number">{{ studentProgress.overallGrade | number:'1.0-0' }}%</p>
+          </div>
+          <div class="stat">
+            <h4>Attendance</h4>
+            <p class="big-number">{{ studentProgress.attendanceRate | number:'1.0-0' }}%</p>
+          </div>
+          <div class="stat">
+            <h4>Assignments</h4>
+            <p class="big-number">{{ studentProgress.assignmentsCompleted }}/{{ studentProgress.totalAssignments }}</p>
+          </div>
+          <div class="stat">
+            <h4>Avg Score</h4>
+            <p class="big-number">{{ studentProgress.averageScore | number:'1.0-0' }}%</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Recent Performance</h3>
+          <div class="performance-list">
+            <div class="performance-item" *ngFor="let perf of studentProgress.recentPerformance">
+              <div>
+                <strong>{{ perf.title }}</strong>
+                <span class="type">{{ perf.type }}</span>
+              </div>
+              <div class="score">{{ perf.score }}/{{ perf.maxScore }} ({{ perf.percentage | number:'1.0-0' }}%)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="strengths-weaknesses">
+          <div class="section">
+            <h3>Strengths</h3>
+            <ul>
+              <li *ngFor="let strength of studentProgress.strengths">{{ strength }}</li>
+            </ul>
+          </div>
+          <div class="section">
+            <h3>Areas for Improvement</h3>
+            <ul>
+              <li *ngFor="let weakness of studentProgress.weaknesses">{{ weakness }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -321,3 +321,15 @@
         display: none;
       }
     }
+/* Light navigation accents. */
+.navbar { background:#fff; border-bottom:1px solid #dfe7dc; box-shadow:0 3px 16px #234c3505; }
+.logo-text { color:#245b3f; background:none; -webkit-text-fill-color:#245b3f; }
+.search-bar { background:#f5f8f1; border:1px solid #e2e9dc; border-radius:10px; }
+
+.logo { border: 0; padding: 0; background: transparent; text-align: left; }
+.search-bar { margin: 0; }
+.search-submit { min-height: 40px; padding: .45rem .8rem; border: 0; border-radius: 20px; color: #fff; background: #2457a6; cursor: pointer; }
+.search-submit:disabled { opacity: .55; cursor: not-allowed; }
+.user-avatar.initials { display: grid; place-items: center; border-radius: 50%; color: #174782; background: #e3eefb; font-weight: 700; }
+.dropdown-item { width: 100%; min-height: 44px; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.dropdown-item:hover { background: #edf4fc; }

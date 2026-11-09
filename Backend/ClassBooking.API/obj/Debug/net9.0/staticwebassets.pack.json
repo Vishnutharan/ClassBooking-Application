@@ -1,0 +1,57 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\wwwroot\\uploads\\497dfd65-4453-4a5e-b729-d308ca8d5fc8_05e924a9-d211-4343-87d8-71214ab179b0.jpg",
+      "PackagePath": "staticwebassets\\uploads\\497dfd65-4453-4a5e-b729-d308ca8d5fc8_05e924a9-d211-4343-87d8-71214ab179b0.jpg"
+    },
+    {
+      "Id": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\wwwroot\\uploads\\4FA49D0B-641A-4238-B951-54720C2F0DD7_f86feb6a-9293-429e-8370-a071d33eb219.jpg",
+      "PackagePath": "staticwebassets\\uploads\\4FA49D0B-641A-4238-B951-54720C2F0DD7_f86feb6a-9293-429e-8370-a071d33eb219.jpg"
+    },
+    {
+      "Id": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\wwwroot\\uploads\\4c108db3-db46-4439-b9d3-043e38cf7766_242dece4-d50a-46d2-be01-4cd4b632a352.png",
+      "PackagePath": "staticwebassets\\uploads\\4c108db3-db46-4439-b9d3-043e38cf7766_242dece4-d50a-46d2-be01-4cd4b632a352.png"
+    },
+    {
+      "Id": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\wwwroot\\uploads\\981effde-4e8c-4267-82be-396b7299452f_33b4a716-7c75-448d-af44-ed1346643b0f.jpg",
+      "PackagePath": "staticwebassets\\uploads\\981effde-4e8c-4267-82be-396b7299452f_33b4a716-7c75-448d-af44-ed1346643b0f.jpg"
+    },
+    {
+      "Id": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\wwwroot\\uploads\\resources\\08bc4e78-39a2-4984-9157-0979256fc8db_Demo2.pdf",
+      "PackagePath": "staticwebassets\\uploads\\resources\\08bc4e78-39a2-4984-9157-0979256fc8db_Demo2.pdf"
+    },
+    {
+      "Id": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\wwwroot\\uploads\\resources\\48dea9c6-b887-4f62-9051-c4ca70768b09_Ethical Analysis – Octopus Go.pptx",
+      "PackagePath": "staticwebassets\\uploads\\resources\\48dea9c6-b887-4f62-9051-c4ca70768b09_Ethical Analysis – Octopus Go.pptx"
+    },
+    {
+      "Id": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\wwwroot\\uploads\\resources\\5b2dcbbe-2468-4ddf-ad5a-08d99bf24f97_dbcontext.txt",
+      "PackagePath": "staticwebassets\\uploads\\resources\\5b2dcbbe-2468-4ddf-ad5a-08d99bf24f97_dbcontext.txt"
+    },
+    {
+      "Id": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\wwwroot\\uploads\\resources\\d79f42a9-2c2d-4a93-aad2-c1258bbbf17f_program.txt",
+      "PackagePath": "staticwebassets\\uploads\\resources\\d79f42a9-2c2d-4a93-aad2-c1258bbbf17f_program.txt"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.ClassBooking.API.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.ClassBooking.API.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.build.ClassBooking.API.props",
+      "PackagePath": "build\\ClassBooking.API.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.buildMultiTargeting.ClassBooking.API.props",
+      "PackagePath": "buildMultiTargeting\\ClassBooking.API.props"
+    },
+    {
+      "Id": "obj\\Debug\\net9.0\\staticwebassets\\msbuild.buildTransitive.ClassBooking.API.props",
+      "PackagePath": "buildTransitive\\ClassBooking.API.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

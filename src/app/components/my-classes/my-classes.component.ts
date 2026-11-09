@@ -8,6 +8,7 @@ import { ClassBooking } from '../../core/models/shared.models';
 
 @Component({
   selector: 'app-my-classes',
+  standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './my-classes.component.html',
   styleUrl: './my-classes.component.css'
@@ -22,7 +23,7 @@ export class MyClassesComponent implements OnInit {
   isLoading = false;
   viewMode: 'list' | 'calendar' = 'list';
   statusFilter = 'All';
-  statuses = ['All', 'Upcoming', 'Completed', 'Cancelled'];
+  statuses = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'];
   currentUser: any;
 
   showNotesModal = false;
@@ -40,7 +41,6 @@ export class MyClassesComponent implements OnInit {
 
     this.isLoading = true;
 
-    // Get bookings based on user role
     const bookingsObservable = this.currentUser.role === 'Teacher'
       ? this.bookingService.getTeacherBookings()
       : this.bookingService.getStudentBookings();
@@ -62,15 +62,7 @@ export class MyClassesComponent implements OnInit {
     let filtered = this.allClasses;
 
     if (this.statusFilter !== 'All') {
-      const statusMap: Record<string, string> = {
-        'Upcoming': 'Confirmed',
-        'Completed': 'Completed',
-        'Cancelled': 'Cancelled'
-      };
-      const mappedStatus = statusMap[this.statusFilter];
-      if (mappedStatus) {
-        filtered = filtered.filter(c => c.status === mappedStatus);
-      }
+      filtered = filtered.filter(c => c.status.toLowerCase() === this.statusFilter.toLowerCase());
     }
 
     this.filteredClasses = filtered.sort((a, b) =>
@@ -82,51 +74,49 @@ export class MyClassesComponent implements OnInit {
     this.applyFilter();
   }
 
-  getClassStatus(booking: ClassBooking): string {
-    const statusMap: Record<string, string> = {
-      'Confirmed': 'Upcoming',
-      'Completed': 'Completed',
-      'Cancelled': 'Cancelled',
-      'Pending': 'Upcoming'
-    };
-    return statusMap[booking.status] || booking.status;
+  getStatusClass(status: string): string {
+    return (status || '').toLowerCase();
   }
 
   startClass(booking: ClassBooking): void {
-    this.notificationService.showInfo(`Starting class: ${booking.subject}`);
+    this.notificationService.showInfo(`Launching online classroom: ${booking.subject}`);
     window.open(booking.meetingLink || 'https://meet.google.com', '_blank');
   }
 
+  confirmBooking(booking: ClassBooking): void {
+    this.bookingService.confirmBooking(booking.id).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Booking confirmed & UK classroom link generated!');
+        this.loadClasses();
+      },
+      error: () => {
+        this.notificationService.showError('Failed to confirm booking');
+      }
+    });
+  }
+
   markComplete(booking: ClassBooking): void {
-    if (confirm('Mark this class as completed?')) {
-      this.bookingService.completeBooking(booking.id).subscribe({
-        next: () => {
-          this.notificationService.showSuccess('Class marked as completed');
-          this.loadClasses();
-        },
-        error: () => {
-          this.notificationService.showError('Failed to mark class as completed');
-        }
-      });
-    }
+    this.bookingService.completeBooking(booking.id).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Class marked as completed');
+        this.loadClasses();
+      },
+      error: () => {
+        this.notificationService.showError('Failed to mark class as completed');
+      }
+    });
   }
 
   cancelClass(booking: ClassBooking): void {
-    if (confirm('Are you sure you want to cancel this class?')) {
-      this.bookingService.cancelBooking(booking.id, 'Cancelled by user').subscribe({
-        next: () => {
-          this.notificationService.showSuccess('Class cancelled');
-          this.loadClasses();
-        },
-        error: () => {
-          this.notificationService.showError('Failed to cancel class');
-        }
-      });
-    }
-  }
-
-  rescheduleClass(booking: ClassBooking): void {
-    this.notificationService.showInfo('Reschedule functionality coming soon');
+    this.bookingService.cancelBooking(booking.id, 'Declined/Cancelled by tutor').subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Class cancelled');
+        this.loadClasses();
+      },
+      error: () => {
+        this.notificationService.showError('Failed to cancel class');
+      }
+    });
   }
 
   openNotesModal(booking: ClassBooking): void {
@@ -145,7 +135,7 @@ export class MyClassesComponent implements OnInit {
       const updatedBooking = { ...this.selectedClass, notes: this.classNotes };
       this.bookingService.updateBooking(this.selectedClass.id, updatedBooking).subscribe({
         next: () => {
-          this.notificationService.showSuccess('Notes saved successfully');
+          this.notificationService.showSuccess('Lesson notes saved successfully');
           this.closeNotesModal();
           this.loadClasses();
         },
@@ -154,30 +144,5 @@ export class MyClassesComponent implements OnInit {
         }
       });
     }
-  }
-
-  onResourceUpload(event: any): void {
-    const files = event.target.files;
-    if (files.length > 0) {
-      Array.from(files).forEach((file: any) => {
-        this.uploadedResources.push({
-          name: file.name,
-          size: (file.size / 1024).toFixed(2),
-          uploadedAt: new Date()
-        });
-      });
-      this.notificationService.showSuccess('Resources uploaded successfully');
-    }
-  }
-
-  removeResource(index: number): void {
-    this.uploadedResources.splice(index, 1);
-    this.notificationService.showSuccess('Resource removed');
-  }
-
-  getClassDuration(booking: ClassBooking): number {
-    const [startHour, startMin] = booking.startTime.split(':').map(Number);
-    const [endHour, endMin] = booking.endTime.split(':').map(Number);
-    return (endHour - startHour) * 60 + (endMin - startMin);
   }
 }

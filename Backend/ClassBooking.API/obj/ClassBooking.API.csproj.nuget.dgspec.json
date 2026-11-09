@@ -1,45 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "D:\\ClassBookingAngular\\Classbooking\\Backend\\ClassBooking.API\\ClassBooking.API.csproj": {}
+    "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\ClassBooking.API.csproj": {}
   },
   "projects": {
-    "D:\\ClassBookingAngular\\Classbooking\\Backend\\ClassBooking.API\\ClassBooking.API.csproj": {
+    "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\ClassBooking.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\ClassBookingAngular\\Classbooking\\Backend\\ClassBooking.API\\ClassBooking.API.csproj",
+        "projectUniqueName": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\ClassBooking.API.csproj",
         "projectName": "ClassBooking.API",
-        "projectPath": "D:\\ClassBookingAngular\\Classbooking\\Backend\\ClassBooking.API\\ClassBooking.API.csproj",
-        "packagesPath": "C:\\Users\\vkarunakaran\\.nuget\\packages\\",
-        "outputPath": "D:\\ClassBookingAngular\\Classbooking\\Backend\\ClassBooking.API\\obj\\",
+        "projectPath": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\ClassBooking.API.csproj",
+        "packagesPath": "C:\\Users\\karun\\.nuget\\packages\\",
+        "outputPath": "D:\\Angular\\ClassBooking-Application\\Backend\\ClassBooking.API\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\DevExpress 21.1\\Components\\Offline Packages",
-          "C:\\Program Files (x86)\\DevExpress 21.2\\Components\\Offline Packages",
-          "C:\\Program Files\\DevExpress 22.2\\Components\\Offline Packages",
-          "C:\\Program Files\\DevExpress 24.1\\Components\\Offline Packages",
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\vkarunakaran\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 21.1.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 21.2.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 22.2.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 24.1.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\karun\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\DevExpress 21.1\\Components\\System\\Components\\Packages": {},
-          "C:\\Program Files (x86)\\DevExpress 21.2\\Components\\System\\Components\\Packages": {},
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\DevExpress 22.2\\Components\\System\\Components\\Packages": {},
-          "C:\\Program Files\\DevExpress 24.1\\Components\\System\\Components\\Packages": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://nuget.devexpress.com/jGjdXCxBhPgJjnB6Ml9WoISF8cekvu8kbRk2zklzcHwqkGbQjG/api/v3/index.json": {}
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
@@ -57,7 +38,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net9.0": {
@@ -95,6 +76,10 @@
               "target": "Package",
               "version": "[9.0.0, )"
             },
+            "Stripe.net": {
+              "target": "Package",
+              "version": "[53.0.0, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"
@@ -119,7 +104,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Users\\karun\\.dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

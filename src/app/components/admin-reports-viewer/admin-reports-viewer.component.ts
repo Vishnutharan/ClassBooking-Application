@@ -2,6 +2,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NotificationService } from '../../core/services/notification.service';
+import { AdminService } from '../../core/services/admin.service';
 
 interface ReportHistory {
   id: string;
@@ -21,6 +22,7 @@ interface ReportHistory {
 })
 export class AdminReportsViewerComponent implements OnInit {
   private notificationService = inject(NotificationService);
+  private adminService = inject(AdminService);
   private platformId = inject(PLATFORM_ID);
   private isBrowser: boolean;
 
@@ -47,44 +49,16 @@ export class AdminReportsViewerComponent implements OnInit {
   private loadReportHistory(): void {
     this.isLoading = true;
 
-    setTimeout(() => {
-      this.reportHistory = [
-        {
-          id: '1',
-          name: 'Monthly Booking Report',
-          type: 'pdf',
-          generatedAt: new Date(Date.now() - 86400000),
-          fileSize: '2.4 MB',
-          status: 'ready'
-        },
-        {
-          id: '2',
-          name: 'User Growth Analysis',
-          type: 'excel',
-          generatedAt: new Date(Date.now() - 172800000),
-          fileSize: '1.8 MB',
-          status: 'ready'
-        },
-        {
-          id: '3',
-          name: 'Revenue Summary',
-          type: 'pdf',
-          generatedAt: new Date(Date.now() - 259200000),
-          fileSize: '3.1 MB',
-          status: 'ready'
-        },
-        {
-          id: '4',
-          name: 'Teacher Performance',
-          type: 'excel',
-          generatedAt: new Date(Date.now() - 345600000),
-          fileSize: '2.9 MB',
-          status: 'ready'
-        }
-      ];
-
-      this.isLoading = false;
-    }, 500);
+    this.adminService.getReportHistory().subscribe({
+      next: (history) => {
+        this.reportHistory = history;
+        this.isLoading = false;
+      },
+      error: () => {
+        this.notificationService.showError('Failed to load report history');
+        this.isLoading = false;
+      }
+    });
   }
 
   viewReport(report: ReportHistory): void {

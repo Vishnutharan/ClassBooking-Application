@@ -6,7 +6,7 @@
         <div class="brand-mark">CB</div>
         <div class="brand-copy">
           <span class="brand-name">ClassBooking</span>
-          <span class="brand-tag">Built for teachers, students & admins</span>
+          <span class="brand-tag">A better space to learn & grow</span>
         </div>
       </div>
 
@@ -70,19 +70,19 @@
         <div class="hero-grid">
           <div class="hero-copy">
             <div class="pill-row">
-              <span class="pill">Bookings · Scheduling · Progress · Payments</span>
-              <span class="pill pill-ghost">Designed for Sri Lanka</span>
+              <span class="pill">YOUR NEXT CHAPTER STARTS HERE</span>
+              <span class="pill pill-ghost">Designed for the United Kingdom</span>
             </div>
             <h1 class="hero-title">
-              Run classes, teachers, and student progress from one modern workspace.
+              A little more learning.<br>A lot more <em>possibility.</em>
             </h1>
             <p class="hero-lede">
-              ClassBooking connects booking, messaging, resources, fees, and analytics so students,
-              teachers, and admins stay aligned.
+              Find your teacher, make time for what matters, and watch your confidence grow. One thoughtful space where
+              learning comes together.
             </p>
             <div class="cta-row">
               <button class="btn primary large" (click)="navigateToAuth('register')">
-                Create your account
+                Start your journey
               </button>
               <button class="btn secondary large" (click)="navigateToBookClass()">Book a class</button>
             </div>
@@ -106,85 +106,27 @@
             </div>
           </div>
 
-          <div class="hero-visual">
-            <div class="hero-board glass">
-              <div class="board-top">
-                <div>
-                  <p class="eyebrow">Today</p>
-                  <p class="board-title">Live schedule</p>
-                </div>
-                <span class="chip success">24 confirmed</span>
-              </div>
-              <div class="board-row">
-                <div class="row-main">
-                  <p class="row-title">Maths · Grade 11</p>
-                  <p class="row-sub">7:00 PM with Shalini · Online</p>
-                </div>
-                <button class="btn tiny ghost" (click)="navigateToBookClass()">Reschedule</button>
-              </div>
-              <div class="progress">
-                <span style="width: 76%"></span>
-              </div>
-              <div class="board-stats">
-                <div class="mini">
-                  <span class="mini-label">Attendance</span>
-                  <span class="mini-value">98%</span>
-                  <small>Reminders sent</small>
-                </div>
-                <div class="mini">
-                  <span class="mini-label">Resources</span>
-                  <span class="mini-value">12 files</span>
-                  <small>Shared with students</small>
-                </div>
-                <div class="mini">
-                  <span class="mini-label">Upcoming</span>
-                  <span class="mini-value">6 classes</span>
-                  <small>This week</small>
-                </div>
-              </div>
+          <div class="hero-visual" aria-label="Example learning dashboard">
+            <div class="hero-board">
+              <div class="board-top"><div><p class="eyebrow">YOUR LEARNING SPACE</p><p class="board-title">A good week to grow.</p></div><span class="chip success">All set &#10003;</span></div>
+              <div class="week-strip" aria-label="Example week"><div>MON<b>12</b></div><div>TUE<b>13</b></div><div class="selected">WED<b>14</b></div><div>THU<b>15</b></div><div>FRI<b>16</b></div><div>SAT<b>17</b></div><div>SUN<b>18</b></div></div>
+              <p class="eyebrow">A LITTLE PROGRESS, EVERY DAY</p>
+              <div class="board-row"><div><p class="row-title">Mathematics, made simple</p><p class="row-sub">GCSE / Year 11 &middot; 4:00 PM &middot; Online</p></div><span class="lesson-icon" aria-hidden="true">&#960;</span></div>
+              <div class="board-row lilac"><div><p class="row-title">Find your voice in English</p><p class="row-sub">Conversation &middot; 6:00 PM &middot; Online</p></div><span class="lesson-icon" aria-hidden="true">Aa</span></div>
+              <div class="board-stats"><div class="mini"><span class="mini-label">THIS WEEK</span><span class="mini-value">4 classes</span><small>Room to keep growing</small></div><div class="mini"><span class="mini-label">YOUR PROGRESS</span><span class="mini-value">98%</span><small>Looking good!</small></div><div class="mini"><span class="mini-label">RESOURCES</span><span class="mini-value">12 files</span><small>Ready when you are</small></div></div>
+              <p class="preview-note">A preview of your learning workspace</p>
             </div>
-
-            <div class="hero-stack">
-              <div class="stack-card glass">
-                <div class="stack-head">
-                  <div>
-                    <p class="stack-title">Student workspace</p>
-                    <p class="stack-sub">Bookings, timetable, resources, and results together.</p>
-                  </div>
-                  <button class="btn tiny outline" (click)="navigateToDashboard()">Open</button>
-                </div>
-                <ul class="stack-list">
-                  <li>Book classes in seconds</li>
-                  <li>View timetable and attendance</li>
-                  <li>Track exam prep and results</li>
-                </ul>
-              </div>
-              <div class="stack-card glass">
-                <div class="stack-head">
-                  <div>
-                    <p class="stack-title">Teacher control</p>
-                    <p class="stack-sub">Availability, materials, messaging, and fees.</p>
-                  </div>
-                  <button class="btn tiny ghost" (click)="navigateToDashboard()">Teacher view</button>
-                </div>
-                <ul class="stack-list">
-                  <li>Set availability and accept bookings</li>
-                  <li>Share lesson plans and resources</li>
-                  <li>Monitor attendance and earnings</li>
-                </ul>
-              </div>
-            </div>
+            <div class="floating-note"><span aria-hidden="true">&#10003;</span><div><b>Your next step? Already organised.</b><small>Classes, resources, and progress. All together.</small></div></div>
           </div>
         </div>
       </div>
     </section>
-
     <!-- Platform -->
     <section id="platform" class="section">
       <div class="shell">
         <div class="section-head">
           <p class="eyebrow">Platform</p>
-          <h2>The ClassBooking system, refreshed for how you already work.</h2>
+          <h2>Less organising. More possibilities.</h2>
           <p class="section-lede">
             Everything you need is already here: booking, discovery, scheduling, lesson plans,
             progress, exams, messaging, fees, and admin controls.
@@ -330,8 +272,7 @@
               <p>Explore booking and scheduling basics.</p>
             </div>
             <div class="price-amount">
-              <span class="currency">LKR</span>
-              <span class="value">0</span>
+              <span class="currency">£</span><span class="value">0</span>
               <span class="period">/mo</span>
             </div>
             <ul>
@@ -349,8 +290,7 @@
               <p>For students and parents who want the full toolkit.</p>
             </div>
             <div class="price-amount">
-              <span class="currency">LKR</span>
-              <span class="value">2499</span>
+              <span class="currency">£</span><span class="value">19</span>
               <span class="period">/mo</span>
             </div>
             <ul>
@@ -369,8 +309,7 @@
               <p>Grow your teaching business with clarity.</p>
             </div>
             <div class="price-amount">
-              <span class="currency">LKR</span>
-              <span class="value">1499</span>
+              <span class="currency">£</span><span class="value">29</span>
               <span class="period">/mo</span>
             </div>
             <ul>
@@ -414,7 +353,7 @@
         <div class="brand-mark">CB</div>
         <div>
           <p class="brand-name">ClassBooking</p>
-          <p class="footer-text">Quality education platform for Sri Lanka.</p>
+          <p class="footer-text">Premier UK education and tutoring platform.</p>
         </div>
       </div>
       <div class="footer-links">

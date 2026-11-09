@@ -60,10 +60,12 @@ namespace ClassBooking.API.Controllers
         {
             var booking = await _bookingService.GetBookingByIdAsync(id);
             if (booking == null) return NotFound();
+            if (!await CanAccess(booking)) return Forbid();
             return Ok(booking);
         }
 
         [HttpPost]
+        [Authorize(Roles = "Student")]
         public async Task<ActionResult<BookingResponse>> CreateBooking([FromBody] BookingRequest request)
         {
             var studentId = User.FindFirst("userId")?.Value;
@@ -72,23 +74,22 @@ namespace ClassBooking.API.Controllers
             try
             {
                 var response = await _bookingService.CreateBookingAsync(studentId, request);
-                if (!response.Success)
-                {
-                    return BadRequest(response);
-                }
-                return Ok(response);
+                return response.Success ? Ok(response) : BadRequest(response);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "Error creating booking", details = ex.Message });
+                return StatusCode(500, new { success = false, message = "Error creating booking" });
             }
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<BookingResponse>> UpdateBooking(string id, [FromBody] BookingRequest request)
         {
+            var booking = await _bookingService.GetBookingByIdAsync(id);
+            if (booking == null) return NotFound();
+            if (!await CanAccess(booking)) return Forbid();
             var response = await _bookingService.UpdateBookingAsync(id, request);
-            return Ok(response);
+            return response.Success ? Ok(response) : BadRequest(response);
         }
 
         [HttpPost("{id}/confirm")]
@@ -114,14 +115,18 @@ namespace ClassBooking.API.Controllers
             }
 
             var response = await _bookingService.ConfirmBookingAsync(id);
-            return Ok(response);
+            return response.Success ? Ok(response) : BadRequest(response);
         }
 
         [HttpPost("{id}/cancel")]
         public async Task<ActionResult<BookingResponse>> CancelBooking(string id, [FromBody] CancelRequest? request)
         {
+            var booking = await _bookingService.GetBookingByIdAsync(id);
+            if (booking == null) return NotFound();
+            if (!await CanAccess(booking)) return Forbid();
+            if (!User.IsInRole("Admin") && !await CanAccess(booking)) return Forbid();
             var response = await _bookingService.CancelBookingAsync(id, request?.Reason);
-            return Ok(response);
+            return response.Success ? Ok(response) : BadRequest(response);
         }
 
         [HttpPost("{id}/reject")]
@@ -147,21 +152,27 @@ namespace ClassBooking.API.Controllers
             }
 
             var response = await _bookingService.RejectBookingAsync(id, request?.Reason);
-            return Ok(response);
+            return response.Success ? Ok(response) : BadRequest(response);
         }
 
         [HttpPost("{id}/complete")]
         public async Task<ActionResult<BookingResponse>> CompleteBooking(string id)
         {
+            var booking = await _bookingService.GetBookingByIdAsync(id);
+            if (booking == null) return NotFound();
+            if (!await CanAccess(booking, teacherOnly: true)) return Forbid();
             var response = await _bookingService.CompleteBookingAsync(id);
-            return Ok(response);
+            return response.Success ? Ok(response) : BadRequest(response);
         }
 
         [HttpPost("{id}/reschedule")]
         public async Task<ActionResult<BookingResponse>> RescheduleBooking(string id, [FromBody] RescheduleRequest request)
         {
+            var booking = await _bookingService.GetBookingByIdAsync(id);
+            if (booking == null) return NotFound();
+            if (!await CanAccess(booking)) return Forbid();
             var response = await _bookingService.RescheduleBookingAsync(id, request.NewDate, request.NewStartTime, request.NewEndTime);
-            return Ok(response);
+            return response.Success ? Ok(response) : BadRequest(response);
         }
 
         [HttpGet("slots")]
@@ -169,6 +180,16 @@ namespace ClassBooking.API.Controllers
         {
             var slots = await _bookingService.GetAvailableSlotsAsync(teacherId, date);
             return Ok(slots);
+        }
+
+        private async Task<bool> CanAccess(Models.ClassBooking booking, bool teacherOnly = false)
+        {
+            if (User.IsInRole("Admin")) return true;
+            var userId = User.FindFirst("userId")?.Value;
+            if (!teacherOnly && User.IsInRole("Student") && booking.StudentId == userId) return true;
+            if (!User.IsInRole("Teacher") || userId == null) return false;
+            var teacher = await _teacherService.GetTeacherByUserIdAsync(userId);
+            return teacher != null && booking.TeacherId == teacher.Id;
         }
 
         private async Task<TeacherProfile?> EnsureTeacherProfile(string userId)

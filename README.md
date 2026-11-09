@@ -1,5 +1,11 @@
 # ClassBooking Platform
 
+## Local Stripe test payments
+
+Card payments use Stripe Checkout in test mode. From `Backend/ClassBooking.API`, run `dotnet user-secrets init`, then set your Stripe test secret with `dotnet user-secrets set "Stripe:SecretKey" "sk_test_..."`. Start `stripe listen --forward-to http://localhost:5197/api/payments/stripe/webhook` and set its printed signing secret with `dotnet user-secrets set "Stripe:WebhookSecret" "whsec_..."`. Keep both keys out of source control. The checkout button reports a configuration error until these secrets are set; cash payments remain available.
+
+Run the API workflow checks from the repository root with `node scripts/verify-workflows.cjs`.
+
 ## Overview
 ClassBooking is a comprehensive online education platform connecting students with teachers for scheduled classes. It supports three distinct roles: Students, Teachers, and Admins, offering tailored dashboards and features for each.
 

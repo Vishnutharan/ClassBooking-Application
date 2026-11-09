@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, map } from 'rxjs';
+import { throwError, Observable, catchError, of, map } from 'rxjs';
 import { ClassBooking } from '../models/shared.models';
 import { environment } from '../../../environments/environment';
-import { MockDataService } from './mock-data.service';
 import { AuthService } from './auth.service';
 
 export interface BookingRequest {
@@ -38,22 +37,27 @@ export interface BookingResponse {
 })
 export class ClassBookingService {
   private http = inject(HttpClient);
-  private mockData = inject(MockDataService);
   private authService = inject(AuthService);
   private apiUrl = `${environment.apiUrl}/bookings`;
 
   getStudentBookings(): Observable<ClassBooking[]> {
     const studentId = this.authService.getCurrentUser()?.id;
-    return this.http.get<ClassBooking[]>(this.apiUrl);
+    return this.http.get<ClassBooking[]>(this.apiUrl).pipe(
+      catchError(error => throwError(() => error))
+    );
   }
 
   getTeacherBookings(): Observable<ClassBooking[]> {
     const teacherId = this.authService.getCurrentUser()?.id;
-    return this.http.get<ClassBooking[]>(this.apiUrl);
+    return this.http.get<ClassBooking[]>(this.apiUrl).pipe(
+      catchError(error => throwError(() => error))
+    );
   }
 
   getAllBookings(): Observable<ClassBooking[]> {
-    return this.http.get<ClassBooking[]>(this.apiUrl);
+    return this.http.get<ClassBooking[]>(this.apiUrl).pipe(
+      catchError(error => throwError(() => error))
+    );
   }
 
   getBookingById(id: string): Observable<ClassBooking> {
