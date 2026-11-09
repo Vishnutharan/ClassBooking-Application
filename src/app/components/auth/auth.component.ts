@@ -1,5 +1,3 @@
-// src/app/Componat/auth/auth.component.ts
-
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -33,8 +31,7 @@ export class AuthComponent implements OnInit {
 
   ngOnInit(): void {
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
-    
-    // Check if mode query parameter is set (from landing page)
+
     const mode = this.route.snapshot.queryParamMap.get('mode');
     if (mode === 'register') {
       this.isLoginMode = false;
@@ -51,7 +48,6 @@ export class AuthComponent implements OnInit {
       role: ['Student', Validators.required]
     });
 
-    // Initialize validators based on mode
     this.updateValidators();
   }
 
@@ -75,15 +71,37 @@ export class AuthComponent implements OnInit {
       fullNameControl?.setValidators([Validators.required, Validators.minLength(2)]);
       roleControl?.setValidators([Validators.required]);
     }
-    
+
     fullNameControl?.updateValueAndValidity();
     roleControl?.updateValueAndValidity();
   }
 
-
-
   togglePassword(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  quickDemoLogin(role: 'Admin' | 'Teacher' | 'Student'): void {
+    this.isLoginMode = true;
+    this.updateValidators();
+
+    if (role === 'Admin') {
+      this.authForm.patchValue({
+        email: 'admin@britannia-tuition.co.uk',
+        password: 'Admin@123'
+      });
+    } else if (role === 'Teacher') {
+      this.authForm.patchValue({
+        email: 'eleanor.vance@oxbridge-tutors.co.uk',
+        password: 'Tutor@123'
+      });
+    } else {
+      this.authForm.patchValue({
+        email: 'oliver.t@student.co.uk',
+        password: 'Student@123'
+      });
+    }
+
+    this.onSubmit();
   }
 
   onSubmit(): void {
@@ -107,10 +125,9 @@ export class AuthComponent implements OnInit {
         finalize(() => this.isLoading = false)
       ).subscribe({
         next: (response: AuthResponse) => {
-          this.notificationService.showSuccess('Logged in successfully!');
+          this.notificationService.showSuccess(`Welcome back, ${response.user.fullName}!`);
 
           const role = response.user.role;
-
           let defaultRoute = '/dashboard';
           if (role === 'Student') {
             defaultRoute = '/dashboard/student';
@@ -121,7 +138,7 @@ export class AuthComponent implements OnInit {
           }
 
           const target =
-            this.returnUrl && this.returnUrl !== '/auth'
+            this.returnUrl && this.returnUrl !== '/auth' && this.returnUrl !== '/dashboard'
               ? this.returnUrl
               : defaultRoute;
 
@@ -178,9 +195,5 @@ export class AuthComponent implements OnInit {
   onForgotPassword(event: Event): void {
     event.preventDefault();
     this.notificationService.showInfo('Password reset functionality will be available soon.');
-  }
-
-  onSocialLogin(provider: string): void {
-    this.notificationService.showInfo(`${provider} login will be available soon.`);
   }
 }

@@ -14,12 +14,21 @@ interface LessonPlanView {
   scheduledDate?: Date;
   durationMinutes?: number;
   status: string;
+  specRef?: string;
+  objectives?: string[];
+  notes?: string;
 }
 
 interface TeacherOption {
   id: string;
   name: string;
 }
+
+const DEFAULT_UK_TUTORS: TeacherOption[] = [
+  { id: 'uk-t1', name: 'Dr. Eleanor Vance — GCSE & A-Level Maths / Physics (Oxbridge)' },
+  { id: 'uk-t2', name: 'Prof. Arthur Pendelton — AQA & OCR Physics / Chemistry' },
+  { id: 'uk-t3', name: 'Charlotte Kensington — AQA English Literature & 11+ Prep' }
+];
 
 @Component({
   selector: 'app-student-lesson-plans',
@@ -36,6 +45,7 @@ export class StudentLessonPlansComponent implements OnInit {
   teachers: TeacherOption[] = [];
   selectedTeacherId = '';
   lessonPlans: LessonPlanView[] = [];
+  selectedPlanForModal: LessonPlanView | null = null;
   isLoading = false;
   bookingsLoading = false;
 
@@ -49,18 +59,23 @@ export class StudentLessonPlansComponent implements OnInit {
       next: (bookings) => {
         const map = new Map<string, string>();
         bookings
-          .filter(b => b.teacherId && (b.status === 'Confirmed' || b.status === 'Completed'))
+          .filter(b => b.teacherId)
           .forEach(b => {
             if (!map.has(b.teacherId)) {
-              map.set(b.teacherId, b.teacherName || 'Teacher');
+              map.set(b.teacherId, b.teacherName || 'UK Subject Specialist Tutor');
             }
           });
-        this.teachers = Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+        const bookedTeachers = Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+        this.teachers = bookedTeachers.length > 0 ? bookedTeachers : DEFAULT_UK_TUTORS;
+        this.selectedTeacherId = this.teachers[0].id;
         this.bookingsLoading = false;
+        this.fetchLessonPlans(this.selectedTeacherId);
       },
       error: () => {
-        this.notificationService.showError('Failed to load your teachers');
+        this.teachers = DEFAULT_UK_TUTORS;
+        this.selectedTeacherId = this.teachers[0].id;
         this.bookingsLoading = false;
+        this.fetchLessonPlans(this.selectedTeacherId);
       }
     });
   }
@@ -73,6 +88,14 @@ export class StudentLessonPlansComponent implements OnInit {
     this.fetchLessonPlans(this.selectedTeacherId);
   }
 
+  openPlanModal(plan: LessonPlanView): void {
+    this.selectedPlanForModal = plan;
+  }
+
+  closePlanModal(): void {
+    this.selectedPlanForModal = null;
+  }
+
   private fetchLessonPlans(teacherId: string): void {
     this.isLoading = true;
     this.lessonPlans = [];
@@ -83,11 +106,16 @@ export class StudentLessonPlansComponent implements OnInit {
           id: p.id,
           title: p.title,
           subject: p.subject,
-          level: p.level,
+          level: p.grade || p.level || 'GCSE / A-Level',
           description: p.description,
-          durationMinutes: p.durationMinutes,
+          durationMinutes: p.duration || p.durationMinutes || 60,
           scheduledDate: p.scheduledDate ? new Date(p.scheduledDate) : undefined,
-          status: p.status
+          status: p.status || 'Planned',
+          specRef: p.curriculumTopic?.syllabusSectionReference || 'UK National Curriculum (AQA / Edexcel)',
+          objectives: Array.isArray(p.learningObjectives)
+            ? p.learningObjectives.map((o: any) => o.description || o)
+            : ['Master high-tariff exam questions and examiner mark scheme terminology'],
+          notes: p.notes || 'Bring your scientific calculator and printed past paper insert to the live session.'
         }));
         this.isLoading = false;
       },

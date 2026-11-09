@@ -3,8 +3,8 @@
     <div class="header-content">
       <div class="header-intro">
         <span class="uk-badge">UK National Curriculum • GCSE, A-Level &amp; 11+</span>
-        <h1 class="page-title">Book a Tutoring Session</h1>
-        <p class="page-description">Select your verified UK tutor below, then choose a quick slot or click any green slot on the calendar.</p>
+        <h1 class="page-title">Book a 1-to-1 UK Tutoring Session</h1>
+        <p class="page-description">Select your DBS-verified UK tutor below, then pick a quick slot or click any green slot on the calendar.</p>
       </div>
       <div class="header-actions">
         <button class="btn btn-secondary" type="button" (click)="refreshSelectedTeacher()">
@@ -22,13 +22,13 @@
     <div class="panel-top-row">
       <div>
         <span class="step-pill">Step 1</span>
-        <h2 class="section-heading">Select Your Tutor</h2>
+        <h2 class="section-heading">Select Your UK Subject Specialist</h2>
       </div>
       <div class="dropdown-fallback">
         <select class="form-select compact-select" [(ngModel)]="selectedTeacherId" (ngModelChange)="onTeacherSelected($event)">
-          <option value="">-- Choose a tutor --</option>
+          <option value="">-- Choose a UK tutor --</option>
           <option *ngFor="let teacher of teachers" [value]="teacher.id">
-            {{ teacher.fullName }} — £{{ teacher.hourlyRate || 35 }}/hr ({{ teacher.subjects.length ? teacher.subjects[0].name : 'Multi-subject' }})
+            {{ teacher.fullName }} — £{{ teacher.hourlyRate || 45 }}/hr ({{ teacher.subjects.length ? teacher.subjects[0].name : 'Multi-subject' }})
           </option>
         </select>
       </div>
@@ -45,11 +45,11 @@
           <div class="tutor-info">
             <div class="tutor-name-row">
               <h3>{{ teacher.fullName }}</h3>
-              <span class="verified-tag" *ngIf="teacher.verificationStatus === 'Verified'">✓ Verified</span>
+              <span class="verified-tag" *ngIf="teacher.verificationStatus === 'Verified'">✓ DBS Verified</span>
             </div>
-            <p class="tutor-location">{{ teacher.locationAddress || 'Online UK-wide' }} • {{ teacher.experienceYears || 6 }} yrs exp</p>
+            <p class="tutor-location">{{ teacher.locationAddress || 'Online UK-wide' }} • {{ teacher.experienceYears || 7 }} yrs exp</p>
           </div>
-          <div class="tutor-rate-pill">£{{ teacher.hourlyRate || 35 }}<span>/hr</span></div>
+          <div class="tutor-rate-pill">£{{ teacher.hourlyRate || 45 }}<span>/hr</span></div>
         </div>
         <div class="tutor-subjects-row">
           <span class="subj-chip" *ngFor="let s of teacher.subjects | slice:0:3">{{ s.name }}</span>
@@ -65,10 +65,10 @@
       <div>
         <span class="step-pill">Step 2</span>
         <h2 class="section-heading">Quick-Book Next Available Slots with {{ selectedTeacher.fullName }}</h2>
-        <p class="section-sub">Click any open slot below to book immediately, or browse the full calendar underneath.</p>
+        <p class="section-sub">Click any open UK slot below to open the instant booking popup, or browse the weekly calendar underneath.</p>
       </div>
       <button class="btn btn-secondary" type="button" (click)="openCustomBookingModal()">
-        Pick Another Date/Time
+        Pick Custom Date/Time
       </button>
     </div>
 
@@ -84,8 +84,8 @@
         </div>
         <div class="slot-time-main">{{ slot.startTime }} – {{ slot.endTime }}</div>
         <div class="slot-footer-row">
-          <span class="slot-price">£{{ selectedTeacher.hourlyRate || 35 }}/hr</span>
-          <span class="slot-cta">Book Now →</span>
+          <span class="slot-price">£{{ selectedTeacher.hourlyRate || 45 }}/hr</span>
+          <span class="slot-cta">Book Slot →</span>
         </div>
       </button>
     </div>
@@ -96,10 +96,10 @@
     <div class="calendar-header">
       <div>
         <h2>Weekly Schedule — {{ selectedTeacher?.fullName || 'Your Tutor' }}</h2>
-        <p class="calendar-subtitle">Click any green slot on the calendar to open the booking confirmation window.</p>
+        <p class="calendar-subtitle">Click any green slot on the calendar to open the booking confirmation popup.</p>
       </div>
       <div class="legend-pills">
-        <span class="legend-item"><i class="dot available"></i> Available</span>
+        <span class="legend-item"><i class="dot available"></i> Available Slot</span>
         <span class="legend-item"><i class="dot pending"></i> Pending Approval</span>
       </div>
     </div>
@@ -111,53 +111,44 @@
   </div>
   <ng-template #selectTeacherHint>
     <div class="placeholder">
-      <p>Please select a tutor above to view available time slots.</p>
+      <p>Please select a UK tutor above to view available time slots.</p>
     </div>
   </ng-template>
 </div>
 
-<div class="modal-overlay" *ngIf="showBookingDialog" (click)="closeBookingDialog()"></div>
-
-<div class="booking-modal" *ngIf="showBookingDialog" (click)="$event.stopPropagation()">
-  <div class="modal-header">
-    <h2 class="modal-title">Confirm Your <b>BOOKING</b></h2>
-    <button class="modal-close" (click)="closeBookingDialog()">&times;</button>
-  </div>
-
-  <div class="modal-body" *ngIf="selectedSlot">
-    <div class="slot-summary">
-      <h3 class="summary-title">Session Summary</h3>
-      <div class="summary-grid">
-        <div class="summary-item">
-          <div class="summary-content">
-            <p class="summary-label">Tutor</p>
-            <p class="summary-value">{{ selectedSlot.teacherName }}</p>
-          </div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-content">
-            <p class="summary-label">Date</p>
-            <p class="summary-value">{{ selectedSlot.date | date:'EEE, d MMM yyyy' }}</p>
-          </div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-content">
-            <p class="summary-label">Time (UK)</p>
-            <p class="summary-value">{{ selectedSlot.startTime }} – {{ selectedSlot.endTime }}</p>
-          </div>
-        </div>
-        <div class="summary-item">
-          <div class="summary-content">
-            <p class="summary-label">Hourly Rate</p>
-            <p class="summary-value">£{{ selectedSlot.teacherRate || '35' }}/hr</p>
-          </div>
-        </div>
+<!-- Neat Compact 2-Column Booking Popup Modal -->
+<div class="modal-overlay" *ngIf="showBookingDialog" (click)="closeBookingDialog()">
+  <div class="booking-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">UK 1-to-1 Tuition Reservation</span>
+        <h2 class="modal-title">Confirm Your Session Booking</h2>
       </div>
+      <button class="modal-close" type="button" (click)="closeBookingDialog()">✕</button>
     </div>
 
-    <div class="booking-form-section">
-      <h3 class="form-title">Lesson Details</h3>
-      <form class="booking-form">
+    <div class="modal-body" *ngIf="selectedSlot">
+      <!-- Compact 4-item Summary Strip -->
+      <div class="summary-grid">
+        <div class="summary-item">
+          <p class="summary-label">UK Tutor</p>
+          <p class="summary-value">{{ selectedSlot.teacherName }}</p>
+        </div>
+        <div class="summary-item">
+          <p class="summary-label">Session Date</p>
+          <p class="summary-value">{{ selectedSlot.date | date:'EEE, d MMM yyyy' }}</p>
+        </div>
+        <div class="summary-item">
+          <p class="summary-label">Time (GMT/BST)</p>
+          <p class="summary-value">{{ selectedSlot.startTime }} – {{ selectedSlot.endTime }}</p>
+        </div>
+        <div class="summary-item highlight">
+          <p class="summary-label">Tuition Fee</p>
+          <p class="summary-value">£{{ selectedSlot.teacherRate || '45' }}/hr</p>
+        </div>
+      </div>
+
+      <form class="booking-form-grid">
         <div class="form-group" *ngIf="isCustomSlotBooking">
           <label class="form-label" for="customDate">Choose Date *</label>
           <input
@@ -171,7 +162,7 @@
         </div>
 
         <div class="form-group" *ngIf="isCustomSlotBooking">
-          <label class="form-label" for="customTime">Choose Time Slot *</label>
+          <label class="form-label" for="customTime">Choose Time Slot (UK) *</label>
           <select
             id="customTime"
             class="form-select"
@@ -185,7 +176,7 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="subject">Select Subject *</label>
+          <label class="form-label" for="subject">Subject &amp; Specification *</label>
           <select id="subject" class="form-select" [(ngModel)]="bookingForm.subject" name="subject" required>
             <option value="">Choose a subject</option>
             <option *ngFor="let subject of selectedSlot.subjects" [value]="subject.name">
@@ -194,15 +185,15 @@
             <option *ngIf="!selectedSlot.subjects || selectedSlot.subjects.length === 0" value="Mathematics">
               Mathematics (GCSE / A-Level)
             </option>
-            <option value="Physics">Physics (GCSE / A-Level)</option>
-            <option value="Chemistry">Chemistry (GCSE / A-Level)</option>
-            <option value="Biology">Biology (GCSE / A-Level)</option>
-            <option value="English Literature">English Literature (GCSE / A-Level)</option>
+            <option value="Physics">Physics (AQA / OCR)</option>
+            <option value="Chemistry">Chemistry (OCR / Edexcel)</option>
+            <option value="Biology">Biology (AQA / Edexcel)</option>
+            <option value="English Literature">English Literature (AQA / Edexcel)</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label class="form-label">Curriculum / Year Group *</label>
+          <label class="form-label">UK Key Stage / Year Group *</label>
           <select class="form-select" [(ngModel)]="bookingForm.gradeLevel" name="gradeLevel" required>
             <option value="">Select Year Group</option>
             <option *ngFor="let grade of gradeOptions" [value]="grade">{{ grade }}</option>
@@ -210,35 +201,27 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="school">School / Sixth Form College</label>
+          <label class="form-label" for="school">UK School / Sixth Form College</label>
           <input type="text" id="school" class="form-input" [(ngModel)]="bookingForm.school" name="school"
-            placeholder="e.g. King's College School, London">
+            placeholder="e.g. Westminster Academy, London">
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="parentName">Parent / Guardian Name</label>
-          <input type="text" id="parentName" class="form-input" [(ngModel)]="bookingForm.parentName" name="parentName"
-            placeholder="Parent or Guardian full name">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="parentContact">Parent Contact Number (UK)</label>
+          <label class="form-label" for="parentContact">Parent / Guardian UK Contact</label>
           <input type="tel" id="parentContact" class="form-input" [(ngModel)]="bookingForm.parentContact"
             name="parentContact" placeholder="e.g. +44 7700 900077">
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="classType">Session Format</label>
+          <label class="form-label">Session Format</label>
           <div class="radio-group">
-            <label class="radio-label">
-              <input type="radio" name="classType" value="Personal_1_1" [(ngModel)]="bookingForm.classType"
-                class="radio-input">
-              <span class="radio-text">1-to-1 Private Tuition</span>
+            <label class="radio-label" [class.selected]="bookingForm.classType === 'Personal_1_1'">
+              <input type="radio" name="classType" value="Personal_1_1" [(ngModel)]="bookingForm.classType" class="radio-input">
+              <span class="radio-text">1-to-1 Private</span>
             </label>
-            <label class="radio-label">
-              <input type="radio" name="classType" value="Group" [(ngModel)]="bookingForm.classType"
-                class="radio-input">
-              <span class="radio-text">Small Group Session</span>
+            <label class="radio-label" [class.selected]="bookingForm.classType === 'Group'">
+              <input type="radio" name="classType" value="Group" [(ngModel)]="bookingForm.classType" class="radio-input">
+              <span class="radio-text">Small Group</span>
             </label>
           </div>
         </div>
@@ -246,30 +229,30 @@
         <div class="form-group">
           <label class="form-label">Delivery Mode</label>
           <div class="radio-group">
-            <label class="radio-label">
+            <label class="radio-label" [class.selected]="bookingForm.mode === 'ONLINE'">
               <input type="radio" name="mode" value="ONLINE" [(ngModel)]="bookingForm.mode" class="radio-input">
-              <span class="radio-text">Online (Interactive Whiteboard)</span>
+              <span class="radio-text">Online Whiteboard</span>
             </label>
-            <label class="radio-label">
+            <label class="radio-label" [class.selected]="bookingForm.mode === 'IN_PERSON'">
               <input type="radio" name="mode" value="IN_PERSON" [(ngModel)]="bookingForm.mode" class="radio-input">
-              <span class="radio-text">In-Person Tuition</span>
+              <span class="radio-text">In-Person (UK)</span>
             </label>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="notes">Topics / Exam Board Notes</label>
-          <textarea id="notes" class="form-textarea" [(ngModel)]="bookingForm.notes" name="notes" rows="3"
-            placeholder="e.g. Edexcel Higher Paper 2 revision, quadratic equations, or AQA past paper practice"></textarea>
+        <div class="form-group full-span">
+          <label class="form-label" for="notes">Exam Board &amp; Topics to Cover (Optional)</label>
+          <textarea id="notes" class="form-textarea" [(ngModel)]="bookingForm.notes" name="notes" rows="2"
+            placeholder="e.g. Edexcel Higher Paper 2 revision, Circle Theorems, or AQA Required Practicals"></textarea>
         </div>
       </form>
     </div>
-  </div>
 
-  <div class="modal-footer">
-    <button class="btn btn-secondary" type="button" (click)="closeBookingDialog()">Cancel</button>
-    <button class="btn btn-primary" type="button" (click)="confirmBooking()" [disabled]="!bookingForm.subject">
-      <span class="btn-text">Confirm &amp; Proceed to Payment</span>
-    </button>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" type="button" (click)="closeBookingDialog()">Cancel</button>
+      <button class="btn btn-primary" type="button" (click)="confirmBooking()" [disabled]="!bookingForm.subject">
+        <span>Confirm Booking (£{{ selectedSlot?.teacherRate || '45' }}) →</span>
+      </button>
+    </div>
   </div>
 </div>

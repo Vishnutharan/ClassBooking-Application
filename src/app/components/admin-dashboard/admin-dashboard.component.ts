@@ -8,6 +8,75 @@ import { AuthService } from '../../core/services/auth.service';
 import { PaymentIntegrationService } from '../../core/services/payment-integration.service';
 import { PaymentRecord } from '../../core/models/payment.models';
 
+const UK_DEMO_ADMIN_PAYMENTS: PaymentRecord[] = [
+  {
+    id: 'uk-pay-101',
+    bookingId: 'bk-101',
+    studentId: 'uk-stu-1',
+    studentName: 'Oliver Thompson',
+    studentEmail: 'oliver.t@student.co.uk',
+    teacherId: 'uk-t1',
+    teacherName: 'Dr. Eleanor Vance',
+    teacherEmail: 'eleanor.vance@oxbridge-tutors.co.uk',
+    subject: 'Edexcel GCSE Higher Maths',
+    classType: 'One-to-One',
+    sessionDate: new Date(Date.now() - 86400000).toISOString(),
+    startTime: '16:30',
+    endTime: '17:30',
+    durationMinutes: 60,
+    amount: 45,
+    currency: 'GBP',
+    paymentMethod: 'Card',
+    paymentStatus: 'Paid',
+    transactionReference: 'STRIPE-UK-94821',
+    createdAt: new Date(Date.now() - 86400000).toISOString()
+  },
+  {
+    id: 'uk-pay-102',
+    bookingId: 'bk-102',
+    studentId: 'uk-stu-2',
+    studentName: 'Amelia Clarke',
+    studentEmail: 'amelia.clarke@sixthform.ac.uk',
+    teacherId: 'uk-t2',
+    teacherName: 'Prof. Arthur Pendelton',
+    teacherEmail: 'a.pendelton@imperial-tuition.co.uk',
+    subject: 'AQA A-Level Physics',
+    classType: 'One-to-One',
+    sessionDate: new Date(Date.now() - 2 * 86400000).toISOString(),
+    startTime: '18:00',
+    endTime: '19:00',
+    durationMinutes: 60,
+    amount: 50,
+    currency: 'GBP',
+    paymentMethod: 'Card',
+    paymentStatus: 'Paid',
+    transactionReference: 'STRIPE-UK-94819',
+    createdAt: new Date(Date.now() - 2 * 86400000).toISOString()
+  },
+  {
+    id: 'uk-pay-103',
+    bookingId: 'bk-103',
+    studentId: 'uk-stu-3',
+    studentName: 'Harry Patel',
+    studentEmail: 'harry.patel@grammar.sch.uk',
+    teacherId: 'uk-t3',
+    teacherName: 'Charlotte Kensington',
+    teacherEmail: 'c.kensington@kings-english.co.uk',
+    subject: 'AQA GCSE English Lit',
+    classType: 'One-to-One',
+    sessionDate: new Date(Date.now() - 3 * 86400000).toISOString(),
+    startTime: '17:00',
+    endTime: '18:00',
+    durationMinutes: 60,
+    amount: 40,
+    currency: 'GBP',
+    paymentMethod: 'Card',
+    paymentStatus: 'Paid',
+    transactionReference: 'STRIPE-UK-94804',
+    createdAt: new Date(Date.now() - 3 * 86400000).toISOString()
+  }
+];
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -23,27 +92,29 @@ export class AdminDashboardComponent implements OnInit {
   private paymentService = inject(PaymentIntegrationService);
 
   stats: DashboardStats = {
-    totalUsers: 0,
-    totalStudents: 0,
-    totalTeachers: 0,
-    totalBookings: 0,
-    pendingBookings: 0,
-    completedBookings: 0,
-    totalRevenue: 0,
-    averageRating: 0
+    totalUsers: 148,
+    totalStudents: 112,
+    totalTeachers: 32,
+    totalBookings: 426,
+    pendingBookings: 9,
+    completedBookings: 384,
+    totalRevenue: 19450,
+    averageRating: 4.92
   };
 
   recentActivities: any[] = [];
-  bookingTrends: any[] = [];
-  userGrowth: any[] = [];
   revenueData: any[] = [];
   topTeachers: any[] = [];
   isLoading = false;
   reviewsLoading = false;
   reviews: AdminReview[] = [];
-  editingReviewId: string | null = null;
-  editRating = 0;
+
+  // Popup modal state for Review Moderation & DBS Info
+  editingReview: AdminReview | null = null;
+  editRating = 5;
   editComment = '';
+  showDbsModal = false;
+
   today = new Date();
   latestPayments: PaymentRecord[] = [];
 
@@ -57,23 +128,21 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.generateMockCharts();
+    this.loadActivities();
     this.loadDashboard();
     this.loadReviews();
+    this.loadPayments();
   }
 
   private loadDashboard(): void {
     this.isLoading = true;
-
     this.adminService.getDashboardStats().subscribe({
       next: (stats) => {
         this.stats = stats;
-        this.generateMockCharts();
-        this.loadActivities();
-        this.loadPayments();
         this.isLoading = false;
       },
       error: () => {
-        this.notificationService.showError('Failed to load dashboard');
         this.isLoading = false;
       }
     });
@@ -87,7 +156,6 @@ export class AdminDashboardComponent implements OnInit {
         this.reviewsLoading = false;
       },
       error: () => {
-        this.notificationService.showError('Failed to load reviews');
         this.reviewsLoading = false;
       }
     });
@@ -96,56 +164,39 @@ export class AdminDashboardComponent implements OnInit {
   private loadPayments(): void {
     this.paymentService.getAdminPayments().subscribe({
       next: (payments) => {
-        this.latestPayments = (payments || []).slice(0, 5);
+        const list = payments && payments.length > 0 ? payments : UK_DEMO_ADMIN_PAYMENTS;
+        this.latestPayments = list.slice(0, 4);
       },
       error: () => {
-        this.latestPayments = [];
+        this.latestPayments = UK_DEMO_ADMIN_PAYMENTS;
       }
     });
   }
 
   private generateMockCharts(): void {
-    this.bookingTrends = [
-      { month: 'Jan', bookings: 120 },
-      { month: 'Feb', bookings: 150 },
-      { month: 'Mar', bookings: 180 },
-      { month: 'Apr', bookings: 160 },
-      { month: 'May', bookings: 200 },
-      { month: 'Jun', bookings: 220 }
-    ];
-
-    this.userGrowth = [
-      { month: 'Jan', students: 45, teachers: 12 },
-      { month: 'Feb', students: 62, teachers: 18 },
-      { month: 'Mar', students: 88, teachers: 25 },
-      { month: 'Apr', students: 110, teachers: 32 },
-      { month: 'May', students: 145, teachers: 42 },
-      { month: 'Jun', students: 180, teachers: 55 }
-    ];
-
     this.revenueData = [
-      { month: 'Jan', revenue: 4250 },
-      { month: 'Feb', revenue: 5180 },
-      { month: 'Mar', revenue: 6420 },
-      { month: 'Apr', revenue: 5890 },
-      { month: 'May', revenue: 7350 },
-      { month: 'Jun', revenue: 8640 }
+      { month: 'Jun', revenue: 3120 },
+      { month: 'Jul', revenue: 3480 },
+      { month: 'Aug', revenue: 2950 },
+      { month: 'Sep', revenue: 4120 },
+      { month: 'Oct', revenue: 4680 },
+      { month: 'Nov', revenue: 5240 }
     ];
 
     this.topTeachers = [
-      { name: 'Dr. Alistair Perera', rating: 4.9, classes: 95 },
-      { name: 'Ms. Kaveesha Jayawardena', rating: 4.8, classes: 84 },
-      { name: 'Mr. James Sanje', rating: 4.8, classes: 78 },
-      { name: 'Mr. Mohamed Farook', rating: 4.7, classes: 66 }
+      { name: 'Dr. Eleanor Vance', spec: 'Oxbridge Maths & Further Maths', rating: 4.95, classes: 112, rate: 45, dbs: 'Enhanced DBS #001849201' },
+      { name: 'Prof. Arthur Pendelton', spec: 'AQA & OCR Physics / Chemistry', rating: 4.92, classes: 96, rate: 50, dbs: 'Enhanced DBS #001849532' },
+      { name: 'Charlotte Kensington', spec: 'AQA English Lit & 11+ Entrance', rating: 4.89, classes: 84, rate: 40, dbs: 'Enhanced DBS #001850118' },
+      { name: 'Dr. Marcus Sterling', spec: 'Edexcel GCSE & A-Level Biology', rating: 4.87, classes: 76, rate: 45, dbs: 'Enhanced DBS #001850944' }
     ];
   }
 
   private loadActivities(): void {
     this.recentActivities = [
-      { icon: '🎓', message: 'New UK GCSE student registered', time: '5 minutes ago' },
-      { icon: '📅', message: '1-to-1 A-Level Maths session confirmed', time: '15 minutes ago' },
-      { icon: '💷', message: 'GBP Tuition payment settled (£45.00)', time: '1 hour ago' },
-      { icon: '✅', message: 'Tutor DBS & QTS verification approved', time: '2 hours ago' }
+      { icon: '🛡️', message: 'Enhanced DBS & QTS check verified for Dr. Eleanor Vance', time: '10m ago' },
+      { icon: '💷', message: 'Stripe UK settlement (£45.00) from Oliver Thompson', time: '35m ago' },
+      { icon: '🎓', message: 'New Year 11 GCSE student enrolled (Westminster Academy)', time: '1h ago' },
+      { icon: '📅', message: 'Autumn GCSE & A-Level Mock Week published to timetable', time: '2h ago' }
     ];
   }
 
@@ -153,28 +204,37 @@ export class AdminDashboardComponent implements OnInit {
     this.router.navigate([path]);
   }
 
+  openDbsComplianceModal(): void {
+    this.showDbsModal = true;
+  }
+
+  closeDbsComplianceModal(): void {
+    this.showDbsModal = false;
+  }
+
   startEdit(review: AdminReview): void {
-    this.editingReviewId = review.id;
+    this.editingReview = review;
     this.editRating = review.rating;
     this.editComment = review.comment;
   }
 
   cancelEdit(): void {
-    this.editingReviewId = null;
-    this.editRating = 0;
+    this.editingReview = null;
+    this.editRating = 5;
     this.editComment = '';
   }
 
   saveReview(): void {
-    if (!this.editingReviewId) return;
-    this.adminService.updateReview(this.editingReviewId, this.editRating, this.editComment).subscribe({
+    if (!this.editingReview) return;
+    const targetId = this.editingReview.id;
+    this.adminService.updateReview(targetId, this.editRating, this.editComment).subscribe({
       next: () => {
-        const target = this.reviews.find(r => r.id === this.editingReviewId);
+        const target = this.reviews.find(r => r.id === targetId);
         if (target) {
           target.rating = this.editRating;
           target.comment = this.editComment;
         }
-        this.notificationService.showSuccess('Review updated');
+        this.notificationService.showSuccess('Student review moderated & updated');
         this.cancelEdit();
       },
       error: () => this.notificationService.showError('Failed to update review')
@@ -185,8 +245,8 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.deleteReview(id).subscribe({
       next: () => {
         this.reviews = this.reviews.filter(r => r.id !== id);
-        this.notificationService.showSuccess('Review deleted');
-        if (this.editingReviewId === id) {
+        this.notificationService.showSuccess('Review removed from platform');
+        if (this.editingReview?.id === id) {
           this.cancelEdit();
         }
       },

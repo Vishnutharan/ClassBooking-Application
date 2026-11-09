@@ -1,93 +1,130 @@
 <div class="planner-container">
   <div class="header">
-    <h1>📝 Lesson Planner</h1>
-    <button class="btn-primary" *ngIf="!showForm" (click)="openForm()">+ Create Lesson Plan</button>
+    <div>
+      <span class="eyebrow">UK National Curriculum & Exam Boards</span>
+      <h1>GCSE & A-Level Lesson Planner</h1>
+      <p class="header-sub">Structure 1-to-1 tuition plans aligned with AQA, Edexcel, OCR & 11+ specifications.</p>
+    </div>
+    <button class="btn-primary" (click)="openForm()">+ Create UK Lesson Plan</button>
   </div>
 
-  <!-- Lesson Plan Form -->
-  <div class="lesson-form-card" *ngIf="showForm">
-    <h2>{{ isEditing ? 'Edit' : 'Create' }} Lesson Plan</h2>
-    <form (ngSubmit)="saveLesson()">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Title</label>
-          <input type="text" [(ngModel)]="currentLesson.title" name="title" required placeholder="e.g. Introduction to Algebra">
+  <!-- Clean Modal Popup for Create / Edit Lesson Plan -->
+  <div class="modal-backdrop" *ngIf="showForm" (click)="cancelForm()">
+    <div class="lesson-form-modal" (click)="$event.stopPropagation()">
+      <div class="modal-top">
+        <div>
+          <span class="modal-badge">{{ isEditing ? 'Update Syllabus Plan' : 'New UK Tuition Plan' }}</span>
+          <h2>{{ isEditing ? 'Edit Lesson Plan' : 'Create Structured Lesson Plan' }}</h2>
         </div>
-        <div class="form-group">
-          <label>Subject</label>
-          <input type="text" [(ngModel)]="currentLesson.subject" name="subject" required placeholder="e.g. Mathematics">
-        </div>
-        <div class="form-group">
-          <label>Grade/Level</label>
-          <input type="text" [(ngModel)]="currentLesson.grade" name="grade" required placeholder="e.g. Grade 10">
-        </div>
-        <div class="form-group">
-          <label>Duration (mins)</label>
-          <input type="number" [(ngModel)]="currentLesson.duration" name="duration" required>
-        </div>
-        <div class="form-group">
-          <label>Scheduled Date</label>
-          <input type="date" [ngModel]="currentLesson.scheduledDate | date:'yyyy-MM-dd'" (ngModelChange)="currentLesson.scheduledDate = $event" name="scheduledDate">
-        </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select [(ngModel)]="currentLesson.status" name="status">
-            <option value="Draft">Draft</option>
-            <option value="Planned">Planned</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-          </select>
-        </div>
-      </div>
-      
-      <div class="form-group full-width">
-        <label>Description</label>
-        <textarea [(ngModel)]="currentLesson.description" name="description" rows="3" placeholder="Brief overview of the lesson..."></textarea>
+        <button type="button" class="close-btn" (click)="cancelForm()">✕</button>
       </div>
 
-      <div class="form-group full-width">
-        <label>Learning Objectives</label>
-        <textarea [(ngModel)]="currentLesson.objectives" name="objectives" rows="3" placeholder="What will students learn?"></textarea>
-      </div>
+      <form (ngSubmit)="saveLesson()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Lesson Title *</label>
+            <input type="text" [(ngModel)]="currentLesson.title" name="title" required placeholder="e.g. Circle Theorems & Geometric Proof (Grade 8/9)">
+          </div>
+          <div class="form-group">
+            <label>Subject & Exam Board *</label>
+            <input type="text" [(ngModel)]="currentLesson.subject" name="subject" required placeholder="e.g. Mathematics (Edexcel Higher)">
+          </div>
+          <div class="form-group">
+            <label>UK Key Stage / Year Group *</label>
+            <select [(ngModel)]="currentLesson.grade" name="grade" required>
+              <option value="">Select UK Year Group</option>
+              <option value="Year 5-6 (11+ Entrance)">Year 5-6 (11+ Entrance)</option>
+              <option value="Year 7-9 (KS3)">Year 7-9 (KS3)</option>
+              <option value="Year 10 (GCSE)">Year 10 (GCSE)</option>
+              <option value="Year 11 (GCSE)">Year 11 (GCSE)</option>
+              <option value="Year 12 (AS / A-Level)">Year 12 (AS / A-Level)</option>
+              <option value="Year 13 (A-Level)">Year 13 (A-Level)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Session Duration (mins)</label>
+            <input type="number" [(ngModel)]="currentLesson.duration" name="duration" required>
+          </div>
+          <div class="form-group">
+            <label>Scheduled Session Date</label>
+            <input type="date" [ngModel]="currentLesson.scheduledDate | date:'yyyy-MM-dd'" (ngModelChange)="currentLesson.scheduledDate = $event" name="scheduledDate">
+          </div>
+          <div class="form-group">
+            <label>Delivery Status</label>
+            <select [(ngModel)]="currentLesson.status" name="status">
+              <option value="Draft">Draft</option>
+              <option value="Planned">Planned</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+        </div>
 
-      <div class="form-group full-width">
-        <label>Materials Needed</label>
-        <textarea [(ngModel)]="currentLesson.materials" name="materials" rows="2" placeholder="Textbooks, worksheets, etc."></textarea>
-      </div>
+        <div class="form-group full-width">
+          <label>Syllabus Overview & Specification Focus</label>
+          <textarea [(ngModel)]="currentLesson.description" name="description" rows="3" placeholder="Outline the AQA/Edexcel/OCR specification points and exam technique covered..."></textarea>
+        </div>
 
-      <div class="form-actions">
-        <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
-        <button type="submit" class="btn-primary">💾 Save Lesson Plan</button>
-      </div>
-    </form>
+        <div class="form-group full-width">
+          <label>Key Learning Objectives (AO1 / AO2 / AO3)</label>
+          <textarea [(ngModel)]="currentLesson.objectives" name="objectives" rows="2" placeholder="What specific exam skills and command words will the student master?"></textarea>
+        </div>
+
+        <div class="form-group full-width">
+          <label>Past Papers, Worksheets & Formula Booklets</label>
+          <textarea [(ngModel)]="currentLesson.materials" name="materials" rows="2" placeholder="e.g. Edexcel June 2024 Higher Paper 2, Formula Sheet, GeoGebra link..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="cancelForm()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Lesson Plan</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Lessons Grid -->
-  <div class="lessons-grid" *ngIf="!showForm">
+  <div class="lessons-grid">
     <div class="lesson-card" *ngFor="let lesson of lessonPlans">
       <div class="lesson-header">
-        <h3>{{ lesson.title }}</h3>
+        <div>
+          <span class="spec-pill" *ngIf="lesson.curriculumTopic && lesson.curriculumTopic.syllabusSectionReference">
+            {{ lesson.curriculumTopic.syllabusSectionReference }}
+          </span>
+          <h3>{{ lesson.title }}</h3>
+        </div>
         <span class="status-badge" [ngClass]="'status-' + lesson.status.toLowerCase().replace(' ', '-')">
           {{ lesson.status }}
         </span>
       </div>
+
       <p class="description">{{ lesson.description }}</p>
+
       <div class="lesson-meta">
-        <span>📚 {{ lesson.subject }}</span>
+        <span>📘 {{ lesson.subject }}</span>
         <span>🎓 {{ lesson.grade }}</span>
         <span>⏱️ {{ lesson.duration }} mins</span>
       </div>
-      <div *ngIf="lesson.scheduledDate" class="scheduled-date">
-        📅 Scheduled: {{ lesson.scheduledDate | date:'MMM dd, yyyy' }}
+
+      <div *ngIf="lesson.learningObjectives?.length" class="objectives-box">
+        <span class="obj-title">Learning Objectives:</span>
+        <ul>
+          <li *ngFor="let obj of lesson.learningObjectives">{{ obj.description }}</li>
+        </ul>
       </div>
+
+      <div *ngIf="lesson.scheduledDate" class="scheduled-date">
+        📅 Target Session: {{ lesson.scheduledDate | date:'EEE, d MMM yyyy' }}
+      </div>
+
       <div class="lesson-actions">
-        <button class="btn-edit" (click)="editLesson(lesson)">Edit</button>
-        <button class="btn-delete" (click)="deleteLesson(lesson.id)">Delete</button>
+        <button class="btn-edit" (click)="editLesson(lesson)">Edit Plan</button>
+        <button class="btn-delete" (click)="deleteLesson(lesson.id)">Remove</button>
       </div>
     </div>
   </div>
 
-  <div *ngIf="!showForm && lessonPlans.length === 0" class="empty-state">
-    <p>No lesson plans yet. Create your first lesson plan!</p>
+  <div *ngIf="lessonPlans.length === 0" class="empty-state">
+    <p>No lesson plans created yet. Click "+ Create UK Lesson Plan" to build your first syllabus plan.</p>
   </div>
 </div>

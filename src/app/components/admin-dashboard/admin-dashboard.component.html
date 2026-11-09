@@ -1,239 +1,257 @@
-<div class="dashboard-shell">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-mark"></div>
-      <div>
-        <p class="brand-title">ClassBooking UK</p>
-        <p class="brand-sub">Admin Control</p>
+<div class="admin-bento-viewport">
+  <!-- TOP ROW: UK Admin Hero Banner + 2x2 KPI Quad Grid -->
+  <section class="top-row-grid">
+    <div class="hero-banner">
+      <div class="hero-left">
+        <div class="hero-badges">
+          <span class="badge-uk">🇬🇧 UK Education Governance</span>
+          <span class="badge-dbs" (click)="openDbsComplianceModal()">🛡️ Enhanced DBS &amp; Safeguarding Active (What is DBS?)</span>
+        </div>
+        <h1>ClassBooking UK — Admin Control Centre</h1>
+        <p class="hero-sub">
+          Oversee DBS-verified UK tutors, GCSE/A-Level enrolments, Stripe GBP (£) settlements, and national exam timetables in one single-screen workspace.
+        </p>
+        <div class="hero-actions">
+          <button type="button" class="btn-hero-primary" (click)="navigate('/admin/users')">Users &amp; DBS Tutors</button>
+          <button type="button" class="btn-hero-glass" (click)="navigate('/admin/fees')">GBP Fee Ledger (£)</button>
+          <button type="button" class="btn-hero-glass" (click)="navigate('/admin/exams')">GCSE / A-Level Results</button>
+          <button type="button" class="btn-hero-glass" (click)="navigate('/admin/timetable')">UK Timetable</button>
+          <button type="button" class="btn-hero-glass" (click)="navigate('/admin/reports')">Reports</button>
+          <button type="button" class="btn-hero-glass" (click)="navigate('/admin/settings')">System Settings</button>
+        </div>
+      </div>
+
+      <div class="hero-revenue-box">
+        <span class="rev-label">Gross UK Platform Revenue</span>
+        <div class="rev-amount">£{{ stats.totalRevenue | number:'1.0-0' }}</div>
+        <div class="rev-rating">★ {{ stats.averageRating | number:'1.2-2' }} / 5.0 UK Trust Score</div>
+        <div class="rev-bar">
+          <div class="rev-bar-fill" [style.width.%]="ratingWidth(stats.averageRating)"></div>
+        </div>
+        <button type="button" class="btn-rev-link" (click)="openDbsComplianceModal()">
+          View UK DBS Safeguarding Policy →
+        </button>
       </div>
     </div>
 
-    <div class="nav-group">
-      <p class="nav-label">Overview</p>
-      <button class="nav-item active" type="button">Dashboard</button>
-      <button class="nav-item" type="button" (click)="navigate('/admin/users')">Users &amp; Tutors</button>
-      <button class="nav-item" type="button" (click)="navigate('/admin/timetable')">Timetable</button>
-      <button class="nav-item" type="button" (click)="navigate('/admin/fees')">GBP Fees &amp; Billing</button>
-      <button class="nav-item" type="button" (click)="navigate('/admin/exams')">Exam Results</button>
-      <button class="nav-item" type="button" (click)="navigate('/admin/reports')">Reports</button>
+    <div class="kpi-quad-grid">
+      <div class="kpi-card" (click)="navigate('/admin/users')">
+        <div class="kpi-top">
+          <span class="kpi-label">UK Students &amp; Users</span>
+          <span class="kpi-pill indigo">{{ stats.totalStudents }} Pupils</span>
+        </div>
+        <div class="kpi-val">{{ stats.totalUsers }}</div>
+        <div class="kpi-foot">Active GCSE, A-Level &amp; 11+ accounts</div>
+      </div>
+
+      <div class="kpi-card" (click)="openDbsComplianceModal()">
+        <div class="kpi-top">
+          <span class="kpi-label">DBS-Verified Tutors</span>
+          <span class="kpi-pill emerald">100% Checked</span>
+        </div>
+        <div class="kpi-val">{{ stats.totalTeachers }}</div>
+        <div class="kpi-foot">Enhanced DBS &amp; QTS verified educators</div>
+      </div>
+
+      <div class="kpi-card" (click)="navigate('/admin/timetable')">
+        <div class="kpi-top">
+          <span class="kpi-label">1-to-1 Bookings</span>
+          <span class="kpi-pill amber">{{ stats.pendingBookings }} Pending</span>
+        </div>
+        <div class="kpi-val">{{ stats.totalBookings }}</div>
+        <div class="kpi-foot">{{ stats.completedBookings }} sessions completed</div>
+      </div>
+
+      <div class="kpi-card" (click)="navigate('/admin/fees')">
+        <div class="kpi-top">
+          <span class="kpi-label">GBP Settlements</span>
+          <span class="kpi-pill purple">Stripe UK</span>
+        </div>
+        <div class="kpi-val">£{{ stats.totalRevenue | number:'1.0-0' }}</div>
+        <div class="kpi-foot">12% platform commission active</div>
+      </div>
     </div>
+  </section>
 
-    <div class="nav-group">
-      <p class="nav-label">System</p>
-      <button class="nav-item" type="button" (click)="navigate('/admin/settings')">Platform Settings</button>
-      <button class="nav-item" type="button" (click)="navigate('/timetable')">Public Timetable</button>
-    </div>
+  <!-- BOTTOM ROW: 3-Column Balanced Single-Screen Bento Grid -->
+  <section class="bento-three-cols">
+    <!-- COLUMN 1: Top UK Tutors & Enhanced DBS Verification Status -->
+    <article class="bento-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-eyebrow">Safeguarding &amp; Quality</span>
+          <h2>Top UK Tutors &amp; DBS Registry</h2>
+        </div>
+        <button type="button" class="panel-btn" (click)="navigate('/admin/users')">Manage All →</button>
+      </div>
 
-    <div class="nav-footer">
-      <p class="nav-hint">Export UK platform data</p>
-      <button class="pill-btn" type="button" (click)="navigate('/admin/reports/view')">Open Reports</button>
-    </div>
-
-    <button class="logout-btn" type="button" (click)="logout()">Sign Out</button>
-  </aside>
-
-  <main class="dashboard-main">
-    <header class="page-header">
-      <div>
-        <p class="eyebrow">{{ today | date:'EEEE, d MMMM yyyy' }} • UK Administration</p>
-        <h1>Platform Administration</h1>
-        <p class="lede">Monitor UK tutor operations, GBP revenue, student enrolments, and system health in real time.</p>
-        <div class="chip-row">
-          <button class="chip" type="button" (click)="navigate('/admin/users')">Manage Users</button>
-          <button class="chip" type="button" (click)="navigate('/admin/timetable')">Timetable</button>
-          <button class="chip" type="button" (click)="navigate('/admin/fees')">Fee Management (£)</button>
-          <button class="chip" type="button" (click)="navigate('/admin/settings')">System Settings</button>
-        </div>
-      </div>
-      <div class="hero-card">
-        <p class="mini-label">Total Revenue (GBP)</p>
-        <h3>£{{ stats.totalRevenue | number:'1.0-0' }}</h3>
-        <p class="small-text">Platform Rating {{ stats.averageRating | number:'1.1-1' }}/5</p>
-        <div class="spark-bar">
-          <div class="spark-fill" [style.width.%]="ratingWidth(stats.averageRating)"></div>
-        </div>
-        <button class="ghost-btn" type="button" (click)="navigate('/admin/reports')">View Reports</button>
-      </div>
-    </header>
-
-    <section class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Users</p>
-          <span class="meta-dot success"></span>
-        </div>
-        <h2>{{ stats.totalUsers }}</h2>
-        <p class="meta-sub">Total registered accounts</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Students</p>
-          <span class="meta-dot info"></span>
-        </div>
-        <h2>{{ stats.totalStudents }}</h2>
-        <p class="meta-sub">Active UK students</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Tutors</p>
-          <span class="meta-dot warning"></span>
-        </div>
-        <h2>{{ stats.totalTeachers }}</h2>
-        <p class="meta-sub">Verified UK tutors</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Bookings</p>
-          <span class="meta-dot neutral"></span>
-        </div>
-        <h2>{{ stats.totalBookings }}</h2>
-        <p class="meta-sub">Confirmed &amp; pending</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Pending</p>
-          <span class="meta-dot warning"></span>
-        </div>
-        <h2>{{ stats.pendingBookings }}</h2>
-        <p class="meta-sub">Awaiting tutor action</p>
-      </div>
-      <div class="stat-card">
-        <div class="stat-meta">
-          <p class="meta-label">Completed</p>
-          <span class="meta-dot success"></span>
-        </div>
-        <h2>{{ stats.completedBookings }}</h2>
-        <p class="meta-sub">Finished tuition sessions</p>
-      </div>
-    </section>
-
-    <section class="panel-grid">
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <p class="mini-label">Top Tutors</p>
-            <h3>Leaderboard by Rating</h3>
+      <div class="panel-scroll">
+        <div class="tutor-row-card" *ngFor="let t of topTeachers">
+          <div class="tutor-avatar">{{ t.name.charAt(0) }}</div>
+          <div class="tutor-main">
+            <div class="tutor-title-line">
+              <strong>{{ t.name }}</strong>
+              <span class="dbs-tag" (click)="openDbsComplianceModal()">✓ Enhanced DBS</span>
+            </div>
+            <p class="tutor-sub">{{ t.spec }} • {{ t.dbs }}</p>
+            <div class="tutor-stats-line">
+              <span>{{ t.classes }} classes</span>
+              <span>•</span>
+              <span>£{{ t.rate }}/hr</span>
+              <span>•</span>
+              <span class="star-txt">★ {{ t.rating }}</span>
+            </div>
           </div>
-          <button class="ghost-btn" type="button" (click)="navigate('/admin/users')">View All</button>
         </div>
-        <div class="stacked-list" *ngIf="topTeachers.length; else noTopTeachers">
-          <div class="stacked-item" *ngFor="let teacher of topTeachers">
+      </div>
+    </article>
+
+    <!-- COLUMN 2: Latest GBP (£) Payments & 6-Month Revenue Strip -->
+    <article class="bento-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-eyebrow">UK Financial Ledger (GBP)</span>
+          <h2>Recent Tuition Payments (£)</h2>
+        </div>
+        <button type="button" class="panel-btn" (click)="navigate('/admin/fees')">Open Ledger →</button>
+      </div>
+
+      <div class="mini-rev-strip">
+        <div class="rev-col" *ngFor="let r of revenueData">
+          <span class="rev-col-val">£{{ (r.revenue / 1000) | number:'1.1-1' }}k</span>
+          <div class="rev-col-bar-wrap">
+            <div class="rev-col-bar" [style.height.%]="(r.revenue / 5500) * 100"></div>
+          </div>
+          <span class="rev-col-lbl">{{ r.month }}</span>
+        </div>
+      </div>
+
+      <div class="panel-scroll">
+        <div class="pay-row-card" *ngFor="let pay of latestPayments">
+          <div class="pay-info">
+            <strong>{{ pay.studentName }} → {{ pay.teacherName }}</strong>
+            <p>{{ pay.subject }} • {{ pay.paymentMethod }} • {{ pay.sessionDate | date:'d MMM' }}</p>
+          </div>
+          <div class="pay-right">
+            <span class="pay-amount">£{{ pay.amount | number:'1.2-2' }}</span>
+            <span class="pay-status" [class.paid]="pay.paymentStatus === 'Paid'">{{ pay.paymentStatus }}</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- COLUMN 3: Review Moderation & UK System Health -->
+    <article class="bento-panel">
+      <div class="panel-head">
+        <div>
+          <span class="panel-eyebrow">Trust &amp; Infrastructure</span>
+          <h2>Review Moderation &amp; UK Cloud Status</h2>
+        </div>
+        <span class="online-pill">● 4/4 Services Online</span>
+      </div>
+
+      <div class="health-mini-grid">
+        <div class="health-chip"><span>SQL Server UK</span><strong>Online</strong></div>
+        <div class="health-chip"><span>ASP.NET API</span><strong>Online</strong></div>
+        <div class="health-chip"><span>Stripe GBP</span><strong>Online</strong></div>
+        <div class="health-chip"><span>DBS Check Sync</span><strong>Active</strong></div>
+      </div>
+
+      <div class="panel-scroll">
+        <div class="review-mod-card" *ngFor="let review of reviews">
+          <div class="rev-mod-top">
             <div>
-              <p class="stacked-title">{{ teacher.name }}</p>
-              <p class="muted">{{ teacher.classes }} sessions delivered</p>
+              <strong>{{ review.studentName }}</strong>
+              <span class="rev-tutor-lbl">for {{ review.teacherName }}</span>
             </div>
-            <span class="pill success">★ {{ teacher.rating | number:'1.1-1' }} / 5</span>
+            <span class="rev-stars">★ {{ review.rating }}/5</span>
           </div>
-        </div>
-      </article>
-
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <p class="mini-label">Infrastructure</p>
-            <h3>UK Cloud &amp; Service Health</h3>
-          </div>
-        </div>
-        <div class="health-grid">
-          <div class="health-item">
-            <span>Database (SQL Server)</span>
-            <span class="health-badge">Online</span>
-          </div>
-          <div class="health-item">
-            <span>ASP.NET Core API</span>
-            <span class="health-badge">Online</span>
-          </div>
-          <div class="health-item">
-            <span>GBP Payment Gateway</span>
-            <span class="health-badge">Online</span>
-          </div>
-          <div class="health-item">
-            <span>Resource Storage</span>
-            <span class="health-badge">Online</span>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <section class="panel-grid">
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <p class="mini-label">Payments (GBP)</p>
-            <h3>Latest Payment Records</h3>
-          </div>
-          <button class="ghost-btn" type="button" (click)="navigate('/admin/fees')">Manage Fees</button>
-        </div>
-        <div class="stacked-list" *ngIf="latestPayments.length; else noPayments">
-          <div class="stacked-item" *ngFor="let pay of latestPayments">
-            <div>
-              <p class="stacked-title">{{ pay.studentName }} → {{ pay.teacherName }}</p>
-              <p class="muted">{{ pay.subject }} • {{ pay.paymentMethod }} • {{ pay.sessionDate | date:'d MMM' }}</p>
-            </div>
-            <div class="mini-actions">
-              <span class="pill" [ngClass]="pay.paymentStatus === 'Paid' ? 'success' : 'warning'">
-                {{ pay.paymentStatus }}
-              </span>
-              <strong>£{{ pay.amount | number:'1.2-2' }}</strong>
+          <p class="rev-comment">{{ review.comment }}</p>
+          <div class="rev-mod-actions">
+            <span class="rev-date">{{ review.createdAt | date:'d MMM yyyy' }}</span>
+            <div class="btn-pair">
+              <button type="button" class="btn-xs-edit" (click)="startEdit(review)">Moderate</button>
+              <button type="button" class="btn-xs-del" (click)="deleteReview(review.id)">Remove</button>
             </div>
           </div>
         </div>
-      </article>
-
-      <article class="panel">
-        <div class="panel-header">
-          <div>
-            <p class="mini-label">Moderation</p>
-            <h3>Student Reviews Control</h3>
-          </div>
-          <div class="pill neutral" *ngIf="reviews.length">{{ reviews.length }} total</div>
-        </div>
-
-        <div *ngIf="reviewsLoading" class="loading-spinner"></div>
-
-        <div class="reviews-list" *ngIf="!reviewsLoading">
-          <div class="review-row" *ngFor="let review of reviews">
-            <div class="review-meta">
-              <p class="stacked-title">{{ review.studentName }}</p>
-              <p class="muted">Tutor: {{ review.teacherName }}</p>
-              <p class="muted">{{ review.createdAt | date:'d MMM yyyy' }}</p>
-            </div>
-            <div class="review-edit">
-              <ng-container *ngIf="editingReviewId !== review.id; else editBlock">
-                <p class="stacked-title">★ {{ review.rating }} / 5</p>
-                <p class="muted">{{ review.comment || 'No comment' }}</p>
-                <div class="row-actions">
-                  <button class="ghost-btn" type="button" (click)="startEdit(review)">Edit</button>
-                  <button class="ghost-btn danger" type="button" (click)="deleteReview(review.id)">Delete</button>
-                </div>
-              </ng-container>
-              <ng-template #editBlock>
-                <select [(ngModel)]="editRating" class="inline-input">
-                  <option *ngFor="let r of [5,4,3,2,1]" [value]="r">{{ r }} stars</option>
-                </select>
-                <textarea rows="2" class="inline-textarea" [(ngModel)]="editComment"></textarea>
-                <div class="row-actions">
-                  <button class="ghost-btn" type="button" (click)="saveReview()">Save</button>
-                  <button class="ghost-btn danger" type="button" (click)="cancelEdit()">Cancel</button>
-                </div>
-              </ng-template>
-            </div>
-          </div>
-          <div *ngIf="reviews.length === 0" class="empty">No reviews recorded yet.</div>
-        </div>
-      </article>
-    </section>
-  </main>
+      </div>
+    </article>
+  </section>
 </div>
 
-<ng-template #noTopTeachers>
-  <div class="empty">
-    <p>Tutor rankings will appear as reviews are submitted.</p>
-  </div>
-</ng-template>
+<!-- POPUP MODAL 1: What is DBS Verified? & UK Safeguarding Compliance -->
+<div class="modal-backdrop" *ngIf="showDbsModal" (click)="closeDbsComplianceModal()">
+  <div class="admin-modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">UK Child Safeguarding &amp; Tutor Vetting</span>
+        <h3>What is "DBS Verified" in the UK?</h3>
+      </div>
+      <button type="button" class="modal-close" (click)="closeDbsComplianceModal()">✕</button>
+    </div>
 
-<ng-template #noPayments>
-  <div class="empty">
-    <p>No payments recorded yet.</p>
+    <div class="modal-body">
+      <div class="dbs-explainer-box">
+        <h4>🛡️ Disclosure and Barring Service (DBS) — UK Government Check</h4>
+        <p>
+          In the United Kingdom (England, Wales &amp; Northern Ireland; PVG in Scotland), the <strong>Disclosure and Barring Service (DBS)</strong> is the official UK Home Office agency that conducts criminal record and safeguarding checks for anyone working with children or young people under 18.
+        </p>
+      </div>
+
+      <div class="dbs-levels-grid">
+        <div class="dbs-level-item">
+          <span class="dbs-badge-pill">1. Enhanced DBS Check</span>
+          <p>The highest level of UK background check required for 1-to-1 tutors teaching GCSE, A-Level, and 11+ school pupils.</p>
+        </div>
+        <div class="dbs-level-item">
+          <span class="dbs-badge-pill">2. Children's Barred List</span>
+          <p>Confirms the educator is cleared against the UK Department for Education (DfE) Children's Barred List.</p>
+        </div>
+        <div class="dbs-level-item">
+          <span class="dbs-badge-pill">3. QTS &amp; University ID</span>
+          <p>Verified Qualified Teacher Status (QTS) or UK university degree credentials alongside photo ID.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-modal-secondary" (click)="navigate('/admin/users'); closeDbsComplianceModal()">
+        Manage Tutor Verifications
+      </button>
+      <button type="button" class="btn-modal-primary" (click)="closeDbsComplianceModal()">
+        Got It, Close
+      </button>
+    </div>
   </div>
-</ng-template>
+</div>
+
+<!-- POPUP MODAL 2: Moderate Student Review -->
+<div class="modal-backdrop" *ngIf="editingReview as rev" (click)="cancelEdit()">
+  <div class="admin-modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <span class="modal-eyebrow">Admin Trust &amp; Safety Moderation</span>
+        <h3>Moderate Review by {{ rev.studentName }}</h3>
+      </div>
+      <button type="button" class="modal-close" (click)="cancelEdit()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="mod-meta">Tutor: <strong>{{ rev.teacherName }}</strong> • Submitted {{ rev.createdAt | date:'d MMM yyyy' }}</p>
+
+      <label class="mod-label">Verified Star Rating</label>
+      <select [(ngModel)]="editRating" class="mod-input">
+        <option *ngFor="let r of [5,4,3,2,1]" [ngValue]="r">{{ r }} ★ Stars</option>
+      </select>
+
+      <label class="mod-label">Student Review Text</label>
+      <textarea rows="4" [(ngModel)]="editComment" class="mod-textarea"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-modal-secondary" (click)="cancelEdit()">Cancel</button>
+      <button type="button" class="btn-modal-primary" (click)="saveReview()">Save Moderated Review</button>
+    </div>
+  </div>
+</div>

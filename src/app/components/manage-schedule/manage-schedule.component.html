@@ -1,21 +1,28 @@
 <div class="schedule-container">
   <div class="header-section">
     <div class="header-content">
-      <h2 class="header-title">Manage Schedule</h2>
-      <p class="header-subtitle">Set date-specific availability and respond to bookings.</p>
+      <span class="eyebrow">UK Educator Availability &amp; Diary</span>
+      <h1 class="header-title">Manage 1-to-1 Tuition Schedule</h1>
+      <p class="header-subtitle">Open new GCSE &amp; A-Level availability slots (GMT/BST) or click any calendar session to approve or manage it.</p>
     </div>
-    <button class="refresh-btn" (click)="loadSchedule()">
-      <span class="icon-spin">↻</span>
-      Refresh
-    </button>
+    <div class="header-actions">
+      <button class="btn-secondary-header" type="button" (click)="loadSchedule()">
+        ↻ Refresh Diary
+      </button>
+      <button class="btn-primary-header" type="button" (click)="openNewSlotModal()">
+        + Add Availability Slot
+      </button>
+    </div>
   </div>
 
-  <div class="alert-container">
-    <div class="alert">
-      <div class="alert-icon">ℹ</div>
-      <div class="alert-content">
-        <p><strong>Tip:</strong> Drag on the calendar to add a slot for that date/time. Click an available slot to remove it.</p>
-      </div>
+  <div class="legend-strip">
+    <div class="legend-tip">
+      <strong>Quick Tip:</strong> Click <em>+ Add Availability Slot</em> or drag directly on the calendar grid to open a slot. Click any slot or booking for instant actions.
+    </div>
+    <div class="legend-badges">
+      <span class="l-badge open"><i class="dot green"></i> Open Slot</span>
+      <span class="l-badge pending"><i class="dot amber"></i> Pending Approval</span>
+      <span class="l-badge confirmed"><i class="dot indigo"></i> Confirmed Tuition</span>
     </div>
   </div>
 
@@ -31,33 +38,82 @@
     </div>
   </div>
 
-  <div class="modal-overlay" [class.active]="showAvailabilityModal">
-    <div class="modal-dialog">
+  <!-- Add Availability Popup Modal -->
+  <div class="modal-overlay" *ngIf="showAvailabilityModal" (click)="closeAvailabilityModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h5 class="modal-title">Add Availability</h5>
-        <button class="modal-close" (click)="closeAvailabilityModal()">&times;</button>
+        <div>
+          <span class="modal-eyebrow">New UK Tuition Slot</span>
+          <h5 class="modal-title">Add 1-to-1 Availability</h5>
+        </div>
+        <button class="modal-close" type="button" (click)="closeAvailabilityModal()">✕</button>
       </div>
 
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Date</label>
+          <label class="form-label">Session Date *</label>
           <input type="date" class="form-input" [(ngModel)]="availabilityForm.date">
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Start Time</label>
-          <input type="time" class="form-input" [(ngModel)]="availabilityForm.startTime">
-        </div>
+        <div class="time-row">
+          <div class="form-group">
+            <label class="form-label">Start Time (UK GMT/BST) *</label>
+            <input type="time" class="form-input" [(ngModel)]="availabilityForm.startTime">
+          </div>
 
-        <div class="form-group">
-          <label class="form-label">End Time</label>
-          <input type="time" class="form-input" [(ngModel)]="availabilityForm.endTime">
+          <div class="form-group">
+            <label class="form-label">End Time (UK GMT/BST) *</label>
+            <input type="time" class="form-input" [(ngModel)]="availabilityForm.endTime">
+          </div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-cancel" (click)="closeAvailabilityModal()">Cancel</button>
-        <button class="btn btn-save" (click)="saveAvailability()">Save Availability</button>
+        <button class="btn btn-cancel" type="button" (click)="closeAvailabilityModal()">Cancel</button>
+        <button class="btn btn-save" type="button" (click)="saveAvailability()">Publish Slot</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Event Action Popup Modal -->
+  <div class="modal-overlay" *ngIf="selectedCalendarEvent as ev" (click)="closeEventModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="modal-eyebrow">{{ ev.type === 'slot' ? 'Availability Slot' : 'Student Tuition Booking' }}</span>
+          <h5 class="modal-title">{{ ev.title }}</h5>
+        </div>
+        <button class="modal-close" type="button" (click)="closeEventModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="event-summary-box">
+          <p><strong>Scheduled Time:</strong> {{ ev.dateStr }}</p>
+          <p><strong>Current Status:</strong> <span class="status-pill">{{ ev.status }}</span></p>
+        </div>
+
+        <p class="helper-note" *ngIf="ev.type === 'slot' && ev.status === 'Available'">
+          This slot is currently open for UK students to book. Would you like to remove it from your calendar?
+        </p>
+        <p class="helper-note" *ngIf="ev.type === 'booking' && ev.status === 'Pending'">
+          A student has requested this 1-to-1 tuition slot. Confirm to lock it into your diary or decline the request.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-cancel" type="button" (click)="closeEventModal()">Close</button>
+        <button *ngIf="ev.type === 'slot' && ev.status === 'Available'" class="btn btn-danger" type="button" (click)="confirmRemoveSlot()">
+          Remove Open Slot
+        </button>
+        <button *ngIf="ev.type === 'booking' && ev.status === 'Pending'" class="btn btn-danger" type="button" (click)="rejectSelectedBooking()">
+          Decline Request
+        </button>
+        <button *ngIf="ev.type === 'booking' && ev.status === 'Pending'" class="btn btn-save" type="button" (click)="approveSelectedBooking()">
+          ✓ Confirm Booking
+        </button>
+        <button *ngIf="ev.type === 'booking' && ev.status === 'Confirmed'" class="btn btn-danger" type="button" (click)="cancelSelectedBooking()">
+          Cancel Session
+        </button>
       </div>
     </div>
   </div>

@@ -22,8 +22,8 @@ export class ResourcesUploadComponent implements OnInit {
   uploadProgress = 0;
 
   fileTypes = ['PDF', 'Video', 'Document', 'Image', 'Quiz'];
-  subjects = ['Mathematics', 'Science', 'English', 'Sinhala', 'History', 'Geography'];
-  levels = ['Primary', 'Secondary', 'Advanced'];
+  subjects = ['Mathematics', 'English Language', 'English Literature', 'Biology', 'Chemistry', 'Physics', 'Combined Science', 'Computer Science', 'History', 'Geography', 'French', 'Spanish', 'Economics', 'Psychology'];
+  levels = ['KS2 / 11+', 'KS3', 'GCSE', 'A-Level'];
 
   selectedFile: File | null = null;
   dragOverActive = false;
@@ -39,7 +39,7 @@ export class ResourcesUploadComponent implements OnInit {
       description: ['', [Validators.required, Validators.minLength(10)]],
       type: ['PDF', Validators.required],
       subject: ['Mathematics', Validators.required],
-      level: ['Primary', Validators.required],
+      level: ['GCSE', Validators.required],
       studentId: [''], // Added Student Id
       isPublic: [false]
     });
@@ -156,7 +156,7 @@ export class ResourcesUploadComponent implements OnInit {
     this.uploadForm.reset({
       type: 'PDF',
       subject: 'Mathematics',
-      level: 'Primary',
+      level: 'GCSE',
       studentId: '',
       isPublic: false
     });

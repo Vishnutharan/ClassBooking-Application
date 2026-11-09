@@ -1,13 +1,17 @@
 <div class="timetable-feed-container">
   <div class="feed-header">
-    <h1>Platform Timetable</h1>
-    <button class="btn" (click)="loadEvents()" [disabled]="isLoading">Refresh</button>
+    <div>
+      <span class="eyebrow">UK Academic Calendar &amp; Key Dates</span>
+      <h1>GCSE, A-Level &amp; 11+ Platform Timetable</h1>
+      <p class="header-sub">Key mock exam weeks, UCAS deadlines, half-term booster clinics, and UK bank holidays.</p>
+    </div>
+    <button class="btn" (click)="loadEvents()" [disabled]="isLoading">↻ Refresh Calendar</button>
   </div>
 
-  <div *ngIf="isLoading" class="loading">Loading...</div>
+  <div *ngIf="isLoading" class="loading">Loading UK academic timetable...</div>
 
   <div *ngIf="!isLoading && events.length === 0" class="empty">
-    <p>No events scheduled.</p>
+    <p>No upcoming UK academic events scheduled.</p>
   </div>
 
   <div class="event-list" *ngIf="events.length > 0">
@@ -15,11 +19,15 @@
       <div class="event-date">
         <span class="day">{{ ev.date | date:'dd' }}</span>
         <span class="month">{{ ev.date | date:'MMM' }}</span>
+        <span class="year">{{ ev.date | date:'yyyy' }}</span>
       </div>
       <div class="event-info">
-        <p class="event-type">{{ ev.type || 'Event' }} • {{ ev.audience || 'All' }}</p>
+        <div class="event-meta-row">
+          <span class="event-type-pill" [ngClass]="(ev.type || 'Event').toLowerCase()">{{ ev.type || 'Academic Event' }}</span>
+          <span class="audience-pill">Audience: {{ ev.audience || 'All UK Students & Tutors' }}</span>
+          <span class="event-time" *ngIf="ev.startTime">🕒 {{ ev.startTime }} – {{ ev.endTime }} (GMT/BST)</span>
+        </div>
         <h3 class="event-title">{{ ev.title }}</h3>
-        <p class="event-time">{{ ev.startTime }} - {{ ev.endTime }}</p>
         <p class="event-desc" *ngIf="ev.description">{{ ev.description }}</p>
       </div>
     </div>

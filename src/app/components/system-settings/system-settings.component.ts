@@ -31,7 +31,7 @@ export class SystemSettingsComponent implements OnInit {
     this.settingsForm = this.fb.group({
       platformName: ['', [Validators.required, Validators.minLength(3)]],
       platformEmail: ['', [Validators.required, Validators.email]],
-      defaultHourlyRate: [500, [Validators.required, Validators.min(0)]],
+      defaultHourlyRate: [35, [Validators.required, Validators.min(0)]],
       minClassDurationMinutes: [30, [Validators.required, Validators.min(15)]],
       maxClassDurationMinutes: [180, [Validators.required, Validators.max(480)]],
       cancellationDeadlineHours: [24, [Validators.required, Validators.min(1)]],

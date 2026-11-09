@@ -1,57 +1,105 @@
 <div class="page">
   <div class="header">
     <div>
-      <h1>📝 Lesson Planner</h1>
-      <p class="subtext">View lesson plans shared by teachers you have booked.</p>
+      <span class="eyebrow">UK 1-to-1 Tuition Curriculum</span>
+      <h1>My GCSE & A-Level Lesson Plans</h1>
+      <p class="subtext">Review structured syllabus roadmaps, specification references, and pre-session preparation shared by your UK tutors.</p>
     </div>
   </div>
 
-  <div class="card">
-    <label class="label">Select Teacher</label>
+  <div class="card filter-bar">
+    <div class="filter-left">
+      <label class="label">Active UK Tutor</label>
+      <span class="hint">Select a tutor to view your personalised AQA, Edexcel & OCR lesson plans</span>
+    </div>
     <div class="teacher-picker">
       <select [(ngModel)]="selectedTeacherId" (ngModelChange)="onTeacherChange()">
-        <option value="">-- Choose your teacher --</option>
         <option *ngFor="let teacher of teachers" [value]="teacher.id">
           {{ teacher.name }}
         </option>
       </select>
-      <span class="hint" *ngIf="bookingsLoading">Loading teachers...</span>
-      <span class="hint" *ngIf="!bookingsLoading && teachers.length === 0">
-        Book a class to see lesson plans from your teacher.
-      </span>
     </div>
   </div>
 
   <div class="card" *ngIf="selectedTeacherId">
     <div class="card-header">
-      <h2>Lesson Plans</h2>
-      <span class="pill" *ngIf="lessonPlans.length">{{ lessonPlans.length }} plans</span>
+      <h2>Structured Tuition Roadmap</h2>
+      <span class="pill" *ngIf="lessonPlans.length">{{ lessonPlans.length }} UK Syllabus Plans</span>
     </div>
 
-    <div *ngIf="isLoading" class="loader">Loading plans...</div>
+    <div *ngIf="isLoading" class="loader">Loading UK lesson plans...</div>
 
     <div class="plans-grid" *ngIf="!isLoading && lessonPlans.length">
       <div class="plan-card" *ngFor="let plan of lessonPlans">
         <div class="plan-top">
-          <h3>{{ plan.title }}</h3>
+          <div>
+            <span class="spec-tag" *ngIf="plan.specRef">{{ plan.specRef }}</span>
+            <h3>{{ plan.title }}</h3>
+          </div>
           <span class="status" [ngClass]="plan.status.toLowerCase().replace(' ', '-')">
             {{ plan.status }}
           </span>
         </div>
-        <p class="description">{{ plan.description || 'No description provided.' }}</p>
+        <p class="description">{{ plan.description || 'Structured 1-to-1 UK syllabus session.' }}</p>
         <div class="meta">
-          <span>📚 {{ plan.subject }}</span>
+          <span>📘 {{ plan.subject }}</span>
           <span *ngIf="plan.level">🎓 {{ plan.level }}</span>
           <span *ngIf="plan.durationMinutes">⏱️ {{ plan.durationMinutes }} mins</span>
         </div>
-        <div class="date" *ngIf="plan.scheduledDate">
-          📆 Scheduled: {{ plan.scheduledDate | date:'MMM dd, yyyy' }}
+        <div class="plan-footer">
+          <div class="date" *ngIf="plan.scheduledDate">
+            📅 {{ plan.scheduledDate | date:'EEE, d MMM yyyy' }}
+          </div>
+          <button type="button" class="btn-outline" (click)="openPlanModal(plan)">
+            View Syllabus & Objectives →
+          </button>
         </div>
       </div>
     </div>
 
     <div class="empty" *ngIf="!isLoading && lessonPlans.length === 0">
-      No lesson plans shared yet for this teacher.
+      No lesson plans shared yet for this tutor.
+    </div>
+  </div>
+
+  <!-- Lesson Plan Detail Popup Modal -->
+  <div class="modal-backdrop" *ngIf="selectedPlanForModal as modalPlan" (click)="closePlanModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="spec-tag">{{ modalPlan.specRef }}</span>
+          <h2>{{ modalPlan.title }}</h2>
+        </div>
+        <button type="button" class="close-btn" (click)="closePlanModal()">✕</button>
+      </div>
+
+      <div class="modal-meta-row">
+        <span class="meta-chip">📘 {{ modalPlan.subject }}</span>
+        <span class="meta-chip">🎓 {{ modalPlan.level }}</span>
+        <span class="meta-chip">⏱️ {{ modalPlan.durationMinutes }} mins</span>
+        <span class="meta-chip" *ngIf="modalPlan.scheduledDate">📅 {{ modalPlan.scheduledDate | date:'EEE, d MMM yyyy' }}</span>
+      </div>
+
+      <div class="modal-section">
+        <h4>Syllabus & Specification Overview</h4>
+        <p>{{ modalPlan.description }}</p>
+      </div>
+
+      <div class="modal-section" *ngIf="modalPlan.objectives?.length">
+        <h4>Assessment Objectives (AO1 / AO2 / AO3)</h4>
+        <ul class="obj-list">
+          <li *ngFor="let obj of modalPlan.objectives">✓ {{ obj }}</li>
+        </ul>
+      </div>
+
+      <div class="modal-section prep-box" *ngIf="modalPlan.notes">
+        <h4>Pre-Session Preparation Note from Tutor</h4>
+        <p>{{ modalPlan.notes }}</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-primary" (click)="closePlanModal()">Got It, Close</button>
+      </div>
     </div>
   </div>
 </div>

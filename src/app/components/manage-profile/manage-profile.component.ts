@@ -48,8 +48,8 @@ export class ManageProfileComponent implements OnInit {
   selectedGrades: string[] = [];
 
   subjectOptionsList = [
-    'Mathematics', 'Science', 'English', 'History', 
-    'Sinhala', 'Tamil', 'ICT', 'Commerce', 
+    'Mathematics', 'Combined Science', 'English Language', 'History', 'Geography', 'Psychology', 
+    'English Literature', 'Computer Science', 'French', 'Economics', 
     'Accounting', 'Physics', 'Chemistry', 'Biology'
   ];
 

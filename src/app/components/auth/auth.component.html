@@ -1,31 +1,76 @@
 <div class="auth-shell">
   <div class="auth-card">
-    <!-- Left curved panel -->
+    <!-- Left UK Brand Panel -->
     <aside class="auth-side">
       <div class="side-content">
-        <h2>{{ isLoginMode ? 'Hello, Welcome!' : 'Welcome Back!' }}</h2>
+        <span class="uk-pill-badge">🇬🇧 UK NATIONAL ACADEMIC PLATFORM</span>
+        <h2>{{ isLoginMode ? 'ClassBooking UK Portal' : 'Join ClassBooking UK' }}</h2>
         <p>
-          {{ isLoginMode ? "Don't have an account?" : 'Already have an account?' }}
+          {{ isLoginMode
+            ? 'Access 1-to-1 GCSE, A-Level & 11+ tuition, Enhanced DBS-verified UK tutors, and GBP settlement tools.'
+            : 'Already registered with our UK Academic Portal?' }}
         </p>
 
+        <div class="side-feature-list" *ngIf="isLoginMode">
+          <div class="side-feature">🛡️ Enhanced DBS & QTS Vetted Tutors</div>
+          <div class="side-feature">📚 AQA, Edexcel & OCR Curriculum Aligned</div>
+          <div class="side-feature">💷 Instant GBP (£) Tuition & Receipts</div>
+        </div>
+
         <a href="#" class="side-btn" (click)="toggleMode($event)">
-          {{ isLoginMode ? 'Register' : 'Sign In' }}
+          {{ isLoginMode ? 'Create UK Account →' : '← Back to Sign In' }}
         </a>
       </div>
     </aside>
 
-    <!-- Right form area -->
+    <!-- Right Form Area -->
     <section class="auth-main">
       <div class="auth-header">
-        <h1>{{ isLoginMode ? 'Login' : 'Registration' }}</h1>
-        <p>{{ isLoginMode ? 'Sign in to continue' : 'Create your account to get started' }}</p>
+        <h1>{{ isLoginMode ? 'Sign In to Your Workspace' : 'Create UK Account' }}</h1>
+        <p>{{ isLoginMode ? 'Enter your credentials or use 1-Click UK Demo Access below' : 'Register as a UK Student or Tutor' }}</p>
+      </div>
+
+      <!-- 1-Click UK Demo Credentials Bar (Login Mode) -->
+      <div class="demo-access-box" *ngIf="isLoginMode">
+        <div class="demo-access-header">
+          <span class="demo-title">⚡ Instant 1-Click UK Portal Login</span>
+          <span class="demo-hint">Click any role to auto-fill & sign in</span>
+        </div>
+        <div class="demo-role-grid">
+          <button type="button" class="demo-role-btn admin" (click)="quickDemoLogin('Admin')">
+            <span class="role-icon">🛡️</span>
+            <div class="role-meta">
+              <strong>UK Admin Dashboard</strong>
+              <small>admin&#64;britannia-tuition.co.uk</small>
+              <span class="pwd-tag">Pass: Admin&#64;123</span>
+            </div>
+          </button>
+
+          <button type="button" class="demo-role-btn teacher" (click)="quickDemoLogin('Teacher')">
+            <span class="role-icon">👨‍🏫</span>
+            <div class="role-meta">
+              <strong>UK Tutor Dashboard</strong>
+              <small>eleanor.vance&#64;oxbridge-tutors.co.uk</small>
+              <span class="pwd-tag">Pass: Tutor&#64;123</span>
+            </div>
+          </button>
+
+          <button type="button" class="demo-role-btn student" (click)="quickDemoLogin('Student')">
+            <span class="role-icon">🎓</span>
+            <div class="role-meta">
+              <strong>UK Student Dashboard</strong>
+              <small>oliver.t&#64;student.co.uk</small>
+              <span class="pwd-tag">Pass: Student&#64;123</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="auth-form">
         <!-- Full Name (Register only) -->
         <div class="form-group" *ngIf="!isLoginMode">
           <label for="fullName">Full Name</label>
-          <input id="fullName" type="text" formControlName="fullName" placeholder="Enter your full name"
+          <input id="fullName" type="text" formControlName="fullName" placeholder="e.g. Oliver Thompson"
             [class.error]="authForm.get('fullName')?.invalid && authForm.get('fullName')?.touched" />
           <span class="error-message" *ngIf="authForm.get('fullName')?.invalid && authForm.get('fullName')?.touched">
             Full name is required
@@ -35,35 +80,27 @@
         <!-- Email -->
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input id="email" type="email" formControlName="email" placeholder="Enter your email"
+          <input id="email" type="email" formControlName="email" placeholder="e.g. admin@britannia-tuition.co.uk"
             [class.error]="authForm.get('email')?.invalid && authForm.get('email')?.touched" />
           <span class="error-message" *ngIf="authForm.get('email')?.invalid && authForm.get('email')?.touched">
             Valid email is required
           </span>
         </div>
 
-        <!-- Phone Number (Register only) -->
-        <div class="form-group" *ngIf="!isLoginMode">
-          <label for="phoneNumber">Phone Number</label>
-          <input id="phoneNumber" type="tel" formControlName="phoneNumber" placeholder="+94 XX XXX XXXX"
-            [class.error]="authForm.get('phoneNumber')?.invalid && authForm.get('phoneNumber')?.touched" />
-          <span class="error-message"
-            *ngIf="authForm.get('phoneNumber')?.invalid && authForm.get('phoneNumber')?.touched">
-            Valid phone number is required
-          </span>
-        </div>
+        <!-- Phone Number & Role (Register only) -->
+        <div class="form-row-2col" *ngIf="!isLoginMode">
+          <div class="form-group">
+            <label for="phoneNumber">UK Mobile Number</label>
+            <input id="phoneNumber" type="tel" formControlName="phoneNumber" placeholder="+44 7700 900077" />
+          </div>
 
-        <!-- Role Selection (Register only) -->
-        <div class="form-group" *ngIf="!isLoginMode">
-          <label for="role">I am a</label>
-          <select id="role" formControlName="role" class="role-select">
-            <option value="" disabled>Select your role</option>
-            <option value="Student">Student</option>
-            <option value="Teacher">Teacher</option>
-          </select>
-          <span class="error-message" *ngIf="authForm.get('role')?.invalid && authForm.get('role')?.touched">
-            Please select a role
-          </span>
+          <div class="form-group">
+            <label for="role">Account Role</label>
+            <select id="role" formControlName="role" class="role-select">
+              <option value="Student">UK Student (GCSE / A-Level / 11+)</option>
+              <option value="Teacher">UK Tutor (Enhanced DBS)</option>
+            </select>
+          </div>
         </div>
 
         <!-- Password -->
@@ -74,7 +111,7 @@
               placeholder="Enter your password"
               [class.error]="authForm.get('password')?.invalid && authForm.get('password')?.touched" />
             <button type="button" class="toggle-password" (click)="togglePassword()">
-              {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+              {{ showPassword ? 'Hide' : 'Show' }}
             </button>
           </div>
           <span class="error-message" *ngIf="authForm.get('password')?.invalid && authForm.get('password')?.touched">
@@ -86,38 +123,21 @@
         <div class="form-group" *ngIf="!isLoginMode">
           <label for="confirmPassword">Confirm Password</label>
           <input id="confirmPassword" [type]="showPassword ? 'text' : 'password'" formControlName="confirmPassword"
-            placeholder="Confirm your password"
-            [class.error]="authForm.get('confirmPassword')?.invalid && authForm.get('confirmPassword')?.touched" />
-          <span class="error-message"
-            *ngIf="authForm.get('confirmPassword')?.invalid && authForm.get('confirmPassword')?.touched">
-            Passwords must match
-          </span>
+            placeholder="Confirm your password" />
         </div>
 
-        <!-- Forgot Password Link (Login only) -->
         <div class="forgot-password" *ngIf="isLoginMode">
           <a href="#" (click)="onForgotPassword($event)">Forgot Password?</a>
         </div>
 
-        <!-- Error Message from API -->
         <div class="api-error" *ngIf="errorMessage">
           {{ errorMessage }}
         </div>
 
-        <!-- Submit Button -->
         <button type="submit" class="submit-btn" [disabled]="isLoading || authForm.invalid">
-          <span *ngIf="!isLoading">{{ isLoginMode ? 'Login' : 'Register' }}</span>
-          <span *ngIf="isLoading" class="loading-spinner">Processing...</span>
+          <span *ngIf="!isLoading">{{ isLoginMode ? 'Sign In to Workspace' : 'Create UK Account' }}</span>
+          <span *ngIf="isLoading">Signing in...</span>
         </button>
-
-        <!-- Social Login -->
-        <div class="social-login">
-          <div class="divider"><span>or login with social platforms</span></div>
-          <div class="social-buttons">
-            <button type="button" class="social-btn" (click)="onSocialLogin('google')">G</button>
-            <button type="button" class="social-btn" (click)="onSocialLogin('facebook')">f</button>
-          </div>
-        </div>
       </form>
     </section>
   </div>

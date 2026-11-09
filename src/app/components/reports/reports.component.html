@@ -130,11 +130,11 @@
       <div class="stats-row">
         <div class="stat-box">
           <span class="label">Total Revenue</span>
-          <h3>LKR {{ (revenueStats.totalRevenue) | number:'1.0-0' }}</h3>
+          <h3>£{{ (revenueStats.totalRevenue) | number:'1.0-0' }}</h3>
         </div>
         <div class="stat-box">
           <span class="label">Commission (15%)</span>
-          <h3>LKR {{ (revenueStats.commission) | number:'1.0-0' }}</h3>
+          <h3>£{{ (revenueStats.commission) | number:'1.0-0' }}</h3>
         </div>
       </div>
 
@@ -162,8 +162,8 @@
             <tr *ngFor="let teacher of revenueStats.byTeacher">
               <td>{{ teacher.name }}</td>
               <td>{{ teacher.classes }}</td>
-              <td>LKR {{ (teacher.revenue) | number:'1.0-0' }}</td>
-              <td>LKR {{ (teacher.revenue * 0.15) | number:'1.0-0' }}</td>
+              <td>£{{ (teacher.revenue) | number:'1.0-0' }}</td>
+              <td>£{{ (teacher.revenue * 0.15) | number:'1.0-0' }}</td>
             </tr>
           </tbody>
         </table>
@@ -227,8 +227,8 @@
             <tr *ngFor="let teacher of teacherStats.earningsLeaderboard; let i = index">
               <td>{{ i + 1 }}</td>
               <td>{{ teacher.name }}</td>
-              <td>LKR {{ (teacher.monthlyEarnings) | number:'1.0-0' }}</td>
-              <td>LKR {{ (teacher.totalEarnings) | number:'1.0-0' }}</td>
+              <td>£{{ (teacher.monthlyEarnings) | number:'1.0-0' }}</td>
+              <td>£{{ (teacher.totalEarnings) | number:'1.0-0' }}</td>
             </tr>
           </tbody>
         </table>

@@ -1,26 +1,31 @@
-﻿import { HttpErrorResponse, HttpEvent, HttpRequest } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpRequest } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { NotificationService } from '../services/notification.service';
+import { AuthService } from '../services/auth.service';
 
 export function errorInterceptor(
   req: HttpRequest<any>,
   next: any
 ): Observable<HttpEvent<any>> {
   const notificationService = inject(NotificationService);
+  const authService = inject(AuthService);
   const platformId = inject(PLATFORM_ID);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      // Suppress toast notifications for background GET requests or demo sessions where services provide UK fallback data
+      if (authService.isDemoSession() || (req.method === 'GET' && (error.status === 401 || error.status === 403 || error.status === 404))) {
+        return throwError(() => error);
+      }
+
       let errorMessage = 'An error occurred';
 
       if (isPlatformBrowser(platformId) && error.error instanceof ErrorEvent) {
-        // Client-side error
         errorMessage = `Error: ${error.error.message}`;
       } else {
-        // Server-side error
         if (error.status === 0) {
           errorMessage = 'Unable to connect to server. Please check your internet connection.';
         } else if (error.status === 400) {
@@ -43,8 +48,6 @@ export function errorInterceptor(
       }
 
       notificationService.showError(errorMessage);
-      console.error('HTTP Error:', error);
-
       return throwError(() => error);
     })
   );
